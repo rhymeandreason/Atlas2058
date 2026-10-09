@@ -5,7 +5,7 @@
 <title>San Rafael 2058</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
 <style>
 /* Layout: one-screen app — a planning-commission massing model on the right, a control sheet on the left (stacks under the model on phones). */
 :root {
@@ -36,6 +36,10 @@
   --display: "Bricolage Grotesque", "Avenir Next Condensed", "Arial Narrow", system-ui, sans-serif;
   --body: "Public Sans", "Helvetica Neue", Arial, system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  /* story mode is always projected on dark letterbox bars, so its tokens hold in both themes */
+  --cine-bg: #0b0e0d; --cine-ink: #f3f0e7; --cine-dim: #b3bab5; --cine-accent: #f39a63;
+  --lbh: clamp(44px, 7.5vh, 76px);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -160,6 +164,86 @@ details.about a { word-break: break-word; }
 #loading { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; background: var(--scene-bg); }
 [hidden] { display: none !important; }
 
+/* Story mode: the panel slides away, the model goes full-bleed between letterbox bars, and each chapter
+   brings its own camera move, caption, impact figures and callouts on the projects that matter. */
+.panel { transition: transform .55s cubic-bezier(.2,.7,.2,1); }
+.app.cinema { grid-template-columns: 1fr; }
+.app.cinema .panel { position: absolute; inset-block: 0; left: 0; width: min(380px, 100%); z-index: 8; transform: translateX(-102%); visibility: hidden; transition: transform .6s cubic-bezier(.6,0,.2,1), visibility 0s .6s; }
+.views, .hint, .compass { transition: opacity .4s; }
+.app.cinema .views, .app.cinema .hint, .app.cinema .compass { opacity: 0; pointer-events: none; }
+.app.cinema .lbl:not(.sel) { opacity: .4; }
+.app.cinema .card { top: calc(var(--lbh) + 12px); max-height: calc(100% - 2 * var(--lbh) - 24px); z-index: 6; }
+
+#callouts { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 3; transition: opacity .8s; }
+.titling #callouts, .titling .cyear { opacity: 0 !important; }
+.co { position: absolute; left: 0; top: 0; opacity: 0; transition: opacity .6s; will-change: transform; }
+.co.on { opacity: 1; }
+.co::before { content: ""; position: absolute; left: -.5px; bottom: 0; width: 1px; height: var(--lead, 36px); background: var(--cine-ink); box-shadow: 0 0 2px rgba(0,0,0,.7); }
+.co::after { content: ""; position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--cine-accent); box-shadow: 0 0 0 3px rgba(11,14,13,.55); }
+.co-tag { position: absolute; left: -12px; bottom: var(--lead, 36px); background: var(--cine-bg); color: var(--cine-ink); padding: 6px 11px 7px 10px; border-left: 2px solid var(--cine-accent); border-radius: 2px; white-space: nowrap; font-size: 12.5px; line-height: 1.25; box-shadow: 0 8px 22px rgba(0,0,0,.28); }
+.co.flip .co-tag { left: auto; right: -12px; border-left: 0; border-right: 2px solid var(--cine-accent); text-align: right; }
+.co-tag small { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--cine-accent); margin-bottom: 1px; }
+.co-tag b { font-weight: 600; }
+
+.cine { position: absolute; inset: 0; z-index: 4; pointer-events: none; color: var(--cine-ink); visibility: hidden; transition: visibility 0s .8s; }
+.app.cinema .cine { visibility: visible; transition: none; }
+.cine button { pointer-events: auto; }
+.cine .bar { position: absolute; left: 0; right: 0; height: var(--lbh); background: var(--cine-bg); display: flex; align-items: center; gap: 16px; padding-inline: clamp(16px, 3vw, 40px); transform: scaleY(0); transition: transform .8s cubic-bezier(.6,0,.2,1); }
+.cine .bar.top { top: 0; transform-origin: top; }
+.cine .bar.bot { bottom: 0; transform-origin: bottom; }
+.app.cinema .cine .bar { transform: none; }
+.cine .bar > * { opacity: 0; transition: opacity .3s; }
+.app.cinema .cine .bar > * { opacity: 1; transition: opacity .5s .55s; }
+.scrim, .vign, .scrimtop { position: absolute; left: 0; right: 0; pointer-events: none; opacity: 0; transition: opacity .9s; }
+.scrim { bottom: var(--lbh); height: 58%; background: linear-gradient(to top, rgba(8,11,10,.88) 0%, rgba(8,11,10,.62) 38%, rgba(8,11,10,0) 100%); }
+.scrimtop { top: var(--lbh); height: 22%; background: linear-gradient(to bottom, rgba(8,11,10,.5), rgba(8,11,10,0)); display: none; }
+.vign { inset: 0; background: radial-gradient(ellipse 75% 70% at 50% 42%, transparent 55%, rgba(0,0,0,.32) 100%); }
+.app.cinema .scrim, .app.cinema .vign, .app.cinema .scrimtop { opacity: 1; }
+
+.cine-brand { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--cine-dim); white-space: nowrap; }
+.cine-ch { flex: 1; min-width: 0; font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--cine-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+.cbtn { background: transparent; border: 1px solid rgba(255,255,255,.24); color: var(--cine-ink); border-radius: 999px; height: 34px; min-width: 34px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-size: 12.5px; white-space: nowrap; }
+.cbtn:hover { border-color: var(--cine-ink); }
+.cbtn svg { width: 12px; height: 12px; fill: currentColor; flex: none; }
+.cbtn.icon { padding: 0; }
+.cbtn.main { background: var(--cine-ink); color: var(--cine-bg); border-color: var(--cine-ink); font-weight: 600; padding: 0 16px 0 13px; min-width: 104px; }
+.cbtn kbd { font-family: var(--mono); font-size: 10px; opacity: .6; }
+.cctl { display: flex; gap: 6px; flex: none; }
+.segs { flex: 1; display: flex; gap: 5px; min-width: 0; }
+.sg { flex: 1; min-width: 0; border: 0; background: none; padding: 6px 0; cursor: pointer; color: var(--cine-dim); display: grid; gap: 7px; text-align: left; }
+.sg i { display: block; height: 3px; border-radius: 2px; background: rgba(255,255,255,.2); position: relative; overflow: hidden; }
+.sg i::after { content: ""; position: absolute; inset: 0; background: var(--cine-ink); transform-origin: left; transform: scaleX(var(--p, 0)); }
+.sg span { font-family: var(--mono); font-size: 10px; letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sg span b { font-weight: 500; color: var(--cine-ink); opacity: .55; margin-right: 6px; }
+.sg[aria-current="true"] span { color: var(--cine-ink); }
+.sg:hover span { color: var(--cine-ink); }
+
+.cap { position: absolute; left: clamp(16px, 4vw, 64px); bottom: calc(var(--lbh) + clamp(18px, 4vh, 40px)); width: min(600px, 58%); }
+.cap > * { opacity: 0; transform: translateY(14px); transition: opacity .25s, transform .25s; }
+.cap.in > * { opacity: 1; transform: none; transition: opacity .7s, transform .9s cubic-bezier(.2,.7,.2,1); }
+.cap.in > :nth-child(2) { transition-delay: .12s; }
+.cap.in > :nth-child(3) { transition-delay: .28s; }
+.cap.in > :nth-child(4) { transition-delay: .44s; }
+.cap-k { font-family: var(--mono); font-size: 11.5px; letter-spacing: .15em; text-transform: uppercase; color: var(--cine-accent); margin-bottom: 12px; }
+.cap-h { font-family: var(--serif); font-weight: 400; text-transform: none; color: inherit; font-size: clamp(34px, 4.2vw, 62px); line-height: 1; letter-spacing: -.01em; margin: 0 0 14px; text-wrap: balance; text-shadow: 0 2px 28px rgba(0,0,0,.35); }
+.cap-d { font-size: clamp(14px, 1.1vw, 16.5px); line-height: 1.55; color: color-mix(in srgb, var(--cine-ink) 88%, transparent); max-width: 58ch; margin: 0 0 18px; text-wrap: pretty; }
+.cap-s { display: flex; gap: clamp(18px, 3vw, 44px); border-top: 1px solid rgba(255,255,255,.2); padding-top: 14px; }
+.cap-s div { display: grid; gap: 4px; align-content: start; min-width: 0; }
+.cap-s b { font-family: var(--display); font-weight: 700; font-size: clamp(24px, 2.3vw, 36px); line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cap-s span { font-size: 12px; line-height: 1.3; color: var(--cine-dim); max-width: 20ch; }
+
+.cyear { position: absolute; right: clamp(16px, 4vw, 64px); bottom: calc(var(--lbh) + clamp(12px, 3vh, 30px)); display: grid; justify-items: end; opacity: 0; transition: opacity .7s .4s; }
+.app.cinema .cyear { opacity: 1; }
+.cyear-l { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--cine-dim); margin-bottom: 10px; }
+#cYear { font-family: var(--display); font-weight: 800; font-size: clamp(84px, 11.5vw, 190px); line-height: .78; letter-spacing: -.045em; font-variant-numeric: tabular-nums; text-shadow: 0 4px 40px rgba(0,0,0,.3); }
+
+.titlecard { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; gap: 18px; padding: 24px; background: rgba(8,11,10,.74); opacity: 0; transition: opacity 1.1s; }
+.titlecard.in { opacity: 1; }
+.tc-k { font-family: var(--mono); font-size: 11.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--cine-accent); }
+.tc-h { font-family: var(--serif); font-weight: 400; font-size: clamp(56px, 8.5vw, 132px); line-height: .9; letter-spacing: -.015em; }
+.tc-h em { color: var(--cine-accent); }
+.titlecard p { margin: 0; max-width: 44ch; color: var(--cine-dim); font-size: 15px; text-wrap: balance; }
+
 @media (max-width: 760px) {
   body { overflow: auto; }
   .app { display: flex; flex-direction: column; height: auto; min-height: 100%; }
@@ -171,6 +255,32 @@ details.about a { word-break: break-word; }
   .hint { display: none; }
   .views { top: 10px; right: 10px; }
   .views button { padding: 5px 8px; font-size: 12px; }
+}
+@media (max-width: 760px) {
+  :root { --lbh: 46px; }
+  html.cine-on, html.cine-on body { overflow: hidden; }
+  .app.cinema .stage { position: fixed; inset: 0; height: auto; min-height: 0; z-index: 30; }
+  .app.cinema .panel { display: none; }
+  .cine-brand, .sg span, .cbtn kbd, .cbtn .lbl-x { display: none; }
+  .cine-ch { text-align: left; }
+  .cine .bar.bot { gap: 10px; }
+  .cbtn.main { min-width: 0; padding: 0 12px; }
+  .scrim { height: 74%; }
+  .scrimtop { display: block; }
+  .cap { left: 16px; right: 16px; width: auto; bottom: calc(var(--lbh) + 14px); }
+  .cap-k { font-size: 10.5px; margin-bottom: 8px; }
+  .cap-h { font-size: 31px; margin-bottom: 10px; }
+  .cap-d { font-size: 13.5px; line-height: 1.5; margin-bottom: 12px; }
+  .cap-s { gap: 16px; padding-top: 10px; }
+  .cap-s b { font-size: 21px; }
+  .cap-s span { font-size: 11px; }
+  .cyear { top: calc(var(--lbh) + 10px); bottom: auto; right: 16px; }
+  .cyear-l { order: 2; margin: 6px 0 0; font-size: 9.5px; }
+  #cYear { font-size: 60px; }
+  .co-tag { font-size: 11px; padding: 4px 8px 5px; }
+  .co-tag small { font-size: 9.5px; }
+  .tc-h { font-size: 52px; }
+  .titlecard p { font-size: 13.5px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -187,6 +297,37 @@ details.about a { word-break: break-word; }
     </div>
     <div class="compass" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="var(--panel)" stroke="var(--line)"/><g id="needle"><path d="M20 6 L24 20 L16 20 Z" fill="var(--accent)"/><path d="M20 34 L24 20 L16 20 Z" fill="var(--muted)"/></g></svg></div>
     <div class="hint">Drag to orbit · right-drag or two fingers to pan · scroll to zoom · click a building or flood zone</div>
+    <div id="callouts" aria-hidden="true"></div>
+    <div class="cine" id="cine" inert>
+      <div class="vign"></div>
+      <div class="scrim"></div>
+      <div class="scrimtop"></div>
+      <div class="titlecard" id="cTitle">
+        <div class="tc-k">A story in <span id="cN">nine</span> chapters</div>
+        <div class="tc-h">San Rafael<br><em>2026 → 2058</em></div>
+        <p>What is actually being built, what has only been proposed, and what the bay may do in the meantime.</p>
+      </div>
+      <section class="cap" id="cap" aria-live="polite">
+        <div class="cap-k" id="capK"></div>
+        <h2 class="cap-h" id="capH"></h2>
+        <p class="cap-d" id="capD"></p>
+        <div class="cap-s" id="capS"></div>
+      </section>
+      <div class="cyear" aria-hidden="true"><span class="cyear-l" id="cYearL"></span><span id="cYear">2026</span></div>
+      <div class="bar top">
+        <span class="cine-brand">San Rafael 2058</span>
+        <span class="cine-ch" id="cCh"></span>
+        <button class="cbtn" id="cExit" type="button" aria-label="Exit the story"><span class="lbl-x">Exit story</span> <kbd>Esc</kbd><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 1.4 L6 4.9 L9.5 1.4 L10.6 2.5 L7.1 6 L10.6 9.5 L9.5 10.6 L6 7.1 L2.5 10.6 L1.4 9.5 L4.9 6 L1.4 2.5 Z"/></svg></button>
+      </div>
+      <div class="bar bot">
+        <div class="cctl">
+          <button class="cbtn icon" id="cPrev" type="button" aria-label="Previous chapter"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1 H3 V11 H1.5 Z M11 1 L4 6 L11 11 Z"/></svg></button>
+          <button class="cbtn main" id="cPlay" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path id="cPlayIcon" d="M2 1 H5 V11 H2 Z M7 1 H10 V11 H7 Z"/></svg><span id="cPlayLbl">Pause</span></button>
+          <button class="cbtn icon" id="cNext" type="button" aria-label="Next chapter"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M9 1 H10.5 V11 H9 Z M1 1 L8 6 L1 11 Z"/></svg></button>
+        </div>
+        <nav class="segs" id="cSegs" aria-label="Chapters"></nav>
+      </div>
+    </div>
     <article id="card" class="card" hidden aria-live="polite"></article>
     <div id="loading">Raising the hills…</div>
   </section>
@@ -195,13 +336,13 @@ details.about a { word-break: break-word; }
     <header>
       <div class="eyebrow">Marin County · 37.97° N 122.53° W</div>
       <h1>San Rafael <span id="h1year">2058</span></h1>
-      <p class="lede">A massing model of the city built from what is actually in the pipeline: projects finished since 2020, under construction, approved and proposed, plus state sea level rise projections. Drag the timeline to watch it change.</p>
+      <p class="lede">A massing model of the city built from what is actually in the pipeline: projects finished since 2020, under construction, approved and proposed, plus state sea level rise projections. Press play for the story of the next three decades, or drag the timeline yourself.</p>
     </header>
 
     <section class="time" aria-label="Timeline">
       <div class="yearrow">
         <output class="year" id="yearOut" for="year">2058</output>
-        <button class="play" id="play" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path id="playIcon" d="M2 1 L11 6 L2 11 Z"/></svg><span id="playLbl">Play from 2026</span></button>
+        <button class="play" id="play" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path id="playIcon" d="M2 1 L11 6 L2 11 Z"/></svg><span id="playLbl">Play the story</span></button>
       </div>
       <label for="year" class="eyebrow" style="position:absolute;left:-9999px">Year</label>
       <input type="range" id="year" min="2026" max="2058" step="1" value="2058">
@@ -613,6 +754,8 @@ function projMat(st) { if (!matCache[st]) matCache[st] = new THREE.MeshLambertMa
 const marshMat = new THREE.MeshLambertMaterial();
 const edgeMat = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.35 });
 const selMat = new THREE.MeshLambertMaterial();
+// story mode: projects outside a chapter's focus fall back to the colour of the ordinary city
+const mutedMat = new THREE.MeshLambertMaterial(), mutedSpecMat = new THREE.MeshLambertMaterial({ transparent: true, opacity: 0.22, depthWrite: false });
 
 function addPart(obj, x, z, w, d, h, rot, mat) {
   const m = new THREE.Mesh(boxGeo, mat || projMat(obj.p.st));
@@ -777,8 +920,9 @@ const railStationMat = new THREE.MeshLambertMaterial();
 const floodMat = new THREE.ShaderMaterial({
   transparent: true, depthWrite: false,
   uniforms: { uColor: { value: new THREE.Color(0x2a78c4) }, uOpacity: { value: 0.0 } },
-  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
-  fragmentShader: 'uniform vec3 uColor; uniform float uOpacity; varying vec2 vUv; void main(){ float r = length(vUv-0.5)*2.0; float a = uOpacity*(1.0-smoothstep(0.55,1.0,r)); if(a<0.01) discard; gl_FragColor = vec4(uColor, a); }'
+  // the renderer uses a logarithmic depth buffer, so the disc must write log depth too or the terrain hides it
+  vertexShader: '#include <common>\n#include <logdepthbuf_pars_vertex>\nvarying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);\n#include <logdepthbuf_vertex>\n}',
+  fragmentShader: '#include <logdepthbuf_pars_fragment>\nuniform vec3 uColor; uniform float uOpacity; varying vec2 vUv; void main(){\n#include <logdepthbuf_fragment>\nfloat r = length(vUv-0.5)*2.0; float a = uOpacity*(1.0-smoothstep(0.55,1.0,r)); if(a<0.01) discard; gl_FragColor = vec4(uColor, a); }'
 });
 const zoneObjs = [];
 function buildZones() {
@@ -800,7 +944,7 @@ function buildProtection() {
   protectGroup.userData.mat = wallMat;
   const s = sampleLine(levee, 25);
   for (let i = 0; i < s.length - 1; i++) { const a = s[i], b = s[i + 1], len = Math.hypot(b.x - a.x, b.z - a.z), ang = Math.atan2(b.x - a.x, b.z - a.z); const m = new THREE.Mesh(boxGeo, wallMat); m.scale.set(9, 8, len + 2); m.rotation.y = ang; m.position.set((a.x + b.x) / 2, 0, (a.z + b.z) / 2); protectGroup.add(m); }
-  const [gx, gz] = XY(37.96722, -122.48760);
+  const [gx, gz] = XY(37.96722, -122.48760); protectGroup.userData.gate = [gx, gz];
   [-1, 1].forEach(sx => { const t = new THREE.Mesh(boxGeo, wallMat); t.scale.set(10, 16, 10); t.position.set(gx, 0, gz + sx * 34); protectGroup.add(t); });
   const gate = new THREE.Mesh(boxGeo, wallMat); gate.scale.set(6, 9, 60); gate.position.set(gx, 0, gz); protectGroup.add(gate);
   scene.add(protectGroup); protectGroup.visible = false;
@@ -862,6 +1006,9 @@ function applyTheme() {
   const b = T('--bldg'); fabricMat.color.set(0xffffff); lmMat.color = b.clone().multiplyScalar(0.96);
   if (fabricMesh) { const cc = new THREE.Color(); fabric.forEach((f, i) => { cc.copy(b).multiplyScalar(f.shade); fabricMesh.setColorAt(i, cc); }); fabricMesh.instanceColor.needsUpdate = true; }
   Object.keys(STATUS).forEach(s => { projMat(s).color = T(STATUS[s].tok); });
+  const sbg = T('--scene-bg'); mutedMat.color = b.clone().lerp(sbg, 0.18); mutedSpecMat.color = b.clone().lerp(sbg, 0.3);
+  cine.fadeColor.setRGB(Math.min(1.3, sbg.r / Math.max(0.02, b.r)), Math.min(1.3, sbg.g / Math.max(0.02, b.g)), Math.min(1.3, sbg.b / Math.max(0.02, b.b)));
+  ringColor.copy(T('--accent')); rings.forEach(r => r.m.material.color.copy(ringColor));
   edgeMat.color = T('--ink'); marshMat.color = T('--marsh').lerp(T('--s-built'), 0.35); selMat.color = T('--ink');
   if (protectGroup) protectGroup.userData.mat.color = T('--s-infra');
   zoneObjs.forEach(z => z.mat.uniforms.uColor.value = T('--flood'));
@@ -889,7 +1036,7 @@ function zoneThreshold(z, Y) { return z.t + (state.protect && z.protect && Y >= 
 function update() {
   const Y = state.year;
   document.getElementById('yearOut').textContent = Y; document.getElementById('h1year').textContent = Y;
-  const yr = document.getElementById('year'); yr.style.setProperty('--pct', ((Y - 2026) / 32 * 100) + '%');
+  const yr = document.getElementById('year'); yr.value = Y; yr.style.setProperty('--pct', ((Y - 2026) / 32 * 100) + '%');
   let homes = 0;
   let specHomes = 0;
   projObjs.forEach(o => { o.target = progressFor(o.p, Y); if (o.target >= 1 && o.p.u) { if (o.p.st === 'spec') specHomes += o.p.u; else homes += o.p.u; } });
@@ -898,6 +1045,8 @@ function update() {
   document.getElementById('stPop').textContent = (Math.round(popAt(Y) / 100) * 100).toLocaleString('en-US');
   const sea = slrIn(Y, state.scen);
   document.getElementById('stSea').textContent = sea.toFixed(0) + '″';
+  document.getElementById('cYear').textContent = Y;
+  document.getElementById('cYearL').textContent = `${SLR[state.scen].name} · bay +${sea.toFixed(0)}″`;
   document.getElementById('scenNote').textContent = `${SLR[state.scen].name}: ${(sea / 12).toFixed(2)} ft above the 2000 level in ${Y}. ${SCEN_NOTE[state.scen]}`;
   water.position.y = (sea + (state.storm ? 36 : 0)) * 0.0254 - 0.35;
   if (creek) creek.position.y = Math.max(0, water.position.y + 0.5);
@@ -964,9 +1113,8 @@ function showZone(z) {
 }
 card.addEventListener('click', e => { if (e.target.closest('.x')) { card.hidden = true; select(null); selZone = null; } });
 function select(o) {
-  if (selected) selected.meshes.forEach(m => { m.material = m.userData.base; m.userData.u = false; });
   selected = o; selZone = null;
-  if (o) { o.meshes.forEach(m => m.material = selMat); showCard(o.p.id, true); selLabel.textContent = o.p.n; }
+  if (o) { showCard(o.p.id, true); selLabel.textContent = o.p.n; }
   else selLabel.textContent = '';
   renderList(); requestRender();
 }
@@ -1001,6 +1149,309 @@ function flyTo(x, z, dist) { const tg = new THREE.Vector3(x, yAt(x, z) + 10, z);
 function startFly(t, p) { fly = { t0: performance.now(), dur: matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 1100, ft: controls.target.clone(), fp: camera.position.clone(), tt: t, tp: p }; requestRender(); }
 document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => flyToView(b.dataset.view)));
 
+/* ---------------- story mode ---------------- */
+// Play runs a sequence of chapters. Each chapter advances the clock to its key year, flies to a shot,
+// mutes everything but its focus projects, rings and labels those, and writes a caption with its impact.
+const cine = { active: false, playing: false, ended: false, list: [], i: 0, elapsed: 0, fromAt: 0, travel: 0, from: null, focus: null, fade: 0, fadeT: 0, fadeColor: new THREE.Color(1, 1, 1), capShown: false, ctx: null };
+const fmt = n => Math.round(n).toLocaleString('en-US');
+const byName = n => P.find(p => p.n === n);
+const namesTo = ns => ns.map(byName).filter(Boolean);
+const homesOf = ns => namesTo(ns).reduce((s, p) => s + (p.u || 0), 0);
+const wetAt = (z, Y) => zoneWater(z, Y) >= zoneThreshold(z, Y);
+const firstWet = z => { for (let Y = 2026; Y <= 2058; Y++) if (wetAt(z, Y)) return Y; return null; };
+const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const NUMW = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+
+const DOWNTOWN = ['Modera San Rafael', 'San Rafael Transit Center (relocated)', '703 Third Street', 'Belmont senior living', 'WildCare wildlife hospital'];
+const NORTHGATE = ['Northgate Town Square — Phase 1', '555 Northgate Drive', '4040 Civic Center Drive', 'Los Gamos', '245 Nova Albion Way'];
+const SKYLINE = ['700 Irwin Street tower', '1230 Fifth Avenue', '700 B Street (Safeway site)', '515 Third Street (United Markets site)', 'Fourth Street Market Hall & Residences', '900 A Street', '790 Mission Avenue', '901 E Street'];
+const CROSSINGS = ['US-101 / I-580 direct connector', 'San Rafael Canal Crossing & 620 Canal St park', 'Tiscornia Marsh restoration'];
+
+function storyCtx() {
+  const canal = ZONES.find(z => z.id === 'canal');
+  const built = P.filter(p => p.st === 'built').reduce((s, p) => s + (p.u || 0), 0);
+  const spec = P.filter(p => p.st === 'spec');
+  return {
+    built, scen: SLR[state.scen].name, storm: state.storm, protect: state.protect,
+    canalYear: firstWet(canal), canal,
+    wet2058: ZONES.filter(z => wetAt(z, 2058)).length,
+    homes2058: P.reduce((s, p) => s + (p.st !== 'spec' && p.u && 2058 >= p.y ? p.u : 0), 0),
+    specHomes: spec.reduce((s, p) => s + p.u, 0), specSites: spec.length
+  };
+}
+
+// shot: target [lat, lon], distance m, azimuth (0 = camera due south, + toward east), elevation deg,
+// drift = degrees of slow orbit over the chapter, dolly = fractional change in distance over the chapter
+const CHAPTERS = [
+  { id:'today', tag:'Today', dur:14, capAt:3.8, key: () => 2026,
+    shot:{ t:[37.9790,-122.5160], d:9400, az:34, el:31, drift:8, dolly:-0.1 },
+    focus: () => P.filter(p => p.st === 'built'),
+    call: [['Residences at Vivalon Healthy Aging Campus','Vivalon, 999 Third St','67 senior homes · 2024'], ['Casa Canal','Casa Canal','41 supportive homes · 2025'], ['Village at Loch Lomond Marina','Village at Loch Lomond','81 homes · 2023']],
+    head: () => 'A small city at the edge of the bay',
+    deck: c => `Since 2020, San Rafael has finished ${fmt(c.built)} homes in its larger projects: senior housing on Third Street, supportive homes in the Canal, townhomes at Loch Lomond. Everything after this frame is a plan, an approval or a guess.`,
+    stats: c => [{ n:c.built, l:'homes finished in larger projects since 2020' }, { n:Math.round(popAt(2026) / 100) * 100, l:'residents today (est.)' }, { n:slrIn(2026, state.scen), suf:'″', l:'of bay rise since 2000' }] },
+
+  { id:'downtown', tag:'Downtown', dur:12, key: () => 2029,
+    shot:{ t:[37.9718,-122.5250], dy:12, d:1500, az:24, el:27, drift:18, dolly:-0.08 },
+    focus: () => namesTo(DOWNTOWN),
+    call: [['Modera San Rafael','Modera, 930 Irwin St','210 homes · 8 stories'], ['San Rafael Transit Center (relocated)','New transit center','17 bus bays'], ['703 Third Street','703 Third St','120 homes'], ['Belmont senior living','1515 Fourth St','183 senior units']],
+    head: () => 'Downtown starts building up, around a new transit hub',
+    deck: () => 'Mill Creek’s 210-home Modera on Irwin Street is already out of the ground, and demolition has cleared 703 Third. The bus transit center moves a block north, freeing today’s Bettini block for housing. Senior housing on Fourth Street and a new WildCare animal hospital follow.',
+    stats: () => [{ n:homesOf(DOWNTOWN), l:'homes rising downtown' }, { t:'$25.6M', l:'federal grant for the transit center' }, { n:17, l:'bus bays, one block north' }] },
+
+  { id:'northgate', tag:'Northgate', dur:12, key: () => 2031,
+    shot:{ t:[38.0050,-122.5440], d:2350, az:40, el:31, drift:20, dolly:-0.08 },
+    focus: () => namesTo(NORTHGATE),
+    call: [['Northgate Town Square — Phase 1','Northgate Town Square','907 homes · town square'], ['555 Northgate Drive','555 Northgate Dr','193 homes · 100% affordable'], ['4040 Civic Center Drive','4040 Civic Center Dr','238 homes · office conversion'], ['Los Gamos','Los Gamos','192 homes · 100% affordable']],
+    head: () => 'A dying mall becomes a neighborhood',
+    deck: () => 'Merlone Geier’s approved plan replaces most of Northgate Mall with a town square and apartments of two to seven stories, starting with the Sears wing. Around it, two fully affordable buildings and an office-to-housing conversion add hundreds more homes.',
+    stats: () => [{ n:homesOf(NORTHGATE), l:'homes in the Northgate cluster' }, { n:homesOf(['555 Northgate Drive', 'Los Gamos']), l:'in 100% affordable buildings' }, { n:44.8, dec:1, suf:' ac', l:'former mall site' }] },
+
+  { id:'skyline', tag:'Skyline', dur:13, key: () => 2032,
+    shot:{ t:[37.9722,-122.5243], dy:48, d:1450, az:14, el:5.5, drift:-12, dolly:-0.1 },
+    focus: () => namesTo(SKYLINE),
+    call: [['700 Irwin Street tower','700 Irwin St','180 ft · tallest in the city'], ['1230 Fifth Avenue','1230 Fifth Ave','13 stories · 188 homes'], ['700 B Street (Safeway site)','Safeway site, 700 B St','331 homes · proposed'], ['515 Third Street (United Markets site)','United Markets site','285 homes · proposed'], ['Fourth Street Market Hall & Residences','Fourth St Market Hall','197 homes · proposed']],
+    head: () => 'Downtown gets a skyline, if the proposals hold',
+    deck: () => { const ps = namesTo(SKYLINE), a = ps.filter(p => p.st === 'approved').length; return `State density-bonus law lets 700 Irwin rise to about 180 ft where the zone tops out at 70. Around it, developers have filed for mid-rises on the Safeway, United Markets and Market Hall blocks. ${NUMW[a][0].toUpperCase() + NUMW[a].slice(1)} of these ${NUMW[ps.length]} buildings are approved; the rest are proposals that could still shrink, stall or disappear.`; },
+    stats: () => [{ n:180, suf:' ft', l:'700 Irwin, the tallest building in town' }, { n:homesOf(SKYLINE), l:'homes on eight downtown blocks' }, { n:namesTo(SKYLINE).filter(p => p.st === 'proposed').length, l:'still only proposals' }] },
+
+  { id:'crossings', tag:'Crossings', dur:12, key: () => 2034,
+    shot:{ t:[37.9612,-122.5020], d:3700, az:156, el:38, drift:10, dolly:-0.08 },
+    focus: () => namesTo(CROSSINGS),
+    call: [['US-101 / I-580 direct connector','101 → 580 flyover','$192–241M · not fully funded'], ['San Rafael Canal Crossing & 620 Canal St park','Canal Crossing','bike & walk drawbridge'], ['Tiscornia Marsh restoration','Tiscornia Marsh','raised levee + marsh']],
+    head: () => 'New ways across the freeway and the creek',
+    deck: () => 'If its construction money comes through, a flyover finally links northbound 101 to eastbound 580, ending the detour through local streets. A bike-and-walk drawbridge ties the Canal to downtown, and a raised levee at Tiscornia Marsh puts wetland between Canal homes and the bay.',
+    stats: () => [{ t:'$192–241M', l:'connector estimate' }, { n:1.65, dec:2, suf:' ac', l:'new waterfront park on the Canal' }, { n:2000, suf:' ft', l:'of raised levee at Tiscornia' }] },
+
+  { id:'water', tag:'Water', dur:14, key: c => c.canalYear == null ? 2050 : Math.max(2027, c.canalYear),
+    shot:{ t:[37.9630,-122.4985], d:3600, az:40, el:38, drift:16, dolly:-0.1 },
+    focus: () => namesTo(['Casa Canal', '88 Vivian Street', 'Marin Square vision']),
+    call: [['zone:canal','Canal District & Pickleweed', c => c.canalYear ? `${c.storm ? 'Storm' : 'Tidal'} flooding from ${c.canalYear}` : 'Dry in this scenario'], ['zone:spinnaker','Spinnaker Point & Baypoint','Flooded'], ['Casa Canal','Casa Canal','41 supportive homes · opened 2025']],
+    head: c => c.canalYear == null ? 'The Canal stays dry, for now' : c.storm ? (c.canalYear <= 2027 ? 'In a 100-year storm, the Canal floods today' : `By ${c.canalYear}, a big storm puts the Canal under`) : `By ${c.canalYear}, high tide reaches the Canal`,
+    deck: c => c.canalYear == null ? `Under the ${c.scen} scenario the water never quite tops the Canal’s exposure point before 2058. Try a higher scenario to see how quickly that changes.` :
+      `Under the ${c.scen} scenario the bay is ${slrIn(c.canalYear, state.scen).toFixed(0)} in above its 2000 level by ${c.canalYear}, and the Canal’s ground keeps sinking about 0.4 in a year. That is enough for ${c.storm ? 'a storm tide' : 'ordinary high tides'} to spill into the city’s densest neighborhood, home to 12,000–16,000 people. Bellam Blvd, its main route to 101, goes under at about a foot.${c.protect ? ' The floodgate is not finished until 2045.' : ''}`,
+    stats: c => [{ t:c.canalYear ? String(c.canalYear) : 'Never', l:'first regular flooding in the Canal' }, { t:'12–16k', l:'people live in the Canal' }, { n:c.wet2058, l:`of ${ZONES.length} low-lying areas flooded by 2058` }] },
+
+  { id:'gate', tag:'Floodgate', dur:12, when: c => c.protect, key: () => 2045,
+    shot:{ t:[37.9635,-122.4950], d:3200, az:30, el:38, drift:12, dolly:-0.08 },
+    focus: () => [],
+    call: [['gate','Canal floodgate','Feasibility study, 2025'], ['zone!canal','Canal District','dry behind the levee']],
+    head: () => 'A floodgate buys the Canal time',
+    deck: () => 'This run assumes the floodgate at the mouth of San Rafael Creek and the levees along the shore from the 2025 feasibility study are finished in 2045. Behind them the Canal, Spinnaker Point and Francisco Blvd dry out, for as long as the walls stay ahead of the water.',
+    stats: () => [{ t:'2045', l:'assumed completion' }, { n:ZONES.filter(z => z.protect).length, l:'low-lying areas behind the walls' }, { n:72, suf:'″', l:'of extra protection modeled' }] },
+
+  { id:'northgate2', tag:'Northgate II', dur:12, key: () => 2040,
+    shot:{ t:[38.0030,-122.5470], d:2150, az:-28, el:34, drift:16, dolly:-0.08 },
+    focus: () => namesTo(['Northgate Town Square — Phase 1', 'Northgate Town Square — Phase 2', 'Kaiser San Rafael hospital replacement']),
+    call: [['Northgate Town Square — Phase 2','Northgate, phase 2','+515 homes · Macy’s wing'], ['Kaiser San Rafael hospital replacement','Kaiser hospital','92 beds · seismic replacement']],
+    head: () => 'Northgate’s second phase finishes the job',
+    deck: c => `The Macy’s wing comes down for the last 515 homes, completing an approved plan for 1,422. That one site adds ${(1422 / c.built).toFixed(1)} times as many homes as all of San Rafael’s larger projects from 2020 to 2026. Next door, Kaiser’s replacement hospital, pushed by the state’s seismic deadline, is open.`,
+    stats: () => [{ n:1422, l:'homes at Northgate Town Square' }, { t:'2040', l:'phase 2 target in the approved plan' }, { n:92, l:'beds in the new Kaiser hospital' }] },
+
+  { id:'sketch', tag:'Sketch', dur:12, when: () => state.spec, key: () => 2052,
+    shot:{ t:[37.9780,-122.5220], d:8400, az:128, el:38, drift:-10, dolly:-0.06 },
+    focus: () => P.filter(p => p.st === 'spec'),
+    call: [['Former Bettini Transit Center site','Old Bettini block','illustrative · ~170 homes'], ['Southeast San Rafael Specific Plan area','Southeast San Rafael','illustrative · assumes raised ground'], ['Marin Civic Center housing site','Civic Center site','illustrative · 80 homes']],
+    head: () => 'After the pipeline runs dry, a sketch',
+    deck: () => 'No developer has filed anything that would finish after the mid-2030s. These ghosted buildings fill sites the Housing Element and Downtown Precise Plan already zone for homes, at about the pace General Plan 2040 projects. Read them as capacity, not a forecast.',
+    stats: c => [{ n:c.specHomes, l:'illustrative homes' }, { n:c.specSites, l:'sites already zoned for housing' }, { n:0, l:'applications filed for any of them' }] },
+
+  { id:'finale', tag:'2058', dur:16, key: () => 2058,
+    shot:{ t:[37.9790,-122.5160], d:10200, az:4, el:30, drift:34, dolly:0.04 },
+    focus: () => null,
+    call: [['Northgate Town Square — Phase 2','Northgate Town Square','1,422 homes'], ['700 Irwin Street tower','Downtown','up to 180 ft'], ['zone:canal','Canal District', c => c.storm ? 'floods in storms' : 'tidal flooding']],
+    head: () => 'San Rafael, 2058',
+    deck: c => `${fmt(c.homes2058)} new homes in real projects, about ${fmt(Math.round(popAt(2058) / 100) * 100)} residents, and a bay ${slrIn(2058, state.scen).toFixed(0)} in higher than in 2000. In the ${c.scen} scenario${c.storm ? ' with a storm tide' : ''}, ${NUMW[c.wet2058]} of ${NUMW[ZONES.length]} low-lying areas flood regularly${c.protect ? ', with the Canal floodgate holding back the rest of the southeast' : ''}. Change the sea level scenario or the Canal protection and play it again.`,
+    stats: c => [{ n:c.homes2058, l:'new homes in real projects since 2020' }, { n:Math.round(popAt(2058) / 100) * 100, l:'residents (est.)' }, { n:slrIn(2058, state.scen), suf:'″', l:'of bay rise since 2000' }] }
+];
+
+/* camera */
+const easeIO = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+function shotPose(s, u) {
+  const [x, z] = XY(s.t[0], s.t[1]), t = new THREE.Vector3(x, yAt(x, z) + (s.dy || 0), z);
+  const az = (s.az + (s.drift || 0) * u) * D2R, el = s.el * D2R, d = s.d * (camera.aspect < 1 ? 1.8 : 1) * (1 + (s.dolly || 0) * u);
+  return { t, p: new THREE.Vector3(x + Math.sin(az) * Math.cos(el) * d, t.y + Math.sin(el) * d, z + Math.cos(az) * Math.cos(el) * d) };
+}
+// Blend two poses: target slides, view direction turns, distance moves in log space, and long moves lift into an arc.
+function blendPose(a, b, k) {
+  const t = a.t.clone().lerp(b.t, k);
+  const oa = a.p.clone().sub(a.t), ob = b.p.clone().sub(b.t), la = oa.length(), lb = ob.length();
+  const dir = oa.divideScalar(la).lerp(ob.divideScalar(lb), k).normalize();
+  const hop = Math.min(1.1, a.t.distanceTo(b.t) / (la + lb));
+  return { t, p: t.clone().add(dir.multiplyScalar(Math.exp(Math.log(la) + (Math.log(lb) - Math.log(la)) * k) * (1 + hop * Math.sin(Math.PI * k)))) };
+}
+
+/* rings under focus projects */
+const ringGeo = new THREE.RingGeometry(0.9, 1, 72); ringGeo.rotateX(-Math.PI / 2);
+const ringColor = new THREE.Color(0xc4521d);
+let rings = [];
+function ringR(p) { const k = p.kind; if (k === 'ng1' || k === 'ng2') return 270; if (k === 'ramp') return 170; if (k === 'bridge') return 80; if (k === 'marsh') return Math.max(p.w, p.d) * 0.62; return Math.max(p.w || 40, p.d || 40) * 0.72 + 14; }
+function buildRings(ps, minR) {
+  rings.forEach(r => { scene.remove(r.m); r.m.material.dispose(); }); rings = [];
+  ps.forEach((p, i) => {
+    const o = projObjs[p.id], r = Math.max(ringR(p), minR);
+    [false, true].forEach(pulse => {
+      const m = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: ringColor, transparent: true, depthWrite: false, opacity: 0 }));
+      m.position.set(p.x, yAt(p.x, p.z) + 2, p.z); m.scale.setScalar(r); m.renderOrder = 4; m.visible = false; scene.add(m);
+      rings.push({ m, o, r, pulse, ph: i * 0.137 });
+    });
+  });
+}
+function pulseRings(now) {
+  const ts = now / 1000, rm = reduceMotion();
+  rings.forEach(r => {
+    const on = r.o.prog > 0.05; r.m.visible = on && !(r.pulse && rm); if (!r.m.visible) return;
+    if (r.pulse) { const ph = (ts * 0.45 + r.ph) % 1; r.m.scale.setScalar(r.r * (1 + ph * 0.9)); r.m.material.opacity = 0.6 * Math.pow(1 - ph, 1.6); }
+    else r.m.material.opacity = 0.85;
+  });
+}
+
+/* callouts: leader-line labels pinned to the top of each focus building or flood zone */
+const calloutsHost = document.getElementById('callouts');
+let callouts = [];
+function buildCallouts(ch) {
+  calloutsHost.innerHTML = ''; callouts = [];
+  (ch.call || []).slice(0, stage.clientWidth < 520 ? 3 : 8).forEach(([name, label, fact]) => {
+    let a;
+    if (name.startsWith('zone')) { const zo = zoneObjs.find(o => o.z.id === name.slice(5)); if (!zo) return; a = { zo, always: name[4] === '!' }; }  // zone! = label it even when dry
+    else if (name === 'gate') a = { gate: true };
+    else { const p = byName(name); if (!p) return; a = { o: projObjs[p.id] }; }
+    const el = document.createElement('div'); el.className = 'co';
+    el.innerHTML = `<div class="co-tag"><small>${esc(typeof fact === 'function' ? fact(cine.ctx) : fact)}</small><b>${esc(label)}</b></div>`;
+    calloutsHost.appendChild(el);
+    callouts.push({ el, tag: el.firstChild, a, w: 0, h: 0 });
+  });
+}
+function placeCallouts() {
+  const w = stage.clientWidth, h = stage.clientHeight, lb = document.querySelector('.cine .bar').offsetHeight;
+  const items = callouts.map(c => {
+    let ok;
+    if (c.a.o) { const o = c.a.o; ok = o.prog > 0.3; const top = o.parts.reduce((m, pt) => Math.max(m, pt.g.position.y + pt.h * pt.g.scale.y), -1e9); tmpV.set(o.p.x, top + 2, o.p.z); }
+    else if (c.a.zo) { const zo = c.a.zo; ok = c.a.always ? state.year >= cine.list[cine.i].key : zo.cur > 0.4; tmpV.set(zo.z.x, zo.g.position.y, zo.z.z); }
+    else { ok = protectGroup.visible; const g = protectGroup.userData.gate; tmpV.set(g[0], yAt(g[0], g[1]) + 18, g[1]); }
+    tmpV.project(camera);
+    const sx = (tmpV.x + 1) / 2 * w, sy = (1 - tmpV.y) / 2 * h;
+    return { c, sx, sy, vis: ok && tmpV.z < 1 && sx > 16 && sx < w - 16 && sy > lb + 70 && sy < h - lb - 8 };
+  });
+  // the caption and year are obstacles: a callout whose anchor sits under them is hidden, others climb above them
+  const sr = stage.getBoundingClientRect(), obst = [];
+  [capEl.classList.contains('in') ? capEl : null, document.querySelector('.cyear')].forEach(el => { if (!el) return; const r = el.getBoundingClientRect(); obst.push([r.left - sr.left - 8, r.top - sr.top - 10, r.right - sr.left + 8, r.bottom - sr.top]); });
+  items.forEach(it => { if (it.vis && obst.some(r => it.sx > r[0] && it.sx < r[2] && it.sy > r[1] && it.sy < r[3])) it.vis = false; });
+  const placed = obst.slice();
+  items.filter(it => it.vis).sort((a, b) => a.sy - b.sy).forEach(it => {
+    const c = it.c; if (!c.w) { c.w = c.tag.offsetWidth; c.h = c.tag.offsetHeight; }
+    const flip = it.sx > w * 0.66;
+    let lead = 34, x0, y0;
+    for (let k = 0; k < 8; k++) {
+      x0 = flip ? it.sx + 12 - c.w : it.sx - 12; y0 = it.sy - lead - c.h;
+      const hit = r => (x0 < r[2] + 6 && x0 + c.w + 6 > r[0] && y0 < r[3] + 4 && y0 + c.h + 4 > r[1]) || (it.sx > r[0] && it.sx < r[2] && y0 + c.h < r[3] && it.sy > r[1]);
+      if (!placed.some(hit)) break;
+      lead += 28;
+    }
+    placed.push([x0, y0, x0 + c.w, y0 + c.h]); placed.push([it.sx - 2, y0 + c.h, it.sx + 2, it.sy]);
+    c.el.style.transform = `translate(${it.sx.toFixed(1)}px, ${it.sy.toFixed(1)}px)`;
+    c.el.style.setProperty('--lead', lead + 'px'); c.el.classList.toggle('flip', flip);
+  });
+  items.forEach(it => it.c.el.classList.toggle('on', it.vis));
+}
+
+/* caption */
+const capEl = document.getElementById('cap'), capS = document.getElementById('capS'), titleCard = document.getElementById('cTitle');
+const fmtStat = (v, dec, suf) => (dec ? v.toFixed(dec) : fmt(v)) + (suf || '');
+function showCaption(ch) {
+  const c = cine.ctx, rm = reduceMotion();
+  document.getElementById('capK').textContent = `${ch.from === ch.key ? ch.key : ch.from + '–' + ch.key} · ${ch.tag}`;
+  document.getElementById('capH').textContent = ch.head(c);
+  document.getElementById('capD').textContent = ch.deck(c);
+  capS.innerHTML = ch.stats(c).map(s => s.n != null
+    ? `<div><b data-n="${s.n}" data-d="${s.dec || 0}" data-s="${s.suf || ''}">${fmtStat(rm ? s.n : 0, s.dec, s.suf)}</b><span>${esc(s.l)}</span></div>`
+    : `<div><b>${esc(s.t)}</b><span>${esc(s.l)}</span></div>`).join('');
+  requestAnimationFrame(() => capEl.classList.add('in'));
+  if (rm) return;
+  const els = [...capS.querySelectorAll('b[data-n]')], t0 = performance.now();
+  const step = now => { const k = Math.min(1, Math.max(0, (now - t0 - 450) / 1400)), e = 1 - Math.pow(1 - k, 3); els.forEach(b => b.textContent = fmtStat(+b.dataset.n * e, +b.dataset.d, b.dataset.s)); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+
+/* chapter control */
+const segsEl = document.getElementById('cSegs'), cPlay = document.getElementById('cPlay');
+function buildSegs() {
+  segsEl.innerHTML = cine.list.map((ch, i) => `<button class="sg" type="button" data-i="${i}" aria-label="Chapter ${i + 1}: ${esc(ch.tag)}, ${ch.key}"><i></i><span><b>${ch.key}</b>${esc(ch.tag)}</span></button>`).join('');
+  document.getElementById('cN').textContent = NUMW[cine.list.length] || cine.list.length;
+}
+function segFill() { segsEl.querySelectorAll('.sg').forEach((b, i) => { b.querySelector('i').style.setProperty('--p', i < cine.i || cine.ended ? 1 : i > cine.i ? 0 : Math.min(1, cine.elapsed / cine.list[i].dur)); if (i === cine.i) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); }); }
+function goChapter(i) {
+  i = Math.max(0, Math.min(cine.list.length - 1, i));
+  const ch = cine.list[i];
+  Object.assign(cine, { i, elapsed: 0, fromAt: 0, ended: false, capShown: false, travel: reduceMotion() ? 0 : i === 0 ? 3.4 : 3, from: { t: controls.target.clone(), p: camera.position.clone() } });
+  if (state.year !== ch.from) { state.year = ch.from; update(); }
+  const fps = ch.focus(cine.ctx);
+  cine.focus = fps ? new Set(fps.map(p => p.id)) : null; cine.fadeT = fps ? 1 : 0;
+  buildRings(fps || [], ch.shot.d * 0.013);
+  buildCallouts(ch);
+  capEl.classList.remove('in');
+  document.getElementById('cCh').textContent = `${String(i + 1).padStart(2, '0')} / ${String(cine.list.length).padStart(2, '0')} · ${ch.tag}`;
+  segFill(); requestRender();
+}
+function setPlaying(on) {
+  if (on && cine.ended) { goChapter(0); }
+  else if (on && !cine.playing && cine.elapsed > 0) { cine.from = { t: controls.target.clone(), p: camera.position.clone() }; cine.fromAt = cine.elapsed; cine.travel = reduceMotion() ? 0 : 1.6; }
+  cine.playing = on; controls.enabled = !on; fly = null;
+  document.getElementById('cPlayLbl').textContent = on ? 'Pause' : cine.ended ? 'Replay' : 'Play';
+  document.getElementById('cPlayIcon').setAttribute('d', on ? 'M2 1 H5 V11 H2 Z M7 1 H10 V11 H7 Z' : 'M2 1 L11 6 L2 11 Z');
+  requestRender();
+}
+function cineTick(dt) {
+  const ch = cine.list[cine.i], rm = reduceMotion();
+  cine.elapsed += dt; const e = cine.elapsed;
+  const to = shotPose(ch.shot, rm ? 0 : Math.min(1, e / ch.dur));
+  const k = cine.travel > 0 ? easeIO(Math.min(1, (e - cine.fromAt) / cine.travel)) : 1;
+  const pose = k < 1 ? blendPose(cine.from, to, k) : to;
+  camera.position.copy(pose.p); controls.target.copy(pose.t); camera.lookAt(pose.t);
+  const Y = Math.round(ch.from + (ch.key - ch.from) * smooth((e - 0.5) / (ch.dur * 0.5)));
+  if (Y !== state.year) { state.year = Y; update(); }
+  if (!cine.capShown && e >= (ch.capAt || 1)) { cine.capShown = true; showCaption(ch); }
+  const titling = cine.i === 0 && e < (ch.capAt || 1) - 0.5;
+  titleCard.classList.toggle('in', titling); stage.classList.toggle('titling', titling);
+  segFill();
+  if (e >= ch.dur) { if (cine.i < cine.list.length - 1) goChapter(cine.i + 1); else { cine.ended = true; segFill(); setPlaying(false); } }
+}
+function startStory() {
+  cine.ctx = storyCtx();
+  cine.list = CHAPTERS.filter(ch => !ch.when || ch.when(cine.ctx)).map((ch, order) => Object.assign({}, ch, { order, key: ch.key(cine.ctx) })).sort((a, b) => a.key - b.key || a.order - b.order);
+  cine.list.forEach((ch, i) => { ch.from = i ? cine.list[i - 1].key : ch.key; });
+  buildSegs();
+  cine.active = true; app.classList.add('cinema'); document.documentElement.classList.add('cine-on'); cineEl.inert = false;
+  select(null); card.hidden = true; selZone = null;
+  frameForStory();
+  goChapter(0); cine.playing = false; setPlaying(true);
+  cPlay.focus({ preventScroll: true });
+}
+function exitStory() {
+  cine.active = false; cine.playing = false; cine.focus = null; cine.fadeT = 0;
+  app.classList.remove('cinema'); document.documentElement.classList.remove('cine-on'); cineEl.inert = true;
+  buildRings([], 0); calloutsHost.innerHTML = ''; callouts = [];
+  capEl.classList.remove('in'); titleCard.classList.remove('in'); stage.classList.remove('titling');
+  controls.enabled = true; frameForStory(); update();
+  document.getElementById('play').focus({ preventScroll: true });
+}
+const app = document.querySelector('.app'), cineEl = document.getElementById('cine');
+cPlay.addEventListener('click', () => setPlaying(!cine.playing));
+document.getElementById('cNext').addEventListener('click', () => { if (cine.i < cine.list.length - 1) { goChapter(cine.i + 1); setPlaying(true); } });
+document.getElementById('cPrev').addEventListener('click', () => { goChapter(cine.elapsed > 3 ? cine.i : cine.i - 1); setPlaying(true); });
+document.getElementById('cExit').addEventListener('click', exitStory);
+segsEl.addEventListener('click', e => { const b = e.target.closest('.sg'); if (!b) return; goChapter(+b.dataset.i); setPlaying(true); });
+// Grabbing the model pauses the film and hands over the camera; Play flies back to the shot.
+stage.addEventListener('pointerdown', e => { if (cine.active && cine.playing && e.target === canvas) setPlaying(false); }, true);
+stage.addEventListener('wheel', e => { if (cine.active && cine.playing && e.target === canvas) setPlaying(false); }, { capture: true, passive: true });
+document.addEventListener('keydown', e => {
+  if (!cine.active || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === 'Escape') { if (!card.hidden) { card.hidden = true; select(null); } else exitStory(); }
+  else if (e.key === ' ' && !(e.target.closest && e.target.closest('button, a, input'))) { e.preventDefault(); setPlaying(!cine.playing); }
+  else if (e.key === 'ArrowRight') { document.getElementById('cNext').click(); }
+  else if (e.key === 'ArrowLeft') { document.getElementById('cPrev').click(); }
+});
+
 /* ---------------- render loop ---------------- */
 let needs = true, animating = false;
 function requestRender() { needs = true; if (!animating) { animating = true; requestAnimationFrame(loop); } }
@@ -1009,48 +1460,54 @@ let lastT = 0;
 function loop(now) {
   let moving = false;
   const dt = Math.min(0.12, lastT ? (now - lastT) / 1000 : 0.016); lastT = now;
-  const kB = 1 - Math.exp(-dt * 8), kZ = 1 - Math.exp(-dt * 5);
+  const kB = 1 - Math.exp(-dt * (cine.active ? 2.6 : 8)), kZ = 1 - Math.exp(-dt * 5);
+  if (cine.active && cine.playing) cineTick(dt);
+  else {
   if (fly) { const t = Math.min(1, (now - fly.t0) / fly.dur), k = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; controls.target.lerpVectors(fly.ft, fly.tt, k); camera.position.lerpVectors(fly.fp, fly.tp, k); if (t >= 1) fly = null; moving = true; }
   if (controls.update()) moving = true;
+  }
   projObjs.forEach(o => {
     const d = o.target - o.prog;
     if (Math.abs(d) > 0.002) { o.prog += d * kB; moving = true; } else o.prog = o.target;
     const vis = o.prog > 0.01;
     o.parts.forEach(pt => { pt.g.visible = vis; pt.g.scale.y = Math.max(0.001, o.prog); });
-    o.meshes.forEach(m => { if (m.material !== selMat) { const under = o.target < 1 && o.target > 0; if (under && !m.userData.u) { if (!m.userData.um) { m.userData.um = m.userData.base.clone(); m.userData.um.transparent = true; m.userData.um.opacity = 0.55; } m.userData.um.color.copy(m.userData.base.color); m.material = m.userData.um; m.userData.u = true; } else if (!under && m.userData.u) { m.material = m.userData.base; m.userData.u = false; } } });
+    o.meshes.forEach(m => {
+      const base = m.userData.base;
+      let want = base;
+      if (selected === o) want = selMat;
+      else if (cine.focus && !cine.focus.has(o.p.id) && o.p.kind !== 'marsh') want = o.p.st === 'spec' ? mutedSpecMat : mutedMat;
+      else if (o.target < 1 && o.target > 0) { if (!m.userData.um) { m.userData.um = base.clone(); m.userData.um.transparent = true; m.userData.um.opacity = 0.55; } m.userData.um.color.copy(base.color); want = m.userData.um; }
+      if (m.material !== want) m.material = want;
+    });
   });
   landmarkObjs.forEach(l => { const d = l.target - (l.cur == null ? 1 : l.cur); l.cur = (l.cur == null ? 1 : l.cur) + d * kB; if (Math.abs(d) > 0.002) moving = true; l.m.visible = l.cur > 0.01; l.m.scale.y = Math.max(0.001, l.h * l.cur); });
   zoneObjs.forEach(z => { const d = z.target - z.cur; if (Math.abs(d) > 0.003) { z.cur += d * kZ; moving = true; } else z.cur = z.target; z.mat.uniforms.uOpacity.value = z.cur * 0.72; z.g.visible = z.cur > 0.01; });
-  if (playing) moving = true;
+  const fd = cine.fadeT - cine.fade;
+  if (Math.abs(fd) > 0.003) { cine.fade += fd * kZ; moving = true; } else cine.fade = cine.fadeT;
+  const fk = cine.fade * 0.6, fc = cine.fadeColor;
+  fabricMat.color.setRGB(1 + (fc.r - 1) * fk, 1 + (fc.g - 1) * fk, 1 + (fc.b - 1) * fk);
+  if (cine.active) { moving = true; pulseRings(now); }
   const az = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z);
   needle.setAttribute('transform', `rotate(${(az * 180 / Math.PI).toFixed(1)} 20 20)`);
-  if (needs || moving) { renderer.render(scene, camera); placeLabels(); needs = false; }
+  if (needs || moving) { renderer.render(scene, camera); placeLabels(); if (cine.active) placeCallouts(); needs = false; }
   if (moving) requestAnimationFrame(loop); else { animating = false; lastT = 0; }
 }
 controls.addEventListener('change', requestRender);
 
-function resize() { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); requestRender(); }
+function resize() { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; frameForStory(); requestRender(); }
+// In story mode the frame is shifted down a little so the subject sits above the caption.
+function frameForStory() { const w = stage.clientWidth, h = stage.clientHeight; if (cine.active && w && h) camera.setViewOffset(w, h, 0, Math.round(h * (w < h ? 0.17 : 0.13)), w, h); else camera.clearViewOffset(); camera.updateProjectionMatrix(); }
 new ResizeObserver(resize).observe(stage);
 
 /* ---------------- controls wiring ---------------- */
 const yearIn = document.getElementById('year');
-yearIn.addEventListener('input', () => { state.year = +yearIn.value; stopPlay(); update(); });
+yearIn.addEventListener('input', () => { state.year = +yearIn.value; update(); });
 document.getElementById('scen').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if (!b) return; state.scen = b.dataset.s; document.querySelectorAll('#scen button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); update(); });
 document.getElementById('tStorm').addEventListener('change', e => { state.storm = e.target.checked; update(); });
 document.getElementById('tProtect').addEventListener('change', e => { state.protect = e.target.checked; update(); });
 document.getElementById('tSpec').addEventListener('change', e => { state.spec = e.target.checked; update(); });
 document.getElementById('tLabels').addEventListener('change', requestRender);
-let playing = false, playT = 0, lastStep = 0;
-const playBtn = document.getElementById('play');
-function stopPlay() { playing = false; document.getElementById('playLbl').textContent = 'Play from 2026'; document.getElementById('playIcon').setAttribute('d', 'M2 1 L11 6 L2 11 Z'); }
-playBtn.addEventListener('click', () => {
-  if (playing) { stopPlay(); return; }
-  playing = true; state.year = 2026; yearIn.value = 2026; update();
-  document.getElementById('playLbl').textContent = 'Pause'; document.getElementById('playIcon').setAttribute('d', 'M2 1 H5 V11 H2 Z M7 1 H10 V11 H7 Z');
-  lastStep = performance.now();
-  const tick = now => { if (!playing) return; if (now - lastStep > 380) { lastStep = now; state.year++; yearIn.value = state.year; update(); if (state.year >= 2058) { stopPlay(); return; } } requestAnimationFrame(tick); requestRender(); };
-  requestAnimationFrame(tick);
-});
+document.getElementById('play').addEventListener('click', startStory);
 
 /* ---------------- boot ---------------- */
 function boot() {
@@ -1076,7 +1533,7 @@ function boot() {
   controls.target.set(tx, 0, tz); camera.position.set(tx + v.off[0], v.off[1], tz + v.off[2]);
   resize(); if (camera.aspect < 1) camera.position.set(tx + v.off[0] * 1.45, v.off[1] * 1.45, tz + v.off[2] * 1.45); update();
   document.getElementById('loading').hidden = true;
-  window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY };
+  window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY, cine, camera, controls, cineTick };
 }
 const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
