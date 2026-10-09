@@ -404,7 +404,7 @@ details.about a { word-break: break-word; }
     <details class="sect about">
       <summary>How this model was made</summary>
       <p>Project locations come from street addresses run through the US Census geocoder; heights, unit counts and status come from City of San Rafael project pages, Marin County, CEQA filings and SF YIMBY as of October 2026. Footprints are sized from unit counts and are approximate. Years after 2026 are reported targets where a developer or agency gave one, and model assumptions otherwise; each card says which.</p>
-      <p>Terrain, shoreline, freeways and rail are hand-traced from geocoded points and USGS summit elevations, with hills exaggerated 1.6×. Existing buildings are generated to match each neighborhood's density, not drawn parcel by parcel.</p>
+      <p>Terrain, shoreline, freeways and rail are hand-traced from geocoded points and USGS summit elevations, with hills exaggerated 1.6×. Existing buildings are real footprints from <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a> (ODbL, July 2026). OpenStreetMap records height for very few of them, so most heights are estimated from building type, footprint size and neighborhood.</p>
       <p>Flood zones switch on when the scenario's water level passes the exposure points reported in Marin's BayWAVE assessment, San Rafael's 2020 Flood Risk &amp; SLR Adaptation Report and TAM's 2024 vulnerability memo. The Canal and Spinnaker zones add about 0.4 in a year of measured ground sinking. These are approximations for exploring, not engineering flood maps.</p>
       <p>Illustrative growth after 2034 fills sites the 2023 Housing Element, Downtown Precise Plan and General Plan 2040 identify for housing, at roughly the pace General Plan 2040 projects. No developer has proposed these buildings.</p>
       <ul>
@@ -738,34 +738,141 @@ const HWY_XY = HWY101.map(p => XY(p[0], p[1])), I580_XY = I580.map(p => XY(p[0],
 let rngS = 20580;
 const rnd = () => { rngS = (rngS * 16807) % 2147483647; return (rngS - 1) / 2147483646; };
 const fabric = [];
-function genFabric(exclude) {
-  const step = 29;
-  for (let x = X0 + 300; x < X1 - 300; x += step) for (let z = Z0 + 300; z < Z1 - 300; z += step) {
-    const jx = x + (rnd() - 0.5) * 22, jz = z + (rnd() - 0.5) * 22;
-    let best = null, bw = 0;
-    for (const u of URBAN) { const d = Math.hypot(jx - u.x, jz - u.z); if (d < u.r * 1.15) { const w = u.dn * (1 - smooth((d / u.r - 0.55) / 0.6)); if (w > bw) { bw = w; best = u; } } }
-    const roll = rnd();
-    if (!best || roll > bw) continue;
-    const e = heightAt(jx, jz); if (e < 1.0) continue;
-    if (e > (best.t === 'res' ? 105 : 60)) continue;
-    const sl = Math.abs(heightAt(jx + 20, jz) - heightAt(jx - 20, jz)) / 40 + Math.abs(heightAt(jx, jz + 20) - heightAt(jx, jz - 20)) / 40;
-    if (sl > 0.32) continue;
-    let bad = false;
-    for (const n of NOBUILD) if (Math.hypot(jx - n.x, jz - n.z) < n.r) { bad = true; break; }
-    if (!bad) for (const n of exclude) if (Math.hypot(jx - n.x, jz - n.z) < n.r) { bad = true; break; }
-    if (bad) continue;
-    if (distPoly(jx, jz, HWY_XY) < 34 || distPoly(jx, jz, I580_XY) < 30 || distPoly(jx, jz, SMART_XY) < 12 || distPoly(jx, jz, CREEK_XY) < 40) continue;
-    let w, d, h;
-    const r1 = rnd(), r2 = rnd(), r3 = rnd();
-    if (best.t === 'res') { w = 11 + r1 * 6; d = 9 + r2 * 5; h = 4.2 + r3 * (r3 > 0.8 ? 3.2 : 1.8); }
-    else if (best.t === 'apt') { w = 18 + r1 * 14; d = 14 + r2 * 9; h = 6.5 + r3 * 5; }
-    else if (best.t === 'com') { w = 24 + r1 * 30; d = 18 + r2 * 22; h = 5 + r3 * 4.5; }
-    else { w = 16 + r1 * 18; d = 16 + r2 * 16; h = 6 + r3 * r3 * 11; }
-    fabric.push({ x:jx, z:jz, w, d, h, rot: -best.ang + (best.t === 'res' ? (rnd() - 0.5) * 0.5 : (rnd() - 0.5) * 0.12), shade: 0.9 + rnd() * 0.12 });
-  }
+// Street-block layout per district type, in the district's street-aligned frame (m):
+// bl/bd block length × depth, st street width, f lot frontage range, sb front setback range, d building depth range, gap side yard
+const BLOCK = {
+  dt:  { bl:105, bd:76,  st:16, f:[12, 26], sb:[0, 1],   d:[18, 32], gap:0 },
+  com: { bl:150, bd:110, st:18, f:[42, 80], sb:[10, 26], d:[20, 40], gap:10 },
+  apt: { bl:115, bd:80,  st:14, f:[26, 40], sb:[4, 7],   d:[13, 19], gap:6 },
+  res: { bl:165, bd:70,  st:12, f:[15, 20], sb:[5, 8],   d:[9, 14],  gap:4 }
+};
+const LOCAL_XY = [FOURTH, SANPEDRO, LUCAS].map(l => l.map(p => XY(p[0], p[1])));
+function urbanWeight(x, z) {
+  let best = null, bw = 0;
+  for (const u of URBAN) { const d = Math.hypot(x - u.x, z - u.z); if (d < u.r * 1.15) { const w = u.dn * (1 - smooth((d / u.r - 0.55) / 0.6)); if (w > bw) { bw = w; best = u; } } }
+  return [best, bw];
 }
-const fabricMat = new THREE.MeshLambertMaterial();
+function genFabric(exclude) {
+  const CELL = 48, hash = new Map(), key = (i, j) => i + ',' + j;
+  const clash = (b) => {
+    const ci = Math.floor(b.x / CELL), cj = Math.floor(b.z / CELL);
+    for (let i = ci - 1; i <= ci + 1; i++) for (let j = cj - 1; j <= cj + 1; j++) for (const o of hash.get(key(i, j)) || [])
+      if ((o.u !== b.u || o.hill || b.hill) && Math.hypot(o.x - b.x, o.z - b.z) < o.cr + b.cr) return true;
+    return false;
+  };
+  URBAN.forEach(u => {
+    const L = BLOCK[u.t], R = u.r * 1.15, PL = L.bl + L.st, PD = L.bd + L.st;
+    const ax = Math.cos(u.ang), az = Math.sin(u.ang), bx = -az, bz = ax; // along-street, across-street
+    const o1 = rnd() * PL, o2 = rnd() * PD;
+    const ni = Math.ceil(R / PL) + 1, nj = Math.ceil(R / PD) + 1;
+    for (let i = -ni; i <= ni; i++) for (let j = -nj; j <= nj; j++) {
+      const s0 = i * PL + o1, t0 = j * PD + o2;
+      if (Math.hypot(s0, t0) > R + PL / 2) continue;
+      if (rnd() < 0.05) continue; // park, school field or vacant block
+      for (const side of [-1, 1]) {
+        let s = -L.bl / 2;
+        while (s < L.bl / 2 - 6) {
+          const f = Math.min(L.f[0] + rnd() * (L.f[1] - L.f[0]), L.bl / 2 - s);
+          const sc = s + f / 2; s += f;
+          if (f < L.f[0] * 0.6) continue;
+          const sb = L.sb[0] + rnd() * (L.sb[1] - L.sb[0]);
+          const d = Math.min(L.d[0] + rnd() * (L.d[1] - L.d[0]), L.bd / 2 - sb - 2);
+          const w = f - L.gap * (0.6 + rnd() * 0.8);
+          const tc = t0 + side * (L.bd / 2 - sb - d / 2);
+          let x = u.x + ax * (s0 + sc) + bx * tc, z = u.z + az * (s0 + sc) + bz * tc;
+          const [best, bw] = urbanWeight(x, z);
+          if (best !== u || rnd() > Math.min(1, 0.3 + bw)) continue;
+          const e = heightAt(x, z); if (e < 1.0 || e > (u.t === 'res' ? 105 : 60)) continue;
+          const gx = (heightAt(x + 20, z) - heightAt(x - 20, z)) / 40, gz = (heightAt(x, z + 20) - heightAt(x, z - 20)) / 40;
+          const sl = Math.abs(gx) + Math.abs(gz);
+          if (sl > 0.32) continue;
+          // on hillsides, streets and houses follow the contours instead of the flatland grid
+          const hill = sl > 0.1 && u.t === 'res';
+          let rot = -u.ang + (rnd() - 0.5) * (u.t === 'res' ? 0.06 : 0.02);
+          if (hill) { rot = Math.atan2(-gx, -gz); x += (rnd() - 0.5) * 6; z += (rnd() - 0.5) * 6; }
+          let bad = false;
+          for (const n of NOBUILD) if (Math.hypot(x - n.x, z - n.z) < n.r) { bad = true; break; }
+          if (!bad) for (const n of exclude) if (Math.hypot(x - n.x, z - n.z) < n.r) { bad = true; break; }
+          if (bad) continue;
+          const half = Math.max(w, d) / 2;
+          if (distPoly(x, z, HWY_XY) < 22 + half || distPoly(x, z, I580_XY) < 20 + half || distPoly(x, z, SMART_XY) < 6 + half || distPoly(x, z, CREEK_XY) < 30 + half) continue;
+          if (LOCAL_XY.some(l => distPoly(x, z, l) < 8 + Math.min(w, d) / 2)) continue;
+          let h;
+          const r3 = rnd();
+          if (u.t === 'res') h = 4.2 + r3 * (r3 > 0.8 ? 3.2 : 1.8);
+          else if (u.t === 'apt') h = 6.5 + r3 * 5;
+          else if (u.t === 'com') h = 5 + r3 * 4.5;
+          else h = 6 + r3 * r3 * 11 * (0.5 + 0.5 * bw / u.dn); // taller toward the core
+          const b = { x, z, w, d, h, rot, shade: 0.9 + rnd() * 0.12, u, hill, cr: (hill ? Math.max(w, d) : Math.min(w, d)) * 0.5 };
+          if (clash(b)) continue;
+          const k = key(Math.floor(x / CELL), Math.floor(z / CELL)); if (!hash.has(k)) hash.set(k, []); hash.get(k).push(b);
+          fabric.push(b);
+        }
+      }
+    }
+  });
+}
+// Phong with no highlight lights like Lambert but can flat-shade, so footprint walls can share vertices with their roofs
+const fabricMat = new THREE.MeshPhongMaterial({ flatShading: true, specular: 0x000000, shininess: 0 }), fabricBase = new THREE.Color(1, 1, 1);
 let fabricMesh;
+
+/* real footprints: OpenStreetMap buildings (ODbL), packed by tools/pack.py into the local metre frame.
+   Each entry is [kind, tagged height in dm (0 if none), x0, z0, dx1, dz1, …] in units of data.q metres. */
+const hrnd = (i, k) => { const s = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return s - Math.floor(s); };
+function osmHeight(kind, hdm, area, x, z, i) {
+  if (hdm) return Math.max(2.5, hdm / 10);
+  const r = hrnd(i, 1);
+  if (kind === 5 || area < 40) return 2.6 + r * 1.2;  // garages, sheds, carports
+  if (kind === 2) return 9 + r * 5;
+  if (kind === 6) return 6.5 + r * 4 + (area > 3000 ? 4 : 0);
+  if (kind === 4) return 6 + r * 4;
+  if (kind === 1) return 4.2 + r * (r > 0.65 ? 3.2 : 1.6);
+  // untagged buildings (most of OSM here): read the neighbourhood and footprint size
+  const [u] = urbanWeight(x, z), t = u ? u.t : 'res';
+  if (t === 'dt') return Math.min(22, 6 + r * 5 + Math.sqrt(area) * 0.18);
+  if (kind === 3 || t === 'com') return area > 1500 ? 7 + r * 3 : 5 + r * 3.5;
+  if (t === 'apt') return area > 250 ? 8 + r * 4.5 : 4.5 + r * 2.5;
+  return area > 450 ? 7.5 + r * 4 : 4.2 + r * (r > 0.7 ? 3.2 : 1.6);
+}
+function buildOSM(data, exclude) {
+  const q = data.q, keepOut = NOBUILD.concat(exclude);
+  let nv = 0, ni = 0;
+  const rings = [];
+  data.b.forEach((b, i) => {
+    const pts = []; let x = 0, z = 0;
+    for (let k = 2; k < b.length; k += 2) { x += b[k]; z += b[k + 1]; pts.push(new THREE.Vector2(x * q, z * q)); }
+    let a = 0, cx = 0, cz = 0;
+    for (let k = 0; k < pts.length; k++) { const p = pts[k], n = pts[(k + 1) % pts.length], c = p.x * n.y - n.x * p.y; a += c; cx += (p.x + n.x) * c; cz += (p.y + n.y) * c; }
+    a /= 2; if (Math.abs(a) < 1e-6) return; cx /= 6 * a; cz /= 6 * a;
+    if (heightAt(cx, cz) < 0.3) return; // falls in the bay where the traced shoreline is approximate
+    for (const n of keepOut) if (Math.hypot(cx - n.x, cz - n.z) < n.r) return;
+    const tri = THREE.ShapeUtils.triangulateShape(pts, []);
+    rings.push({ pts, tri, h: osmHeight(b[0], b[1], Math.abs(a), cx, cz, i), shade: 0.9 + hrnd(i, 2) * 0.12 });
+    nv += pts.length * 2; ni += pts.length * 6 + tri.length * 3;
+  });
+  const pos = new Float32Array(nv * 3), col = new Uint8Array(nv * 3), idx = new Uint32Array(ni);
+  let v = 0, w = 0;
+  for (const r of rings) {
+    const n = r.pts.length; let lo = Infinity, hi = -Infinity;
+    for (const p of r.pts) { const y = yAt(p.x, p.y); lo = Math.min(lo, y); hi = Math.max(hi, y); }
+    // base on the lowest corner so hillside buildings don't float; roof clears the highest corner
+    const y0 = lo - 1, y1 = hi + r.h - 1, g = Math.min(255, Math.round(r.shade * 255));
+    for (let k = 0; k < n; k++) {
+      const p = r.pts[k], b = (v + k * 2) * 3;
+      pos[b] = p.x; pos[b + 1] = y0; pos[b + 2] = p.y; pos[b + 3] = p.x; pos[b + 4] = y1; pos[b + 5] = p.y;
+      col.fill(g, b, b + 6);
+      const k1 = (k + 1) % n, b0 = v + k * 2, b1 = v + k1 * 2;
+      idx[w++] = b0; idx[w++] = b1; idx[w++] = b1 + 1; idx[w++] = b0; idx[w++] = b1 + 1; idx[w++] = b0 + 1;
+    }
+    for (const t of r.tri) { idx[w++] = v + t[0] * 2 + 1; idx[w++] = v + t[1] * 2 + 1; idx[w++] = v + t[2] * 2 + 1; }
+    v += n * 2;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('color', new THREE.BufferAttribute(col, 3, true)); geo.setIndex(new THREE.BufferAttribute(idx, 1));
+  geo.computeBoundingSphere();
+  fabricMat.vertexColors = true; fabricMat.side = THREE.DoubleSide;
+  return new THREE.Mesh(geo, fabricMat);
+}
 
 /* ---------------- project meshes ---------------- */
 const projGroup = new THREE.Group(), pickables = [], projObjs = [];
@@ -1025,8 +1132,7 @@ function applyTheme() {
   waterMat.color = wat;
   roadMat.color = T('--road'); streetMat.color = T('--street'); railMat.color = T('--rail'); creekMat.color = wat.clone().lerp(T('--rail'), 0.15);
   railStationMat.color = T('--rail'); infraMat.color = T('--s-infra');
-  const b = T('--bldg'); fabricMat.color.set(0xffffff); lmMat.color = b.clone().multiplyScalar(0.96);
-  if (fabricMesh) { const cc = new THREE.Color(); fabric.forEach((f, i) => { cc.copy(b).multiplyScalar(f.shade); fabricMesh.setColorAt(i, cc); }); fabricMesh.instanceColor.needsUpdate = true; }
+  const b = T('--bldg'); fabricBase.copy(b); fabricMat.color.copy(b); lmMat.color = b.clone().multiplyScalar(0.96);
   Object.keys(STATUS).forEach(s => { projMat(s).color = T(STATUS[s].tok); });
   const sbg = T('--scene-bg'); mutedMat.color = b.clone().lerp(sbg, 0.18); mutedSpecMat.color = b.clone().lerp(sbg, 0.3);
   cine.fadeColor.setRGB(Math.min(1.3, sbg.r / Math.max(0.02, b.r)), Math.min(1.3, sbg.g / Math.max(0.02, b.g)), Math.min(1.3, sbg.b / Math.max(0.02, b.b)));
@@ -1616,7 +1722,7 @@ function loop(now) {
   const fd = cine.fadeT - cine.fade;
   if (Math.abs(fd) > 0.003) { cine.fade += fd * kZ; moving = true; } else cine.fade = cine.fadeT;
   const fk = cine.fade * 0.6, fc = cine.fadeColor;
-  fabricMat.color.setRGB(1 + (fc.r - 1) * fk, 1 + (fc.g - 1) * fk, 1 + (fc.b - 1) * fk);
+  fabricMat.color.setRGB(fabricBase.r * (1 + (fc.r - 1) * fk), fabricBase.g * (1 + (fc.g - 1) * fk), fabricBase.b * (1 + (fc.b - 1) * fk));
   if (cine.active) { moving = true; pulseRings(now); }
   const az = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z);
   needle.setAttribute('transform', `rotate(${(az * 180 / Math.PI).toFixed(1)} 20 20)`);
@@ -1649,7 +1755,7 @@ document.getElementById('tSpec').addEventListener('change', e => { state.spec = 
 document.getElementById('tLabels').addEventListener('change', requestRender);
 
 /* ---------------- boot ---------------- */
-function boot() {
+function boot(osm) {
   buildTerrain();
   terrain = new THREE.Mesh(tGeo, terrainMat); scene.add(terrain); scene.add(water);
   scene.add(ribbon(HWY101, 32, roadMat, 2.2, s => { const lat = LAT0 - s.z / KZ; return yAt(s.x, s.z) + 2.2 + ((lat > 37.9685 && lat < 37.979) ? 7 : 0); }));
@@ -1661,10 +1767,17 @@ function boot() {
   scene.add(ribbon(LUCAS, 10, streetMat, 1.6));
   creek = ribbon(CREEK, s => (s.x > XY(37.97, -122.517)[0] ? 58 : 22), creekMat, 0, () => -0.1); creek.renderOrder = 2; scene.add(creek);
   const exclude = buildProjects(); scene.add(projGroup);
-  genFabric(exclude);
-  fabricMesh = new THREE.InstancedMesh(boxGeo, fabricMat, fabric.length);
-  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), ps = new THREE.Vector3(), yAx = new THREE.Vector3(0, 1, 0);
-  fabric.forEach((f, i) => { q.setFromAxisAngle(yAx, f.rot); sc.set(f.w, f.h, f.d); ps.set(f.x, yAt(f.x, f.z) - 1, f.z); m4.compose(ps, q, sc); fabricMesh.setMatrixAt(i, m4); fabricMesh.setColorAt(i, new THREE.Color(1, 1, 1)); });
+  if (osm) fabricMesh = buildOSM(osm, exclude);
+  else { // offline / file:// fallback: procedurally generated blocks
+    genFabric(exclude);
+    fabricMesh = new THREE.InstancedMesh(boxGeo, fabricMat, fabric.length);
+    const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), ps = new THREE.Vector3(), yAx = new THREE.Vector3(0, 1, 0);
+    fabric.forEach((f, i) => {
+      // seat each building on its lowest corner so hillside houses don't float on the downhill side
+      const c = Math.cos(f.rot), s = Math.sin(f.rot); let lo = Infinity, hi = -Infinity;
+      for (const [u, v] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const y = yAt(f.x + (u * f.w * c + v * f.d * s) / 2, f.z + (-u * f.w * s + v * f.d * c) / 2); lo = Math.min(lo, y); hi = Math.max(hi, y); }
+      q.setFromAxisAngle(yAx, f.rot); sc.set(f.w, f.h + hi - lo, f.d); ps.set(f.x, lo - 1, f.z); m4.compose(ps, q, sc); fabricMesh.setMatrixAt(i, m4); fabricMesh.setColorAt(i, new THREE.Color(f.shade, f.shade, f.shade)); });
+  }
   scene.add(fabricMesh);
   buildLandmarks(); buildZones(); buildProtection(); makeLabels(); buildChips();
   applyTheme();
@@ -1676,6 +1789,7 @@ function boot() {
 }
 const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-setTimeout(() => { try { boot(); } catch (err) { document.getElementById('loading').classList.add('err'); document.getElementById('loadMsg').textContent = 'The model failed to build: ' + err.message; console.error(err); } }, 1200);
+const osmData = fetch('buildings.json').then(r => r.ok ? r.json() : null).catch(() => null);
+setTimeout(() => osmData.then(osm => { try { boot(osm); } catch (err) { document.getElementById('loading').classList.add('err'); document.getElementById('loadMsg').textContent = 'The model failed to build: ' + err.message; console.error(err); } }), 1200);
 })();
 </script>
