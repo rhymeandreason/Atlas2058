@@ -72,6 +72,7 @@ a { color: inherit; }
 .stage { position: absolute; inset: 0; min-width: 0; min-height: 0; overflow: hidden; background: var(--scene-bg); }
 #scene { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
 #scene:active { cursor: grabbing; }
+#scene.hot { cursor: pointer; }
 
 /* Masthead */
 .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
@@ -1132,15 +1133,25 @@ function select(o) {
 /* ---------------- picking ---------------- */
 const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
 let downAt = null;
+function pick(e) {
+  const r = canvas.getBoundingClientRect(); mouse.x = (e.clientX - r.left) / r.width * 2 - 1; mouse.y = -(e.clientY - r.top) / r.height * 2 + 1;
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(pickables.filter(m => m.parent.visible && m.parent.scale.y > 0.02), false)[0];
+  const zh = hit ? null : ray.intersectObjects(zoneObjs.filter(z => z.cur > 0.3).map(z => z.m), false)[0];
+  return { hit, zh };
+}
+let hoverEv = null;
+canvas.addEventListener('pointermove', e => {
+  if (e.buttons || e.pointerType === 'touch') return;
+  if (!hoverEv) requestAnimationFrame(() => { const { hit, zh } = pick(hoverEv); canvas.classList.toggle('hot', !!(hit || zh)); hoverEv = null; });
+  hoverEv = e;
+});
+canvas.addEventListener('pointerleave', () => canvas.classList.remove('hot'));
 canvas.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; });
 canvas.addEventListener('pointerup', e => {
   if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 5) return;
-  const r = canvas.getBoundingClientRect(); mouse.x = (e.clientX - r.left) / r.width * 2 - 1; mouse.y = -(e.clientY - r.top) / r.height * 2 + 1;
-  ray.setFromCamera(mouse, camera);
-  const vis = pickables.filter(m => m.parent.visible && m.parent.scale.y > 0.02);
-  const hit = ray.intersectObjects(vis, false)[0];
+  const { hit, zh } = pick(e);
   if (hit) { select(hit.object.userData.obj); return; }
-  const zh = ray.intersectObjects(zoneObjs.filter(z => z.cur > 0.3).map(z => z.m), false)[0];
   if (zh) { select(null); selZone = zh.object.userData.zone; showZone(selZone); return; }
   select(null); card.hidden = true;
 });
@@ -1586,6 +1597,17 @@ function loop(now) {
   if (moving) requestAnimationFrame(loop); else { animating = false; lastT = 0; }
 }
 controls.addEventListener('change', requestRender);
+/* trackpad: two-finger swipe pans, pinch (ctrlKey) and mouse wheels still zoom */
+const isMouseWheel = e => e.deltaMode !== 0 || (e.deltaX === 0 && e.wheelDeltaY !== undefined && e.wheelDeltaY !== 0 && e.wheelDeltaY % 120 === 0);
+canvas.addEventListener('wheel', e => {
+  if (!controls.enabled || e.ctrlKey || isMouseWheel(e)) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const k = camera.position.distanceTo(controls.target) * 2 * Math.tan(camera.fov * Math.PI / 360) / canvas.clientHeight;
+  const right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0); right.y = 0; right.normalize();
+  const fwd = new THREE.Vector3().crossVectors(THREE.Object3D.DefaultUp, right).normalize();
+  const d = right.multiplyScalar(e.deltaX * k).add(fwd.multiplyScalar(-e.deltaY * k));
+  camera.position.add(d); controls.target.add(d); fly = null; requestRender();
+}, { capture: true, passive: false });
 
 function resize() { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; frameForStory(); requestRender(); }
 // In story mode the frame is shifted down a little so the subject sits above the caption.
