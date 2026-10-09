@@ -358,37 +358,37 @@ details.about a { word-break: break-word; }
 
   <aside class="panel">
     <header>
-      <div class="eyebrow">Marin County · 37.97° N 122.53° W</div>
+      <div class="eyebrow">Marin County, California</div>
       <h1>San Rafael <span id="h1year">2058</span></h1>
-      <p class="lede">What is actually in the city’s pipeline, plus state sea level projections.</p>
+      <p class="lede">See what’s being built and planned across town, and how much the bay could rise around it.</p>
     </header>
 
     <section class="stats" aria-label="Totals for the selected year">
       <div class="stat"><b id="stHomes">0</b><span>new homes in real projects since 2020<em id="stSpec" class="specnote"></em></span></div>
-      <div class="stat"><b id="stPop">0</b><span>residents (est.)</span></div>
-      <div class="stat"><b id="stSea">0″</b><span>bay rise since 2000</span></div>
+      <div class="stat"><b id="stPop">0</b><span>residents (estimated)</span></div>
+      <div class="stat"><b id="stSea">0″</b><span>higher bay than in 2000</span></div>
     </section>
 
     <section aria-label="Sea level">
-      <h2>Sea level rise scenario · OPC 2024</h2>
-      <div class="seg" role="group" aria-label="Sea level scenario" id="scen">
-        <button type="button" data-s="Low">Low</button>
-        <button type="button" data-s="IntLow">Int-Low</button>
-        <button type="button" data-s="Int" aria-pressed="true">Interm.</button>
-        <button type="button" data-s="IntHigh">Int-High</button>
-        <button type="button" data-s="High">High</button>
+      <h2>How much will the bay rise?</h2>
+      <div class="seg" role="group" aria-label="Sea level rise forecast" id="scen">
+        <button type="button" data-s="Low">Lowest</button>
+        <button type="button" data-s="IntLow">Lower</button>
+        <button type="button" data-s="Int" aria-pressed="true">Likely</button>
+        <button type="button" data-s="IntHigh">Higher</button>
+        <button type="button" data-s="High">Worst</button>
       </div>
       <p class="segnote" id="scenNote"></p>
       <div class="toggles">
-        <label class="tog"><input type="checkbox" id="tStorm"><span>Add a 100-year storm tide<small>About 36 in of extra water on top.</small></span></label>
-        <label class="tog"><input type="checkbox" id="tProtect"><span>Build the Canal flood protection<small>Floodgate and levees, assumed done by 2045.</small></span></label>
-        <label class="tog"><input type="checkbox" id="tSpec" checked><span>Show illustrative growth after 2034<small>Ghosted buildings on zoned sites, no project yet.</small></span></label>
+        <label class="tog"><input type="checkbox" id="tStorm"><span>Add a major storm<small>A once-a-century storm adds about 3 feet.</small></span></label>
+        <label class="tog"><input type="checkbox" id="tProtect"><span>Protect the Canal neighborhood<small>A planned floodgate and levees, done by 2045.</small></span></label>
+        <label class="tog"><input type="checkbox" id="tSpec" checked><span>Imagine growth after 2034<small>Faded buildings where housing is allowed but not yet proposed.</small></span></label>
         <label class="tog"><input type="checkbox" id="tLabels" checked><span>Neighborhood labels</span></label>
       </div>
     </section>
 
     <details class="sect">
-      <summary>Projects by status today <em id="pCount"></em></summary>
+      <summary>All projects <em id="pCount"></em></summary>
       <div class="chips" id="chips"></div>
       <ul class="plist" id="plist"></ul>
     </details>
@@ -631,15 +631,15 @@ const STATUS = {
 /* ---------------- sea level (OPC 2024, San Francisco, ft rel. 2000) ---------------- */
 const SLR_YEARS = [2000, 2030, 2040, 2050, 2060, 2070];
 const SLR = {
-  Low:     { name:'Low', v:[0,0.3,0.4,0.5,0.6,0.7] },
-  IntLow:  { name:'Intermediate-Low', v:[0,0.4,0.5,0.6,0.8,1.0] },
-  Int:     { name:'Intermediate', v:[0,0.4,0.6,0.8,1.1,1.4] },
-  IntHigh: { name:'Intermediate-High', v:[0,0.4,0.7,1.0,1.5,2.2] },
-  High:    { name:'High', v:[0,0.4,0.8,1.3,2.0,2.9] }
+  Low:     { name:'Lowest case', v:[0,0.3,0.4,0.5,0.6,0.7] },
+  IntLow:  { name:'Lower case', v:[0,0.4,0.5,0.6,0.8,1.0] },
+  Int:     { name:'Likely case', v:[0,0.4,0.6,0.8,1.1,1.4] },
+  IntHigh: { name:'Higher case', v:[0,0.4,0.7,1.0,1.5,2.2] },
+  High:    { name:'Worst case', v:[0,0.4,0.8,1.3,2.0,2.9] }
 };
 const SCEN_NOTE = {
-  Low: 'Lowest plausible path.', IntLow: 'Below the most likely path.',
-  Int: 'OPC treats this as the most likely path for 2050.', IntHigh: 'A planning case for projects that can adapt.', High: 'A stress test for critical infrastructure.'
+  Low: 'If rise is slower than expected.', IntLow: 'A bit below what scientists expect.',
+  Int: 'California’s best estimate.', IntHigh: 'If rise is faster than expected.', High: 'An unlikely extreme that cities plan for anyway.'
 };
 function slrIn(year, s) { const v = SLR[s].v; for (let i = 0; i < SLR_YEARS.length - 1; i++) { if (year <= SLR_YEARS[i + 1]) { const t = (year - SLR_YEARS[i]) / (SLR_YEARS[i + 1] - SLR_YEARS[i]); return (v[i] + t * (v[i + 1] - v[i])) * 12; } } return v[v.length - 1] * 12; }
 
@@ -1061,7 +1061,7 @@ function update() {
   document.getElementById('cYear').textContent = Y;
   renderStoryProgress(Y);
   document.getElementById('cYearL').textContent = `${SLR[state.scen].name} · bay +${sea.toFixed(0)}″`;
-  document.getElementById('scenNote').textContent = `${SLR[state.scen].name}: ${(sea / 12).toFixed(2)} ft above the 2000 level in ${Y}. ${SCEN_NOTE[state.scen]}`;
+  document.getElementById('scenNote').textContent = `${SCEN_NOTE[state.scen]} The bay would be about ${Math.round(sea)} inches higher in ${Y} than in 2000.`;
   water.position.y = (sea + (state.storm ? 36 : 0)) * 0.0254 - 0.35;
   if (creek) creek.position.y = Math.max(0, water.position.y + 0.5);
   zoneObjs.forEach(zo => { const w = zoneWater(zo.z, Y), t = zoneThreshold(zo.z, Y); zo.target = w >= t ? 1 : 0; zo.level = Math.max(0, w - t); zo.g.position.y = (ZG + 0.35 + Math.min(zo.level, 48) * 0.0254 * 2) * EX; });
