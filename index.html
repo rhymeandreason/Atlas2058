@@ -404,7 +404,7 @@ details.about a { word-break: break-word; }
     <details class="sect about">
       <summary>How this model was made</summary>
       <p>Project locations come from street addresses run through the US Census geocoder; heights, unit counts and status come from City of San Rafael project pages, Marin County, CEQA filings and SF YIMBY as of October 2026. Footprints are sized from unit counts and are approximate. Years after 2026 are reported targets where a developer or agency gave one, and model assumptions otherwise; each card says which.</p>
-      <p>Terrain, shoreline, freeways and rail are hand-traced from geocoded points and USGS summit elevations, with hills exaggerated 1.6×. Existing buildings are real footprints from <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a> (ODbL, July 2026). OpenStreetMap records height for very few of them, so most heights are estimated from building type, footprint size and neighborhood.</p>
+      <p>Terrain is USGS 3DEP elevation data, with hills exaggerated 1.6× and low ground near the flood zones evened out so flooding reads clearly. The shoreline, streets and existing building footprints come from <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a> (ODbL, July 2026). US-101, I-580 and SMART rail are hand-traced from geocoded points. OpenStreetMap records height for very few of them, so most heights are estimated from building type, footprint size and neighborhood.</p>
       <p>Flood zones switch on when the scenario's water level passes the exposure points reported in Marin's BayWAVE assessment, San Rafael's 2020 Flood Risk &amp; SLR Adaptation Report and TAM's 2024 vulnerability memo. The Canal and Spinnaker zones add about 0.4 in a year of measured ground sinking. These are approximations for exploring, not engineering flood maps.</p>
       <p>Illustrative growth after 2034 fills sites the 2023 Housing Element, Downtown Precise Plan and General Plan 2040 identify for housing, at roughly the pace General Plan 2040 projects. No developer has proposed these buildings.</p>
       <ul>
@@ -508,7 +508,7 @@ function ellipseR(x, z, e) { const dx = x - e.x, dz = z - e.z, c = Math.cos(e.r)
 const CREEK_XY = CREEK.map(p => XY(p[0], p[1]));
 const ZG = 2.6; // zone ground (m)
 
-function elevRaw(x, z) {
+function elevProc(x, z) { // fallback: hand-traced shoreline and USGS summits as smooth hills
   const land = pip(x, z, LAND) || pip(x, z, TIB) || pip(x, z, RICH);
   const d = Math.min(distPoly(x, z, SHORE), distPoly(x, z, TIB), distPoly(x, z, RICH));
   if (!land) return -1.5 - Math.min(d, 3000) / 600;
@@ -517,7 +517,12 @@ function elevRaw(x, z) {
   for (const h of HILLS) { const dx = x - h[0], dz = z - h[1]; const q = (dx * dx + dz * dz) / (h[3] * h[3]); if (q < 9) hills += h[2] * Math.exp(-q); }
   hills *= 0.35 + 0.65 * smooth(d / 380);
   const n = (Math.sin(x * 0.0021 + 1.3) * Math.sin(z * 0.0017 + 0.4) + 0.5 * Math.sin(x * 0.0053 - z * 0.0041)) * Math.min(1, hills / 50) * 7;
-  e += hills + n;
+  return e + hills + n;
+}
+// modelling adjustments on top of either terrain source: flatten the flood zones to a common ground level so the
+// flood sheets read, settle the marshes, and cut San Rafael Creek's channel
+function elevAdjust(x, z, e) {
+  if (e <= 0) return e;
   for (const zn of ZONES) { const r = ellipseR(x, z, zn); if (r < 1.5) { const f = (1 - smooth((r - 0.8) / 0.6)) * (1 - smooth((e - 18) / 26)); if (f > 0) e = e * (1 - f) + Math.min(e, ZG) * f; } }
   for (const m of MARSH) { const r = ellipseR(x, z, m); if (r < 1.3) { const f = 1 - smooth((r - 0.8) / 0.5); e = e * (1 - f) + Math.min(e, 1.9) * f; } }
   const dc = distPoly(x, z, CREEK_XY);
@@ -528,7 +533,7 @@ function elevRaw(x, z) {
 
 /* ---------------- terrain grid ---------------- */
 const [X0, Z1] = XY(LATMIN, LONMIN), [X1, Z0] = XY(LATMAX, LONMAX);
-const NX = 470, NZ = 420;
+const NX = 620, NZ = 554; // ~44 m cells; must match tools/terrain.py
 const GW = X1 - X0, GH = Z1 - Z0;
 const HGT = new Float32Array((NX + 1) * (NZ + 1));
 function heightAt(x, z) { // true metres, bilinear
@@ -669,17 +674,18 @@ const tok = n => new THREE.Color((css.getPropertyValue(n) || '#888').trim());
 /* terrain */
 const tGeo = new THREE.BufferGeometry();
 const tPos = new Float32Array((NX + 1) * (NZ + 1) * 3), tCol = new Float32Array((NX + 1) * (NZ + 1) * 3), tKind = new Float32Array((NX + 1) * (NZ + 1) * 2);
-function buildTerrain() {
+// dem: USGS 3DEP elevations split along the OSM coastline (terrain.bin, Int16 dm), or null for the procedural fallback
+function buildTerrain(dem) {
   for (let j = 0; j <= NZ; j++) for (let i = 0; i <= NX; i++) {
     const k = j * (NX + 1) + i, x = X0 + GW * i / NX, z = Z0 + GH * j / NZ;
-    const e = elevRaw(x, z); HGT[k] = e;
+    const e = elevAdjust(x, z, dem ? dem[k] / 10 : elevProc(x, z)); HGT[k] = e;
     tPos[k * 3] = x; tPos[k * 3 + 1] = e * EX; tPos[k * 3 + 2] = z;
     let marsh = 0; for (const m of MARSH) { const r = ellipseR(x, z, m); if (r < 1.1) marsh = Math.max(marsh, 1 - smooth((r - 0.7) / 0.4)); }
     tKind[k * 2] = e; tKind[k * 2 + 1] = marsh;
   }
-  const idx = [];
-  for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) { const a = j * (NX + 1) + i, b = a + 1, c = a + NX + 1, d = c + 1; idx.push(a, c, b, b, c, d); }
-  tGeo.setIndex(idx); tGeo.setAttribute('position', new THREE.BufferAttribute(tPos, 3)); tGeo.setAttribute('color', new THREE.BufferAttribute(tCol, 3));
+  const idx = new Uint32Array(NX * NZ * 6); let w = 0;
+  for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) { const a = j * (NX + 1) + i, b = a + 1, c = a + NX + 1, d = c + 1; idx[w++] = a; idx[w++] = c; idx[w++] = b; idx[w++] = b; idx[w++] = c; idx[w++] = d; }
+  tGeo.setIndex(new THREE.BufferAttribute(idx, 1)); tGeo.setAttribute('position', new THREE.BufferAttribute(tPos, 3)); tGeo.setAttribute('color', new THREE.BufferAttribute(tCol, 3));
   tGeo.computeVertexNormals();
 }
 const terrainMat = new THREE.MeshLambertMaterial({ vertexColors: true });
@@ -710,6 +716,29 @@ function ribbon(ll, width, mat, lift, yfn) {
   }
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
   return new THREE.Mesh(g, mat);
+}
+// OSM streets (roads.json, packed by tools/roads.py): every way merged into one ribbon mesh
+const STREET_W = [0, 14, 11, 9, 6.5, 6];
+function buildStreets(data) {
+  const q = data.q, pos = [], idx = [];
+  for (const r of data.r) {
+    const pts = []; let x = 0, z = 0;
+    for (let k = 2; k < r.length; k += 2) { x += r[k] * q; z += r[k + 1] * q; pts.push([x, z]); }
+    const s = sampleLine(pts.map(p => [LAT0 - p[1] / KZ, LON0 + p[0] / KX]), 14), hw = STREET_W[r[0]] / 2;
+    // bridges span straight between their banks instead of dipping into the channel
+    const ya = yAt(s[0].x, s[0].z), yb = yAt(s[s.length - 1].x, s[s.length - 1].z);
+    const v0 = pos.length / 3;
+    for (let i = 0; i < s.length; i++) {
+      const a = s[Math.max(0, i - 1)], b = s[Math.min(s.length - 1, i + 1)];
+      let dx = b.x - a.x, dz = b.z - a.z; const l = Math.hypot(dx, dz) || 1; dx /= l; dz /= l;
+      const y = (r[1] ? ya + (yb - ya) * i / (s.length - 1) : yAt(s[i].x, s[i].z)) + 1.4;
+      pos.push(s[i].x - dz * hw, y, s[i].z + dx * hw, s[i].x + dz * hw, y, s[i].z - dx * hw);
+      if (i < s.length - 1) { const k = v0 + i * 2; idx.push(k, k + 2, k + 1, k + 1, k + 2, k + 3); }
+    }
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(new THREE.BufferAttribute(new Uint32Array(idx), 1));
+  g.computeBoundingSphere();
+  return new THREE.Mesh(g, streetMat);
 }
 const roadMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
 const streetMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
@@ -1755,16 +1784,15 @@ document.getElementById('tSpec').addEventListener('change', e => { state.spec = 
 document.getElementById('tLabels').addEventListener('change', requestRender);
 
 /* ---------------- boot ---------------- */
-function boot(osm) {
-  buildTerrain();
+function boot({ osm, dem, roads }) {
+  buildTerrain(dem);
   terrain = new THREE.Mesh(tGeo, terrainMat); scene.add(terrain); scene.add(water);
   scene.add(ribbon(HWY101, 32, roadMat, 2.2, s => { const lat = LAT0 - s.z / KZ; return yAt(s.x, s.z) + 2.2 + ((lat > 37.9685 && lat < 37.979) ? 7 : 0); }));
   scene.add(ribbon(I580, 28, roadMat, 2.2));
   scene.add(ribbon(RSR_BRIDGE, 18, roadMat, 0));
   scene.add(ribbon(SMART, 7, railMat, 2.6));
-  scene.add(ribbon(FOURTH, 13, streetMat, 1.6));
-  scene.add(ribbon(SANPEDRO, 10, streetMat, 1.6));
-  scene.add(ribbon(LUCAS, 10, streetMat, 1.6));
+  if (roads) scene.add(buildStreets(roads));
+  else { scene.add(ribbon(FOURTH, 13, streetMat, 1.6)); scene.add(ribbon(SANPEDRO, 10, streetMat, 1.6)); scene.add(ribbon(LUCAS, 10, streetMat, 1.6)); }
   creek = ribbon(CREEK, s => (s.x > XY(37.97, -122.517)[0] ? 58 : 22), creekMat, 0, () => -0.1); creek.renderOrder = 2; scene.add(creek);
   const exclude = buildProjects(); scene.add(projGroup);
   if (osm) fabricMesh = buildOSM(osm, exclude);
@@ -1789,7 +1817,11 @@ function boot(osm) {
 }
 const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-const osmData = fetch('buildings.json').then(r => r.ok ? r.json() : null).catch(() => null);
-setTimeout(() => osmData.then(osm => { try { boot(osm); } catch (err) { document.getElementById('loading').classList.add('err'); document.getElementById('loadMsg').textContent = 'The model failed to build: ' + err.message; console.error(err); } }), 1200);
+// baked real-world data; each falls back to the hand-built model if it can't be fetched (e.g. opened from file://)
+const getJSON = u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null);
+const realData = Promise.all([getJSON('buildings.json'), getJSON('roads.json'),
+  fetch('terrain.bin').then(r => r.ok ? r.arrayBuffer() : null).then(b => b && b.byteLength === (NX + 1) * (NZ + 1) * 2 ? new Int16Array(b) : null).catch(() => null)
+]).then(([osm, roads, dem]) => ({ osm, roads, dem }));
+setTimeout(() => realData.then(data => { try { boot(data); } catch (err) { document.getElementById('loading').classList.add('err'); document.getElementById('loadMsg').textContent = 'The model failed to build: ' + err.message; console.error(err); } }), 1200);
 })();
 </script>
