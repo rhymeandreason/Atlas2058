@@ -156,17 +156,25 @@ details.about a { word-break: break-word; }
 .card .src { font-size: 12px; display: grid; gap: 2px; }
 .card .src a { color: var(--muted); word-break: break-all; }
 .basis { font-family: var(--body); font-weight: 600; font-size: 12px; color: var(--muted); margin-left: 4px; }
-#loading { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; font-family: var(--body); font-weight: 600; font-size: 13.5px; color: var(--muted); background: var(--scene-bg); transition: opacity .6s ease, visibility 0s .6s; }
+#loading { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-family: var(--body); font-weight: 600; font-size: 13.5px; color: var(--muted); background: radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--accent) 9%, var(--scene-bg)), var(--scene-bg) 62%); transition: opacity .7s ease, visibility 0s .7s; }
 #loading.done { opacity: 0; visibility: hidden; }
-#loading .skyline { display: flex; align-items: flex-end; gap: 5px; height: 44px; }
-#loading .skyline i { display: block; width: 7px; height: 100%; background: var(--muted); border-radius: 1px; transform-origin: bottom; animation: rise 1.6s cubic-bezier(.5,0,.3,1) infinite; }
-#loading .skyline i:nth-child(1) { animation-delay: 0s; --h: .45; } #loading .skyline i:nth-child(2) { animation-delay: .1s; --h: .75; }
-#loading .skyline i:nth-child(3) { animation-delay: .2s; --h: 1; background: var(--accent); } #loading .skyline i:nth-child(4) { animation-delay: .3s; --h: .6; }
-#loading .skyline i:nth-child(5) { animation-delay: .4s; --h: .85; } #loading .skyline i:nth-child(6) { animation-delay: .5s; --h: .35; }
-#loading .tide { width: 72px; height: 2px; background: color-mix(in srgb, var(--s-water, #4a90b8) 70%, transparent); border-radius: 2px; margin-top: -12px; animation: tide 1.6s ease-in-out infinite; }
-#loading.err .skyline, #loading.err .tide { display: none; }
-@keyframes rise { 0%, 100% { transform: scaleY(.12); opacity: .5; } 45%, 60% { transform: scaleY(var(--h)); opacity: 1; } }
-@keyframes tide { 0%, 100% { transform: scaleX(.6); opacity: .5; } 50% { transform: scaleX(1); opacity: 1; } }
+#loadMsg { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 20px; color: var(--ink); opacity: .8; }
+#loading.done .vista { transform: scale(1.06); }
+#loading .vista { width: min(340px, 78vw); height: auto; overflow: hidden; transition: transform .7s ease; }
+#loading .hills { fill: color-mix(in srgb, var(--muted) 22%, transparent); }
+#loading .hills.near { fill: color-mix(in srgb, var(--muted) 34%, transparent); }
+#loading .b { fill: var(--ink); opacity: .82; transform-box: fill-box; transform-origin: bottom; transform: scaleY(0); animation: build 2s cubic-bezier(.3,.7,.2,1) infinite; }
+#loading .b.new { fill: var(--accent); opacity: 1; }
+#loading .sun { fill: #f2c55c; opacity: .9; animation: sun 2s ease-in-out infinite; }
+#loading .wave { fill: color-mix(in srgb, var(--flood) 40%, transparent); animation: swell 2s ease-in-out infinite; }
+#loading .wave path { animation: drift 1.2s linear infinite; }
+#loading .wave.back { fill: color-mix(in srgb, var(--flood) 30%, transparent); }
+#loading .wave.back path { animation-duration: 3.6s; animation-direction: reverse; }
+#loading.err .vista { display: none; }
+@keyframes build { 0% { transform: scaleY(0); } 55%, 92% { transform: scaleY(1); } 100% { transform: scaleY(0); } }
+@keyframes sun { 0% { transform: translateY(14px); opacity: 0; } 20%, 85% { opacity: .9; } 70% { transform: translateY(-6px); } 100% { transform: translateY(-6px); opacity: 0; } }
+@keyframes swell { 0%, 8% { transform: translateY(6px); } 70%, 92% { transform: translateY(-5px); } 100% { transform: translateY(6px); } }
+@keyframes drift { from { transform: translateX(0); } to { transform: translateX(-40px); } }
 [hidden] { display: none !important; }
 
 /* Story mode: the panel slides away, the model goes full-bleed between letterbox bars, and each chapter
@@ -353,7 +361,7 @@ details.about a { word-break: break-word; }
       <div class="segtip" id="segTip" hidden></div>
     </div>
     <article id="card" class="card" hidden aria-live="polite"></article>
-    <div id="loading" role="status"><div class="skyline" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="tide" aria-hidden="true"></div><span id="loadMsg">Raising the hills…</span></div>
+    <div id="loading" role="status"><svg class="vista" viewBox="0 0 300 140" aria-hidden="true"><defs><linearGradient id="ldFade"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".18" stop-color="#fff"/><stop offset=".82" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><linearGradient id="ldFadeV" x2="0" y2="1"><stop offset=".7" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><mask id="ldMask"><rect width="300" height="140" fill="url(#ldFade)"/></mask><mask id="ldMaskV"><rect width="300" height="140" fill="url(#ldFadeV)"/></mask></defs><g mask="url(#ldMask)"><g mask="url(#ldMaskV)"><circle class="sun" cx="236" cy="22" r="12"/><path class="hills" d="M0 92 C40 60 70 58 110 76 S180 50 220 66 S280 70 300 80 V120 H0 Z"/><path class="hills near" d="M0 104 C30 92 60 96 90 102 S200 90 240 98 S290 104 300 102 V120 H0 Z"/><rect class="b" x="30" y="84" width="14" height="26" style="animation-delay:0.02s"/><rect class="b new" x="46" y="70" width="10" height="40" style="animation-delay:0.07s"/><rect class="b" x="58" y="80" width="16" height="30" style="animation-delay:0.03s"/><rect class="b new" x="78" y="56" width="12" height="54" style="animation-delay:0.14s"/><rect class="b" x="92" y="74" width="14" height="36" style="animation-delay:0.05s"/><rect class="b new" x="110" y="40" width="18" height="70" style="animation-delay:0.22s"/><rect class="b" x="130" y="66" width="10" height="44" style="animation-delay:0.07s"/><rect class="b new" x="142" y="52" width="14" height="58" style="animation-delay:0.29s"/><rect class="b" x="160" y="78" width="16" height="32" style="animation-delay:0.08s"/><rect class="b new" x="178" y="62" width="12" height="48" style="animation-delay:0.36s"/><rect class="b" x="192" y="72" width="20" height="38" style="animation-delay:0.10s"/><rect class="b new" x="214" y="48" width="10" height="62" style="animation-delay:0.43s"/><rect class="b" x="226" y="82" width="14" height="28" style="animation-delay:0.12s"/><rect class="b" x="244" y="68" width="12" height="42" style="animation-delay:0.13s"/><g transform="translate(0 104)"><g class="wave back"><path d="M0 6 Q10 0 20 6 T40 6 T60 6 T80 6 T100 6 T120 6 T140 6 T160 6 T180 6 T200 6 T220 6 T240 6 T260 6 T280 6 T300 6 T320 6 T340 6 V22 H0 Z"/></g></g><g transform="translate(0 108)"><g class="wave"><path d="M0 6 Q10 0 20 6 T40 6 T60 6 T80 6 T100 6 T120 6 T140 6 T160 6 T180 6 T200 6 T220 6 T240 6 T260 6 T280 6 T300 6 T320 6 T340 6 V22 H0 Z"/></g></g></g></g></svg><span id="loadMsg">Raising the hills…</span></div>
   </section>
 
   <aside class="panel">
@@ -1668,6 +1676,6 @@ function boot() {
 }
 const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-setTimeout(() => { try { boot(); } catch (err) { document.getElementById('loading').classList.add('err'); document.getElementById('loadMsg').textContent = 'The model failed to build: ' + err.message; console.error(err); } }, 30);
+setTimeout(() => { try { boot(); } catch (err) { document.getElementById('loading').classList.add('err'); document.getElementById('loadMsg').textContent = 'The model failed to build: ' + err.message; console.error(err); } }, 1200);
 })();
 </script>
