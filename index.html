@@ -68,7 +68,7 @@ a { color: inherit; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .app { height: 100%; position: relative; }
-.panel { position: absolute; top: 16px; left: 16px; z-index: 7; width: min(372px, calc(100% - 32px)); max-height: calc(100% - var(--lbh) - var(--bpad) - 32px); overflow-y: auto; background: color-mix(in srgb, var(--panel) 94%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 14px 40px rgba(0,0,0,.18); padding: 16px 20px 12px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.panel { position: absolute; top: 16px; left: 16px; z-index: 7; width: min(372px, calc(100% - 32px)); max-height: calc(100% - var(--lbh) - var(--bpad) - 32px); overflow-y: auto; background: color-mix(in srgb, var(--panel) 94%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 14px 40px rgba(0,0,0,.18); padding: 24px 26px 22px; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .stage { position: absolute; inset: 0; min-width: 0; min-height: 0; overflow: hidden; background: var(--scene-bg); }
 #scene { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
 #scene:active { cursor: grabbing; }
@@ -118,8 +118,8 @@ h2 { font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing
 .plist .yr { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .plist .future .nm { opacity: .55; }
 
-details.sect { border-top: 1px solid var(--line); padding-top: 12px; }
-details.sect summary { cursor: pointer; font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); list-style-position: outside; }
+details.sect { border-top: 1px solid var(--line); padding-top: 16px; }
+details.sect summary { cursor: pointer; font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); list-style-position: inside; }
 details.sect summary:hover { color: var(--ink); }
 details.sect summary em { font-style: normal; opacity: .7; margin-left: 4px; }
 details.sect[open] summary { margin-bottom: 10px; }
@@ -151,7 +151,17 @@ details.about a { word-break: break-word; }
 .card .src { font-size: 12px; display: grid; gap: 2px; }
 .card .src a { color: var(--muted); word-break: break-all; }
 .basis { font-family: var(--mono); font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-left: 4px; }
-#loading { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; background: var(--scene-bg); }
+#loading { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; background: var(--scene-bg); transition: opacity .6s ease, visibility 0s .6s; }
+#loading.done { opacity: 0; visibility: hidden; }
+#loading .skyline { display: flex; align-items: flex-end; gap: 5px; height: 44px; }
+#loading .skyline i { display: block; width: 7px; height: 100%; background: var(--muted); border-radius: 1px; transform-origin: bottom; animation: rise 1.6s cubic-bezier(.5,0,.3,1) infinite; }
+#loading .skyline i:nth-child(1) { animation-delay: 0s; --h: .45; } #loading .skyline i:nth-child(2) { animation-delay: .1s; --h: .75; }
+#loading .skyline i:nth-child(3) { animation-delay: .2s; --h: 1; background: var(--accent); } #loading .skyline i:nth-child(4) { animation-delay: .3s; --h: .6; }
+#loading .skyline i:nth-child(5) { animation-delay: .4s; --h: .85; } #loading .skyline i:nth-child(6) { animation-delay: .5s; --h: .35; }
+#loading .tide { width: 72px; height: 2px; background: color-mix(in srgb, var(--s-water, #4a90b8) 70%, transparent); border-radius: 2px; margin-top: -12px; animation: tide 1.6s ease-in-out infinite; }
+#loading.err .skyline, #loading.err .tide { display: none; }
+@keyframes rise { 0%, 100% { transform: scaleY(.12); opacity: .5; } 45%, 60% { transform: scaleY(var(--h)); opacity: 1; } }
+@keyframes tide { 0%, 100% { transform: scaleX(.6); opacity: .5; } 50% { transform: scaleX(1); opacity: 1; } }
 [hidden] { display: none !important; }
 
 /* Story mode: the panel slides away, the model goes full-bleed between letterbox bars, and each chapter
@@ -338,14 +348,14 @@ details.about a { word-break: break-word; }
       <div class="segtip" id="segTip" hidden></div>
     </div>
     <article id="card" class="card" hidden aria-live="polite"></article>
-    <div id="loading">Raising the hills…</div>
+    <div id="loading" role="status"><div class="skyline" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="tide" aria-hidden="true"></div><span id="loadMsg">Raising the hills…</span></div>
   </section>
 
   <aside class="panel">
     <header>
       <div class="eyebrow">Marin County · 37.97° N 122.53° W</div>
       <h1>San Rafael <span id="h1year">2058</span></h1>
-      <p class="lede">What is actually in the city’s pipeline, plus state sea level projections. Watch the story, or drag the timeline to any year.</p>
+      <p class="lede">What is actually in the city’s pipeline, plus state sea level projections.</p>
     </header>
 
     <section class="stats" aria-label="Totals for the selected year">
@@ -405,7 +415,7 @@ details.about a { word-break: break-word; }
 <script>
 (function () {
 "use strict";
-if (!window.THREE) { document.getElementById('loading').textContent = 'The 3D library did not load. Check your connection and reload.'; return; }
+if (!window.THREE) { document.getElementById('loading').classList.add('err'); document.getElementById('loadMsg').textContent = 'The 3D library did not load. Check your connection and reload.'; return; }
 
 /* ---------------- geography ---------------- */
 const D2R = Math.PI / 180, LAT0 = 37.983, LON0 = -122.515;
@@ -1612,11 +1622,11 @@ function boot() {
   const v = VIEWS.overview, [tx, tz] = XY(v.t[0], v.t[1]);
   controls.target.set(tx, 0, tz); camera.position.set(tx + v.off[0], v.off[1], tz + v.off[2]);
   resize(); if (camera.aspect < 1) camera.position.set(tx + v.off[0] * 1.45, v.off[1] * 1.45, tz + v.off[2] * 1.45); update();
-  document.getElementById('loading').hidden = true;
+  document.getElementById('loading').classList.add('done');
   window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY, cine, camera, controls, cineTick };
 }
 const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-setTimeout(() => { try { boot(); } catch (err) { document.getElementById('loading').textContent = 'The model failed to build: ' + err.message; console.error(err); } }, 30);
+setTimeout(() => { try { boot(); } catch (err) { document.getElementById('loading').classList.add('err'); document.getElementById('loadMsg').textContent = 'The model failed to build: ' + err.message; console.error(err); } }, 30);
 })();
 </script>
