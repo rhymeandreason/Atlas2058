@@ -40,6 +40,7 @@
   /* story mode is always projected on dark letterbox bars, so its tokens hold in both themes */
   --cine-bg: #0b0e0d; --cine-ink: #f3f0e7; --cine-dim: #b3bab5; --cine-accent: #f39a63;
   --lbh: clamp(44px, 7.5vh, 76px);
+  --bpad: 14px; /* extra room under the timeline controls */
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -66,33 +67,18 @@ button, input, select { font: inherit; color: inherit; }
 a { color: inherit; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.app { height: 100%; display: grid; grid-template-columns: minmax(320px, 380px) 1fr; }
-.panel { order: 0; background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; padding-block: 20px 28px; padding-inline: 22px; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
-.stage { order: 1; position: relative; min-width: 0; min-height: 0; overflow: hidden; background: var(--scene-bg); }
+.app { height: 100%; position: relative; }
+.panel { position: absolute; top: 16px; left: 16px; z-index: 7; width: min(372px, calc(100% - 32px)); max-height: calc(100% - var(--lbh) - var(--bpad) - 32px); overflow-y: auto; background: color-mix(in srgb, var(--panel) 94%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 14px 40px rgba(0,0,0,.18); padding: 16px 20px 12px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.stage { position: absolute; inset: 0; min-width: 0; min-height: 0; overflow: hidden; background: var(--scene-bg); }
 #scene { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
 #scene:active { cursor: grabbing; }
 
 /* Masthead */
 .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-h1 { font-family: var(--display); font-weight: 800; font-size: 40px; line-height: .95; letter-spacing: -.02em; margin: 6px 0 10px; text-wrap: balance; }
+h1 { font-family: var(--serif); font-weight: 400; font-size: 54px; line-height: .92; letter-spacing: -.012em; margin: 6px 0 10px; text-wrap: balance; }
 h1 span { color: var(--accent); }
 .lede { margin: 0; color: var(--muted); max-width: 62ch; }
 h2 { font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
-
-/* Timeline */
-.time { display: grid; gap: 8px; }
-.yearrow { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
-.year { font-family: var(--display); font-weight: 700; font-size: 64px; line-height: .85; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
-.play { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--ink); background: transparent; border-radius: 999px; padding: 7px 14px 7px 12px; cursor: pointer; font-weight: 600; font-size: 13px; }
-.play:hover { background: var(--ink); color: var(--panel); }
-.play svg { width: 12px; height: 12px; fill: currentColor; }
-input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; background: transparent; cursor: pointer; margin: 0; }
-input[type=range]::-webkit-slider-runnable-track { height: 4px; background: linear-gradient(to right, var(--accent) var(--pct, 100%), var(--line) var(--pct, 100%)); border-radius: 2px; }
-input[type=range]::-moz-range-track { height: 4px; background: var(--line); border-radius: 2px; }
-input[type=range]::-moz-range-progress { height: 4px; background: var(--accent); border-radius: 2px; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--panel); border: 3px solid var(--accent); margin-top: -7px; }
-input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--panel); border: 3px solid var(--accent); }
-.ticks { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 /* Stats */
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-block: 1px solid var(--line); }
@@ -132,7 +118,11 @@ input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 
 .plist .yr { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .plist .future .nm { opacity: .55; }
 
-details.about summary { cursor: pointer; font-weight: 600; }
+details.sect { border-top: 1px solid var(--line); padding-top: 12px; }
+details.sect summary { cursor: pointer; font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); list-style-position: outside; }
+details.sect summary:hover { color: var(--ink); }
+details.sect summary em { font-style: normal; opacity: .7; margin-left: 4px; }
+details.sect[open] summary { margin-bottom: 10px; }
 details.about p, details.about li { color: var(--muted); font-size: 13px; }
 details.about ul { padding-left: 18px; margin: 6px 0; }
 details.about a { word-break: break-word; }
@@ -141,14 +131,14 @@ details.about a { word-break: break-word; }
 .views { position: absolute; top: 14px; right: 14px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; max-width: calc(100% - 28px); }
 .views button { border: 1px solid var(--line); background: var(--panel); border-radius: 6px; padding: 6px 10px; font-size: 12.5px; cursor: pointer; }
 .views button:hover { border-color: var(--ink); }
-.hint { position: absolute; left: 14px; bottom: 12px; font-size: 11.5px; color: var(--muted); background: color-mix(in srgb, var(--scene-bg) 80%, transparent); padding: 3px 8px; border-radius: 4px; pointer-events: none; }
-.compass { position: absolute; right: 14px; bottom: 12px; width: 38px; height: 38px; pointer-events: none; }
+.hint { position: absolute; left: 404px; bottom: calc(var(--lbh) + var(--bpad) + 40px); right: 260px; font-size: 11.5px; color: var(--muted); text-shadow: 0 0 6px var(--scene-bg); pointer-events: none; }
+.compass { position: absolute; right: 14px; top: 54px; width: 38px; height: 38px; pointer-events: none; }
 .compass svg { width: 100%; height: 100%; }
 #labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .lbl { position: absolute; left: 0; top: 0; white-space: nowrap; font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink); opacity: .7; text-shadow: 0 0 3px var(--scene-bg), 0 0 6px var(--scene-bg); will-change: transform; }
 .lbl.water { color: var(--rail); font-style: italic; text-transform: none; letter-spacing: .02em; font-family: var(--body); font-size: 12px; }
 .lbl.sel { font-family: var(--body); text-transform: none; letter-spacing: 0; font-weight: 600; font-size: 12.5px; opacity: 1; background: var(--ink); color: var(--panel); text-shadow: none; padding: 2px 7px; border-radius: 3px; }
-.card { position: absolute; top: 56px; right: 14px; width: min(340px, calc(100% - 28px)); max-height: calc(100% - 110px); overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 16px 14px; box-shadow: 0 10px 30px rgba(0,0,0,.14); display: grid; gap: 8px; }
+.card { position: absolute; z-index: 6; top: 56px; right: 14px; width: min(340px, calc(100% - 28px)); max-height: calc(100% - var(--lbh) - 72px); overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 16px 14px; box-shadow: 0 10px 30px rgba(0,0,0,.14); display: grid; gap: 8px; }
 .card h3 { font-family: var(--display); font-weight: 700; font-size: 21px; line-height: 1.1; margin: 0; padding-right: 28px; text-wrap: balance; }
 .card .x { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; border: 0; background: transparent; cursor: pointer; font-size: 18px; color: var(--muted); border-radius: 6px; }
 .card .x:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
@@ -161,14 +151,13 @@ details.about a { word-break: break-word; }
 .card .src { font-size: 12px; display: grid; gap: 2px; }
 .card .src a { color: var(--muted); word-break: break-all; }
 .basis { font-family: var(--mono); font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-left: 4px; }
-#loading { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; background: var(--scene-bg); }
+#loading { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; background: var(--scene-bg); }
 [hidden] { display: none !important; }
 
 /* Story mode: the panel slides away, the model goes full-bleed between letterbox bars, and each chapter
    brings its own camera move, caption, impact figures and callouts on the projects that matter. */
-.panel { transition: transform .55s cubic-bezier(.2,.7,.2,1); }
-.app.cinema { grid-template-columns: 1fr; }
-.app.cinema .panel { position: absolute; inset-block: 0; left: 0; width: min(380px, 100%); z-index: 8; transform: translateX(-102%); visibility: hidden; transition: transform .6s cubic-bezier(.6,0,.2,1), visibility 0s .6s; }
+.panel { transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .4s; }
+.app.cinema .panel { transform: translateX(calc(-100% - 24px)); opacity: 0; visibility: hidden; transition: transform .6s cubic-bezier(.6,0,.2,1), opacity .4s, visibility 0s .6s; }
 .views, .hint, .compass { transition: opacity .4s; }
 .app.cinema .views, .app.cinema .hint, .app.cinema .compass { opacity: 0; pointer-events: none; }
 .app.cinema .lbl:not(.sel) { opacity: .4; }
@@ -188,14 +177,16 @@ details.about a { word-break: break-word; }
 .cine { position: absolute; inset: 0; z-index: 4; pointer-events: none; color: var(--cine-ink); visibility: hidden; transition: visibility 0s .8s; }
 .app.cinema .cine { visibility: visible; transition: none; }
 .cine button { pointer-events: auto; }
-.cine .bar { position: absolute; left: 0; right: 0; height: var(--lbh); background: var(--cine-bg); display: flex; align-items: center; gap: 16px; padding-inline: clamp(16px, 3vw, 40px); transform: scaleY(0); transition: transform .8s cubic-bezier(.6,0,.2,1); }
-.cine .bar.top { top: 0; transform-origin: top; }
-.cine .bar.bot { bottom: 0; transform-origin: bottom; }
-.app.cinema .cine .bar { transform: none; }
-.cine .bar > * { opacity: 0; transition: opacity .3s; }
-.app.cinema .cine .bar > * { opacity: 1; transition: opacity .5s .55s; }
+.bar { position: absolute; left: 0; right: 0; height: var(--lbh); background: var(--cine-bg); color: var(--cine-ink); display: flex; align-items: center; gap: 16px; padding-inline: clamp(16px, 3vw, 40px); }
+.bar.top { top: 0; transform-origin: top; transform: scaleY(0); transition: transform .8s cubic-bezier(.6,0,.2,1); }
+/* the timeline bar fades up into the map instead of starting at a hard edge */
+.bar.bot { bottom: 0; z-index: 6; background: none; height: calc(var(--lbh) + var(--bpad)); padding-bottom: var(--bpad); }
+.bar.bot::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: calc(100% + 64px); z-index: -1; pointer-events: none; background: linear-gradient(to top, rgba(8,11,10,.9) 0, rgba(8,11,10,.72) var(--lbh), rgba(8,11,10,.32) calc(var(--lbh) + 26px), rgba(8,11,10,0) 100%); }
+.app.cinema .bar.top { transform: none; }
+.bar.top > * { opacity: 0; transition: opacity .3s; }
+.app.cinema .bar.top > * { opacity: 1; transition: opacity .5s .55s; }
 .scrim, .vign, .scrimtop { position: absolute; left: 0; right: 0; pointer-events: none; opacity: 0; transition: opacity .9s; }
-.scrim { bottom: var(--lbh); height: 58%; background: linear-gradient(to top, rgba(8,11,10,.88) 0%, rgba(8,11,10,.62) 38%, rgba(8,11,10,0) 100%); }
+.scrim { bottom: calc(var(--lbh) + var(--bpad)); height: 58%; background: linear-gradient(to top, rgba(8,11,10,.88) 0%, rgba(8,11,10,.62) 38%, rgba(8,11,10,0) 100%); }
 .scrimtop { top: var(--lbh); height: 22%; background: linear-gradient(to bottom, rgba(8,11,10,.5), rgba(8,11,10,0)); display: none; }
 .vign { inset: 0; background: radial-gradient(ellipse 75% 70% at 50% 42%, transparent 55%, rgba(0,0,0,.32) 100%); }
 .app.cinema .scrim, .app.cinema .vign, .app.cinema .scrimtop { opacity: 1; }
@@ -207,18 +198,26 @@ details.about a { word-break: break-word; }
 .cbtn svg { width: 12px; height: 12px; fill: currentColor; flex: none; }
 .cbtn.icon { padding: 0; }
 .cbtn.main { background: var(--cine-ink); color: var(--cine-bg); border-color: var(--cine-ink); font-weight: 600; padding: 0 16px 0 13px; min-width: 104px; }
+.cbtn-link { border: 0; background: none; padding: 4px 2px; color: var(--cine-dim); font-size: 12.5px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; white-space: nowrap; }
+.cbtn-link:hover { color: var(--cine-ink); }
+.cctl { align-items: center; }
 .cbtn kbd { font-family: var(--mono); font-size: 10px; opacity: .6; }
 .cctl { display: flex; gap: 6px; flex: none; }
-.segs { flex: 1; display: flex; gap: 5px; min-width: 0; }
+.segs { flex: 1; display: flex; gap: 5px; min-width: 0; touch-action: pan-y; }
+.app:not(.cinema) .segs { cursor: ew-resize; }
 .sg { flex: 1; min-width: 0; border: 0; background: none; padding: 6px 0; cursor: pointer; color: var(--cine-dim); display: grid; gap: 7px; text-align: left; }
 .sg i { display: block; height: 3px; border-radius: 2px; background: rgba(255,255,255,.2); position: relative; overflow: hidden; }
 .sg i::after { content: ""; position: absolute; inset: 0; background: var(--cine-ink); transform-origin: left; transform: scaleX(var(--p, 0)); }
 .sg span { font-family: var(--mono); font-size: 10px; letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sg span b { font-weight: 500; color: var(--cine-ink); opacity: .55; margin-right: 6px; }
 .sg[aria-current="true"] span { color: var(--cine-ink); }
+.app:not(.cinema) .sg[aria-current="true"] i::after { background: var(--cine-accent); }
+.segtip { position: absolute; bottom: calc(100% + 10px); left: 0; transform: translateX(-50%); width: max-content; max-width: min(300px, 80vw); background: var(--cine-bg); color: var(--cine-ink); border: 1px solid rgba(255,255,255,.14); border-radius: 8px; padding: 9px 12px 10px; pointer-events: none; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+.segtip small { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--cine-accent); margin-bottom: 3px; }
+.segtip b { display: block; font-family: var(--serif); font-weight: 400; font-size: 17px; line-height: 1.15; text-wrap: balance; }
 .sg:hover span { color: var(--cine-ink); }
 
-.cap { position: absolute; left: clamp(16px, 4vw, 64px); bottom: calc(var(--lbh) + clamp(18px, 4vh, 40px)); width: min(600px, 58%); }
+.cap { position: absolute; left: clamp(16px, 4vw, 64px); bottom: calc(var(--lbh) + var(--bpad) + clamp(18px, 4vh, 40px)); width: min(600px, 58%); }
 .cap > * { opacity: 0; transform: translateY(14px); transition: opacity .25s, transform .25s; }
 .cap.in > * { opacity: 1; transform: none; transition: opacity .7s, transform .9s cubic-bezier(.2,.7,.2,1); }
 .cap.in > :nth-child(2) { transition-delay: .12s; }
@@ -232,10 +231,13 @@ details.about a { word-break: break-word; }
 .cap-s b { font-family: var(--display); font-weight: 700; font-size: clamp(24px, 2.3vw, 36px); line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .cap-s span { font-size: 12px; line-height: 1.3; color: var(--cine-dim); max-width: 20ch; }
 
-.cyear { position: absolute; right: clamp(16px, 4vw, 64px); bottom: calc(var(--lbh) + clamp(12px, 3vh, 30px)); display: grid; justify-items: end; opacity: 0; transition: opacity .7s .4s; }
-.app.cinema .cyear { opacity: 1; }
-.cyear-l { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--cine-dim); margin-bottom: 10px; }
-#cYear { font-family: var(--display); font-weight: 800; font-size: clamp(84px, 11.5vw, 190px); line-height: .78; letter-spacing: -.045em; font-variant-numeric: tabular-nums; text-shadow: 0 4px 40px rgba(0,0,0,.3); }
+/* The year lives on the map in both modes: a corner readout while exploring, the big film year in the story. */
+.cyear { position: absolute; z-index: 2; right: 20px; bottom: calc(var(--lbh) + var(--bpad) + 30px); display: grid; justify-items: end; pointer-events: none; color: var(--ink); transition: right .8s cubic-bezier(.6,0,.2,1), bottom .8s cubic-bezier(.6,0,.2,1), color .6s, opacity .6s; }
+.cyear-l { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; text-shadow: 0 0 6px var(--scene-bg); transition: color .6s; }
+#cYear { font-family: var(--display); font-weight: 800; font-size: clamp(68px, 7.5vw, 124px); line-height: .78; letter-spacing: -.045em; font-variant-numeric: tabular-nums; text-shadow: 0 0 22px var(--scene-bg), 0 0 6px var(--scene-bg); transition: font-size .8s cubic-bezier(.6,0,.2,1), text-shadow .6s; }
+.app.cinema .cyear { z-index: 5; color: var(--cine-ink); right: clamp(16px, 4vw, 64px); bottom: calc(var(--lbh) + var(--bpad) + clamp(12px, 3vh, 30px)); }
+.app.cinema .cyear-l { color: var(--cine-dim); text-shadow: none; }
+.app.cinema #cYear { font-size: clamp(84px, 11.5vw, 190px); text-shadow: 0 4px 40px rgba(0,0,0,.3); }
 
 .titlecard { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; gap: 18px; padding: 24px; background: rgba(8,11,10,.74); opacity: 0; transition: opacity 1.1s; }
 .titlecard.in { opacity: 1; }
@@ -247,12 +249,10 @@ details.about a { word-break: break-word; }
 @media (max-width: 760px) {
   body { overflow: auto; }
   .app { display: flex; flex-direction: column; height: auto; min-height: 100%; }
-  .stage { order: 0; height: 58svh; min-height: 340px; flex: none; }
-  .panel { order: 1; border-right: 0; border-top: 1px solid var(--line); overflow: visible; padding-inline: 16px; }
-  h1 { font-size: 34px; }
-  .year { font-size: 52px; }
+  .stage { position: relative; inset: auto; order: 0; height: 62svh; min-height: 360px; flex: none; }
+  .panel { position: static; order: 1; width: auto; max-height: none; overflow: visible; border: 0; border-radius: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--panel); padding: 20px 16px 28px; }
+  h1 { font-size: 46px; }
   .card { top: auto; bottom: 10px; right: 10px; left: 10px; width: auto; max-height: 62%; }
-  .hint { display: none; }
   .views { top: 10px; right: 10px; }
   .views button { padding: 5px 8px; font-size: 12px; }
 }
@@ -263,20 +263,27 @@ details.about a { word-break: break-word; }
   .app.cinema .panel { display: none; }
   .cine-brand, .sg span, .cbtn kbd, .cbtn .lbl-x { display: none; }
   .cine-ch { text-align: left; }
-  .cine .bar.bot { gap: 10px; }
+  .bar.bot { gap: 10px; }
+  .lbl-long, #cOver { display: none; }
+  .cbtn.main { min-width: 0; }
+  .hint { display: none; }
+  .cyear { right: 12px; bottom: calc(var(--lbh) + var(--bpad) + 26px); }
+  .compass { top: 50px; right: 10px; }
   .cbtn.main { min-width: 0; padding: 0 12px; }
   .scrim { height: 74%; }
   .scrimtop { display: block; }
-  .cap { left: 16px; right: 16px; width: auto; bottom: calc(var(--lbh) + 14px); }
+  .cap { left: 16px; right: 16px; width: auto; bottom: calc(var(--lbh) + var(--bpad) + 14px); }
   .cap-k { font-size: 10.5px; margin-bottom: 8px; }
   .cap-h { font-size: 31px; margin-bottom: 10px; }
   .cap-d { font-size: 13.5px; line-height: 1.5; margin-bottom: 12px; }
   .cap-s { gap: 16px; padding-top: 10px; }
   .cap-s b { font-size: 21px; }
   .cap-s span { font-size: 11px; }
-  .cyear { top: calc(var(--lbh) + 10px); bottom: auto; right: 16px; }
-  .cyear-l { order: 2; margin: 6px 0 0; font-size: 9.5px; }
-  #cYear { font-size: 60px; }
+  .cyear-l { font-size: 9.5px; margin-bottom: 6px; }
+  #cYear { font-size: 52px; }
+  .app.cinema .cyear { top: calc(var(--lbh) + 10px); bottom: auto; right: 16px; }
+  .app.cinema .cyear-l { order: 2; margin: 6px 0 0; }
+  .app.cinema #cYear { font-size: 60px; }
   .co-tag { font-size: 11px; padding: 4px 8px 5px; }
   .co-tag small { font-size: 9.5px; }
   .tc-h { font-size: 52px; }
@@ -295,8 +302,9 @@ details.about a { word-break: break-word; }
       <button type="button" data-view="northgate">Northgate</button>
       <button type="button" data-view="canal">Canal</button>
     </div>
-    <div class="compass" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="var(--panel)" stroke="var(--line)"/><g id="needle"><path d="M20 6 L24 20 L16 20 Z" fill="var(--accent)"/><path d="M20 34 L24 20 L16 20 Z" fill="var(--muted)"/></g></svg></div>
+    <div class="cyear" aria-hidden="true"><span class="cyear-l" id="cYearL"></span><span id="cYear">2058</span></div>
     <div class="hint">Drag to orbit · right-drag or two fingers to pan · scroll to zoom · click a building or flood zone</div>
+    <div class="compass" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="var(--panel)" stroke="var(--line)"/><g id="needle"><path d="M20 6 L24 20 L16 20 Z" fill="var(--accent)"/><path d="M20 34 L24 20 L16 20 Z" fill="var(--muted)"/></g></svg></div>
     <div id="callouts" aria-hidden="true"></div>
     <div class="cine" id="cine" inert>
       <div class="vign"></div>
@@ -313,20 +321,21 @@ details.about a { word-break: break-word; }
         <p class="cap-d" id="capD"></p>
         <div class="cap-s" id="capS"></div>
       </section>
-      <div class="cyear" aria-hidden="true"><span class="cyear-l" id="cYearL"></span><span id="cYear">2026</span></div>
       <div class="bar top">
         <span class="cine-brand">San Rafael 2058</span>
         <span class="cine-ch" id="cCh"></span>
         <button class="cbtn" id="cExit" type="button" aria-label="Exit the story"><span class="lbl-x">Exit story</span> <kbd>Esc</kbd><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 1.4 L6 4.9 L9.5 1.4 L10.6 2.5 L7.1 6 L10.6 9.5 L9.5 10.6 L6 7.1 L2.5 10.6 L1.4 9.5 L4.9 6 L1.4 2.5 Z"/></svg></button>
       </div>
-      <div class="bar bot">
-        <div class="cctl">
-          <button class="cbtn icon" id="cPrev" type="button" aria-label="Previous chapter"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1 H3 V11 H1.5 Z M11 1 L4 6 L11 11 Z"/></svg></button>
-          <button class="cbtn main" id="cPlay" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path id="cPlayIcon" d="M2 1 H5 V11 H2 Z M7 1 H10 V11 H7 Z"/></svg><span id="cPlayLbl">Pause</span></button>
-          <button class="cbtn icon" id="cNext" type="button" aria-label="Next chapter"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M9 1 H10.5 V11 H9 Z M1 1 L8 6 L1 11 Z"/></svg></button>
-        </div>
-        <nav class="segs" id="cSegs" aria-label="Chapters"></nav>
+    </div>
+    <div class="bar bot" id="tbar">
+      <div class="cctl">
+        <button class="cbtn icon" id="cPrev" type="button" aria-label="Previous chapter"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1 H3 V11 H1.5 Z M11 1 L4 6 L11 11 Z"/></svg></button>
+        <button class="cbtn main" id="cPlay" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path id="cPlayIcon" d="M2 1 L11 6 L2 11 Z"/></svg><span id="cPlayLbl">Watch the story</span></button>
+        <button class="cbtn icon" id="cNext" type="button" aria-label="Next chapter"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M9 1 H10.5 V11 H9 Z M1 1 L8 6 L1 11 Z"/></svg></button>
+        <button class="cbtn-link" id="cOver" type="button" hidden>Start over</button>
       </div>
+      <nav class="segs" id="cSegs" aria-label="Timeline by chapter. Drag, or use the arrow keys, to choose a year"></nav>
+      <div class="segtip" id="segTip" hidden></div>
     </div>
     <article id="card" class="card" hidden aria-live="polite"></article>
     <div id="loading">Raising the hills…</div>
@@ -336,18 +345,8 @@ details.about a { word-break: break-word; }
     <header>
       <div class="eyebrow">Marin County · 37.97° N 122.53° W</div>
       <h1>San Rafael <span id="h1year">2058</span></h1>
-      <p class="lede">A massing model of the city built from what is actually in the pipeline: projects finished since 2020, under construction, approved and proposed, plus state sea level rise projections. Press play for the story of the next three decades, or drag the timeline yourself.</p>
+      <p class="lede">What is actually in the city’s pipeline, plus state sea level projections. Watch the story, or drag the timeline to any year.</p>
     </header>
-
-    <section class="time" aria-label="Timeline">
-      <div class="yearrow">
-        <output class="year" id="yearOut" for="year">2058</output>
-        <button class="play" id="play" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path id="playIcon" d="M2 1 L11 6 L2 11 Z"/></svg><span id="playLbl">Play the story</span></button>
-      </div>
-      <label for="year" class="eyebrow" style="position:absolute;left:-9999px">Year</label>
-      <input type="range" id="year" min="2026" max="2058" step="1" value="2058">
-      <div class="ticks"><span>2026</span><span>2034</span><span>2042</span><span>2050</span><span>2058</span></div>
-    </section>
 
     <section class="stats" aria-label="Totals for the selected year">
       <div class="stat"><b id="stHomes">0</b><span>new homes in real projects since 2020<em id="stSpec" class="specnote"></em></span></div>
@@ -366,20 +365,20 @@ details.about a { word-break: break-word; }
       </div>
       <p class="segnote" id="scenNote"></p>
       <div class="toggles">
-        <label class="tog"><input type="checkbox" id="tStorm"><span>Add a 100-year storm tide<small>About 36 in of extra water on top of the scenario.</small></span></label>
-        <label class="tog"><input type="checkbox" id="tProtect"><span>Build the Canal flood protection<small>Floodgate and levees from the 2025 Canal feasibility study, assumed done by 2045.</small></span></label>
-        <label class="tog"><input type="checkbox" id="tSpec" checked><span>Show illustrative growth after 2034<small>Ghosted buildings on Housing Element and plan-area sites with no project yet.</small></span></label>
+        <label class="tog"><input type="checkbox" id="tStorm"><span>Add a 100-year storm tide<small>About 36 in of extra water on top.</small></span></label>
+        <label class="tog"><input type="checkbox" id="tProtect"><span>Build the Canal flood protection<small>Floodgate and levees, assumed done by 2045.</small></span></label>
+        <label class="tog"><input type="checkbox" id="tSpec" checked><span>Show illustrative growth after 2034<small>Ghosted buildings on zoned sites, no project yet.</small></span></label>
         <label class="tog"><input type="checkbox" id="tLabels" checked><span>Neighborhood labels</span></label>
       </div>
     </section>
 
-    <section aria-label="Projects">
-      <h2>Projects by status today</h2>
+    <details class="sect">
+      <summary>Projects by status today <em id="pCount"></em></summary>
       <div class="chips" id="chips"></div>
       <ul class="plist" id="plist"></ul>
-    </section>
+    </details>
 
-    <details class="about">
+    <details class="sect about">
       <summary>How this model was made</summary>
       <p>Project locations come from street addresses run through the US Census geocoder; heights, unit counts and status come from City of San Rafael project pages, Marin County, CEQA filings and SF YIMBY as of October 2026. Footprints are sized from unit counts and are approximate. Years after 2026 are reported targets where a developer or agency gave one, and model assumptions otherwise; each card says which.</p>
       <p>Terrain, shoreline, freeways and rail are hand-traced from geocoded points and USGS summit elevations, with hills exaggerated 1.6×. Existing buildings are generated to match each neighborhood's density, not drawn parcel by parcel.</p>
@@ -1035,8 +1034,7 @@ function zoneThreshold(z, Y) { return z.t + (state.protect && z.protect && Y >= 
 
 function update() {
   const Y = state.year;
-  document.getElementById('yearOut').textContent = Y; document.getElementById('h1year').textContent = Y;
-  const yr = document.getElementById('year'); yr.value = Y; yr.style.setProperty('--pct', ((Y - 2026) / 32 * 100) + '%');
+  document.getElementById('h1year').textContent = Y;
   let homes = 0;
   let specHomes = 0;
   projObjs.forEach(o => { o.target = progressFor(o.p, Y); if (o.target >= 1 && o.p.u) { if (o.p.st === 'spec') specHomes += o.p.u; else homes += o.p.u; } });
@@ -1046,6 +1044,7 @@ function update() {
   const sea = slrIn(Y, state.scen);
   document.getElementById('stSea').textContent = sea.toFixed(0) + '″';
   document.getElementById('cYear').textContent = Y;
+  renderStoryProgress(Y);
   document.getElementById('cYearL').textContent = `${SLR[state.scen].name} · bay +${sea.toFixed(0)}″`;
   document.getElementById('scenNote').textContent = `${SLR[state.scen].name}: ${(sea / 12).toFixed(2)} ft above the 2000 level in ${Y}. ${SCEN_NOTE[state.scen]}`;
   water.position.y = (sea + (state.storm ? 36 : 0)) * 0.0254 - 0.35;
@@ -1063,6 +1062,7 @@ let filter = 'all';
 const chipsEl = document.getElementById('chips'), listEl = document.getElementById('plist');
 function buildChips() {
   const counts = {}; P.forEach(p => counts[p.st] = (counts[p.st] || 0) + 1);
+  document.getElementById('pCount').textContent = P.length;
   const all = document.createElement('button'); all.type = 'button'; all.className = 'chip'; all.dataset.f = 'all'; all.innerHTML = `All <em>${P.length}</em>`; chipsEl.appendChild(all);
   Object.keys(STATUS).forEach(s => { if (!counts[s]) return; const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.f = s; b.innerHTML = `<i data-tok="${STATUS[s].tok}"></i>${STATUS[s].label} <em>${counts[s]}</em>`; chipsEl.appendChild(b); });
   const fz = document.createElement('span'); fz.className = 'chip'; fz.style.cursor = 'default'; fz.innerHTML = `<i data-tok="--flood" style="border-radius:50%"></i>Flood-exposed`; chipsEl.appendChild(fz);
@@ -1256,7 +1256,7 @@ const CHAPTERS = [
     deck: () => 'No developer has filed anything that would finish after the mid-2030s. These ghosted buildings fill sites the Housing Element and Downtown Precise Plan already zone for homes, at about the pace General Plan 2040 projects. Read them as capacity, not a forecast.',
     stats: c => [{ n:c.specHomes, l:'illustrative homes' }, { n:c.specSites, l:'sites already zoned for housing' }, { n:0, l:'applications filed for any of them' }] },
 
-  { id:'finale', tag:'2058', dur:16, key: () => 2058,
+  { id:'finale', tag:'Finale', dur:16, key: () => 2058,
     shot:{ t:[37.9790,-122.5160], d:10200, az:4, el:30, drift:34, dolly:0.04 },
     focus: () => null,
     call: [['Northgate Town Square — Phase 2','Northgate Town Square','1,422 homes'], ['700 Irwin Street tower','Downtown','up to 180 ft'], ['zone:canal','Canal District', c => c.storm ? 'floods in storms' : 'tidal flooding']],
@@ -1375,9 +1375,9 @@ function showCaption(ch) {
 
 /* chapter control */
 const segsEl = document.getElementById('cSegs'), cPlay = document.getElementById('cPlay');
-function buildSegs() {
-  segsEl.innerHTML = cine.list.map((ch, i) => `<button class="sg" type="button" data-i="${i}" aria-label="Chapter ${i + 1}: ${esc(ch.tag)}, ${ch.key}"><i></i><span><b>${ch.key}</b>${esc(ch.tag)}</span></button>`).join('');
-  document.getElementById('cN').textContent = NUMW[cine.list.length] || cine.list.length;
+function buildSegs(L) {
+  segsEl.innerHTML = L.map((ch, i) => `<button class="sg" type="button" data-i="${i}" aria-label="Chapter ${i + 1}: ${esc(ch.tag)}, ${ch.key}"><i></i><span><b>${ch.key}</b>${esc(ch.tag)}</span></button>`).join('');
+  document.getElementById('cN').textContent = NUMW[L.length] || L.length;
 }
 function segFill() { segsEl.querySelectorAll('.sg').forEach((b, i) => { b.querySelector('i').style.setProperty('--p', i < cine.i || cine.ended ? 1 : i > cine.i ? 0 : Math.min(1, cine.elapsed / cine.list[i].dur)); if (i === cine.i) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); }); }
 function goChapter(i) {
@@ -1416,31 +1416,48 @@ function cineTick(dt) {
   segFill();
   if (e >= ch.dur) { if (cine.i < cine.list.length - 1) goChapter(cine.i + 1); else { cine.ended = true; segFill(); setPlaying(false); } }
 }
-function startStory() {
+function storyList(c) {
+  const L = CHAPTERS.filter(ch => !ch.when || ch.when(c)).map((ch, order) => Object.assign({}, ch, { order, key: ch.key(c) })).sort((a, b) => a.key - b.key || a.order - b.order);
+  L.forEach((ch, i) => { ch.from = i ? L[i - 1].key : ch.key; });
+  return L;
+}
+function startStory(at) {
   cine.ctx = storyCtx();
-  cine.list = CHAPTERS.filter(ch => !ch.when || ch.when(cine.ctx)).map((ch, order) => Object.assign({}, ch, { order, key: ch.key(cine.ctx) })).sort((a, b) => a.key - b.key || a.order - b.order);
-  cine.list.forEach((ch, i) => { ch.from = i ? cine.list[i - 1].key : ch.key; });
-  buildSegs();
+  cine.list = storyList(cine.ctx);
+  at = Math.max(0, Math.min(cine.list.length - 1, typeof at === 'number' ? at : 0)); cine.resumeAt = null;
+  buildSegs(cine.list); segTip.hidden = true; document.getElementById('cOver').hidden = true;
   cine.active = true; app.classList.add('cinema'); document.documentElement.classList.add('cine-on'); cineEl.inert = false;
   select(null); card.hidden = true; selZone = null;
   frameForStory();
-  goChapter(0); cine.playing = false; setPlaying(true);
+  goChapter(at); cine.playing = false; setPlaying(true);
   cPlay.focus({ preventScroll: true });
 }
 function exitStory() {
+  cine.resumeAt = cine.ended ? null : cine.i;
   cine.active = false; cine.playing = false; cine.focus = null; cine.fadeT = 0;
   app.classList.remove('cinema'); document.documentElement.classList.remove('cine-on'); cineEl.inert = true;
   buildRings([], 0); calloutsHost.innerHTML = ''; callouts = [];
   capEl.classList.remove('in'); titleCard.classList.remove('in'); stage.classList.remove('titling');
-  controls.enabled = true; frameForStory(); update();
-  document.getElementById('play').focus({ preventScroll: true });
+  controls.enabled = true; frameForStory(); buildSegs(storyToc().list); update(); playLabel();
+  cPlay.focus({ preventScroll: true });
 }
 const app = document.querySelector('.app'), cineEl = document.getElementById('cine');
-cPlay.addEventListener('click', () => setPlaying(!cine.playing));
-document.getElementById('cNext').addEventListener('click', () => { if (cine.i < cine.list.length - 1) { goChapter(cine.i + 1); setPlaying(true); } });
-document.getElementById('cPrev').addEventListener('click', () => { goChapter(cine.elapsed > 3 ? cine.i : cine.i - 1); setPlaying(true); });
+cPlay.addEventListener('click', () => { if (cine.active) setPlaying(!cine.playing); else startStory(cine.resumeAt != null ? cine.resumeAt : 0); });
+document.getElementById('cNext').addEventListener('click', () => {
+  if (!cine.active) { const n = storyToc().list.find(ch => ch.key > state.year); setYear(n ? n.key : 2058); return; }
+  if (cine.i < cine.list.length - 1) { goChapter(cine.i + 1); setPlaying(true); }
+});
+document.getElementById('cPrev').addEventListener('click', () => {
+  if (!cine.active) { const p = storyToc().list.filter(ch => ch.key < state.year).pop(); setYear(p ? p.key : 2026); return; }
+  goChapter(cine.elapsed > 3 ? cine.i : cine.i - 1); setPlaying(true);
+});
+document.getElementById('cOver').addEventListener('click', () => startStory(0));
 document.getElementById('cExit').addEventListener('click', exitStory);
-segsEl.addEventListener('click', e => { const b = e.target.closest('.sg'); if (!b) return; goChapter(+b.dataset.i); setPlaying(true); });
+segsEl.addEventListener('click', e => {
+  const b = e.target.closest('.sg'); if (!b) return;
+  if (cine.active) { goChapter(+b.dataset.i); setPlaying(true); }
+  else if (e.detail === 0) setYear(storyToc().list[+b.dataset.i].key);  // keyboard; pointer input scrubs instead
+});
 // Grabbing the model pauses the film and hands over the camera; Play flies back to the shot.
 stage.addEventListener('pointerdown', e => { if (cine.active && cine.playing && e.target === canvas) setPlaying(false); }, true);
 stage.addEventListener('wheel', e => { if (cine.active && cine.playing && e.target === canvas) setPlaying(false); }, { capture: true, passive: true });
@@ -1450,6 +1467,72 @@ document.addEventListener('keydown', e => {
   else if (e.key === ' ' && !(e.target.closest && e.target.closest('button, a, input'))) { e.preventDefault(); setPlaying(!cine.playing); }
   else if (e.key === 'ArrowRight') { document.getElementById('cNext').click(); }
   else if (e.key === 'ArrowLeft') { document.getElementById('cPrev').click(); }
+});
+
+/* timeline: outside the film the chapter bar is the year scrubber. Each segment spans its chapter's
+   years (from the previous chapter's year to its own), so dragging maps piecewise onto 2026–2058. */
+const segTip = document.getElementById('segTip');
+let toc = null, tocKey = '';
+const pad2 = n => String(n).padStart(2, '0');
+function storyToc() {
+  const k = [state.scen, state.storm, state.protect, state.spec].join('|');
+  if (k !== tocKey) { tocKey = k; const ctx = storyCtx(); toc = { ctx, list: storyList(ctx) }; if (!cine.active) buildSegs(toc.list); playLabel(); }
+  return toc;
+}
+function setYear(Y) { Y = Math.max(2026, Math.min(2058, Math.round(Y))); if (Y !== state.year) { state.year = Y; update(); } }
+function renderStoryProgress(Y) {
+  const { list: L } = storyToc();
+  if (cine.active) return;
+  let cur = 0; L.forEach((ch, i) => { if (ch.key <= Y) cur = i; });
+  segsEl.querySelectorAll('.sg').forEach((b, i) => {
+    const ch = L[i]; b.querySelector('i').style.setProperty('--p', Y >= ch.key ? 1 : Y <= ch.from ? 0 : (Y - ch.from) / (ch.key - ch.from));
+    if (i === cur) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
+  });
+}
+function playLabel() {
+  if (cine.active) return;
+  const r = cine.resumeAt, L = toc ? toc.list : [], k = r != null ? Math.min(r, L.length - 1) : -1;
+  document.getElementById('cPlayLbl').innerHTML = k >= 0 ? `Resume<span class="lbl-long"> · ${pad2(k + 1)} ${esc(L[k].tag)}</span>` : 'Watch<span class="lbl-long"> the story</span>';
+  document.getElementById('cPlayIcon').setAttribute('d', 'M2 1 L11 6 L2 11 Z');
+  document.getElementById('cOver').hidden = k < 0;
+}
+function yearAtX(x) {
+  const L = storyToc().list, bs = [...segsEl.querySelectorAll('.sg')];
+  for (let i = 0; i < bs.length; i++) {
+    const r = bs[i].getBoundingClientRect();
+    if (x < r.right + 2.5 || i === bs.length - 1) { const t = Math.max(0, Math.min(1, (x - r.left) / r.width)); return { Y: L[i].from + (L[i].key - L[i].from) * t, i }; }
+  }
+}
+function showTip(i, b) {
+  if (i == null) { segTip.hidden = true; return; }
+  const L = cine.active ? cine.list : storyToc().list, ctx = cine.active ? cine.ctx : toc.ctx, ch = L[i];
+  segTip.innerHTML = `<small>${pad2(i + 1)} · ${esc(ch.tag)} · ${ch.key}</small><b>${esc(ch.head(ctx))}</b>`;
+  const br = document.getElementById('tbar').getBoundingClientRect(), r = b.getBoundingClientRect();
+  segTip.hidden = false;
+  const w = segTip.offsetWidth, x = Math.max(w / 2 + 8, Math.min(br.width - w / 2 - 8, r.left + r.width / 2 - br.left));
+  segTip.style.left = x + 'px';
+}
+let scrubbing = false;
+segsEl.addEventListener('pointerdown', e => {
+  if (cine.active || e.button) return;
+  scrubbing = true; segsEl.setPointerCapture(e.pointerId);
+  const h = yearAtX(e.clientX); setYear(h.Y); showTip(h.i, segsEl.querySelectorAll('.sg')[h.i]);
+});
+segsEl.addEventListener('pointermove', e => {
+  if (scrubbing) { const h = yearAtX(e.clientX); setYear(h.Y); showTip(h.i, segsEl.querySelectorAll('.sg')[h.i]); return; }
+  const b = e.target.closest('.sg'); if (b && e.pointerType === 'mouse') showTip(+b.dataset.i, b);
+});
+const endScrub = () => { scrubbing = false; segTip.hidden = true; };
+segsEl.addEventListener('pointerup', endScrub); segsEl.addEventListener('pointercancel', endScrub);
+segsEl.addEventListener('pointerleave', () => { if (!scrubbing) segTip.hidden = true; });
+segsEl.addEventListener('focusin', e => { const b = e.target.closest('.sg'); if (b) showTip(+b.dataset.i, b); });
+segsEl.addEventListener('focusout', () => { segTip.hidden = true; });
+segsEl.addEventListener('keydown', e => {
+  if (cine.active) return;
+  const d = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 }[e.key];
+  if (d) { e.preventDefault(); e.stopPropagation(); setYear(state.year + d); }
+  else if (e.key === 'Home') { e.preventDefault(); setYear(2026); }
+  else if (e.key === 'End') { e.preventDefault(); setYear(2058); }
 });
 
 /* ---------------- render loop ---------------- */
@@ -1500,14 +1583,11 @@ function frameForStory() { const w = stage.clientWidth, h = stage.clientHeight; 
 new ResizeObserver(resize).observe(stage);
 
 /* ---------------- controls wiring ---------------- */
-const yearIn = document.getElementById('year');
-yearIn.addEventListener('input', () => { state.year = +yearIn.value; update(); });
 document.getElementById('scen').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if (!b) return; state.scen = b.dataset.s; document.querySelectorAll('#scen button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); update(); });
 document.getElementById('tStorm').addEventListener('change', e => { state.storm = e.target.checked; update(); });
 document.getElementById('tProtect').addEventListener('change', e => { state.protect = e.target.checked; update(); });
 document.getElementById('tSpec').addEventListener('change', e => { state.spec = e.target.checked; update(); });
 document.getElementById('tLabels').addEventListener('change', requestRender);
-document.getElementById('play').addEventListener('click', startStory);
 
 /* ---------------- boot ---------------- */
 function boot() {
