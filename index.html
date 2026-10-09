@@ -1,0 +1,1081 @@
+<title>San Rafael 2058</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one-screen app — a planning-commission massing model on the right, a control sheet on the left (stacks under the model on phones). */
+:root {
+  --bg: #e7eae3;
+  --panel: #f4f6f1;
+  --ink: #17211e;
+  --muted: #5a6762;
+  --line: #cdd4cb;
+  --accent: #c4521d;
+  --accent-ink: #ffffff;
+  --scene-bg: #dde3dc;
+  --land-low: #e2e5d4;
+  --land-high: #b9b07a;
+  --marsh: #a9bb93;
+  --water: #8eaebd;
+  --bldg: #f7f6f1;
+  --road: #7b827e;
+  --street: #a3a99f;
+  --rail: #2c7d8e;
+  --flood: #2a78c4;
+  --s-built: #5f7d4c;
+  --s-uc: #d4951a;
+  --s-approved: #c4521d;
+  --s-proposed: #7a55b5;
+  --s-concept: #a47ccf;
+  --s-spec: #9fb1c2;
+  --s-infra: #1f7a8c;
+  --display: "Bricolage Grotesque", "Avenir Next Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Public Sans", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1413; --panel: #141c1a; --ink: #e4ebe6; --muted: #91a099; --line: #2a3632;
+    --accent: #ef7d47; --accent-ink: #1a0d06;
+    --scene-bg: #0c1312; --land-low: #1d2623; --land-high: #3b3a2a; --marsh: #22312a; --water: #132430;
+    --bldg: #6c7672; --road: #59605c; --street: #3e4542; --rail: #3fa8ba; --flood: #3c92e6;
+    --s-built: #8fb378; --s-uc: #f0b23a; --s-approved: #ef7d47; --s-proposed: #a985e3; --s-concept: #c3a3ea; --s-spec: #7f97ad; --s-infra: #3cb3c7;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1413; --panel: #141c1a; --ink: #e4ebe6; --muted: #91a099; --line: #2a3632;
+  --accent: #ef7d47; --accent-ink: #1a0d06;
+  --scene-bg: #0c1312; --land-low: #1d2623; --land-high: #3b3a2a; --marsh: #22312a; --water: #132430;
+  --bldg: #6c7672; --road: #59605c; --street: #3e4542; --rail: #3fa8ba; --flood: #3c92e6;
+  --s-built: #8fb378; --s-uc: #f0b23a; --s-approved: #ef7d47; --s-proposed: #a985e3; --s-concept: #c3a3ea; --s-spec: #7f97ad; --s-infra: #3cb3c7;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.45; overflow: hidden; }
+* { box-sizing: border-box; }
+button, input, select { font: inherit; color: inherit; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app { height: 100%; display: grid; grid-template-columns: minmax(320px, 380px) 1fr; }
+.panel { order: 0; background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; padding-block: 20px 28px; padding-inline: 22px; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.stage { order: 1; position: relative; min-width: 0; min-height: 0; overflow: hidden; background: var(--scene-bg); }
+#scene { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+#scene:active { cursor: grabbing; }
+
+/* Masthead */
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--display); font-weight: 800; font-size: 40px; line-height: .95; letter-spacing: -.02em; margin: 6px 0 10px; text-wrap: balance; }
+h1 span { color: var(--accent); }
+.lede { margin: 0; color: var(--muted); max-width: 62ch; }
+h2 { font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+
+/* Timeline */
+.time { display: grid; gap: 8px; }
+.yearrow { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.year { font-family: var(--display); font-weight: 700; font-size: 64px; line-height: .85; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.play { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--ink); background: transparent; border-radius: 999px; padding: 7px 14px 7px 12px; cursor: pointer; font-weight: 600; font-size: 13px; }
+.play:hover { background: var(--ink); color: var(--panel); }
+.play svg { width: 12px; height: 12px; fill: currentColor; }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; background: transparent; cursor: pointer; margin: 0; }
+input[type=range]::-webkit-slider-runnable-track { height: 4px; background: linear-gradient(to right, var(--accent) var(--pct, 100%), var(--line) var(--pct, 100%)); border-radius: 2px; }
+input[type=range]::-moz-range-track { height: 4px; background: var(--line); border-radius: 2px; }
+input[type=range]::-moz-range-progress { height: 4px; background: var(--accent); border-radius: 2px; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--panel); border: 3px solid var(--accent); margin-top: -7px; }
+input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--panel); border: 3px solid var(--accent); }
+.ticks { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-block: 1px solid var(--line); }
+.stat { padding: 12px 10px 12px 0; display: grid; gap: 2px; align-content: start; min-width: 0; }
+.stat + .stat { padding-left: 12px; border-left: 1px solid var(--line); }
+.stat b { font-family: var(--display); font-weight: 700; font-size: 24px; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 11.5px; color: var(--muted); line-height: 1.3; }
+.specnote { display: block; font-style: normal; color: var(--s-spec); font-family: var(--mono); font-size: 10.5px; margin-top: 2px; }
+
+/* Controls */
+.seg { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: 7px 2px; font-size: 12px; cursor: pointer; border-left: 1px solid var(--line); }
+.seg button:first-child { border-left: 0; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); font-weight: 600; }
+.segnote { font-size: 12px; color: var(--muted); margin: 8px 0 0; }
+.toggles { display: grid; gap: 8px; margin-top: 12px; }
+.tog { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+.tog input { appearance: none; -webkit-appearance: none; flex: none; width: 30px; height: 18px; border-radius: 9px; background: var(--line); position: relative; margin: 1px 0 0; cursor: pointer; transition: background .15s; }
+.tog input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--panel); transition: transform .15s; }
+.tog input:checked { background: var(--accent); }
+.tog input:checked::after { transform: translateX(12px); }
+.tog small { display: block; color: var(--muted); font-size: 12px; }
+
+/* Legend + list */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px 4px 8px; font-size: 12px; background: transparent; cursor: pointer; }
+.chip i, .dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex: none; }
+.chip[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--panel); }
+.chip em { font-style: normal; font-family: var(--mono); font-size: 11px; opacity: .75; }
+.plist { list-style: none; margin: 10px 0 0; padding: 0; display: grid; }
+.plist button { width: 100%; display: grid; grid-template-columns: 10px 1fr auto; gap: 10px; align-items: baseline; text-align: left; border: 0; border-top: 1px solid var(--line); background: transparent; padding: 8px 2px; cursor: pointer; }
+.plist button:hover { background: color-mix(in srgb, var(--ink) 5%, transparent); }
+.plist button[aria-current="true"] { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.plist .dot { transform: translateY(1px); }
+.plist .nm { min-width: 0; }
+.plist .nm small { display: block; color: var(--muted); font-size: 11.5px; }
+.plist .yr { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.plist .future .nm { opacity: .55; }
+
+details.about summary { cursor: pointer; font-weight: 600; }
+details.about p, details.about li { color: var(--muted); font-size: 13px; }
+details.about ul { padding-left: 18px; margin: 6px 0; }
+details.about a { word-break: break-word; }
+
+/* Stage overlays */
+.views { position: absolute; top: 14px; right: 14px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; max-width: calc(100% - 28px); }
+.views button { border: 1px solid var(--line); background: var(--panel); border-radius: 6px; padding: 6px 10px; font-size: 12.5px; cursor: pointer; }
+.views button:hover { border-color: var(--ink); }
+.hint { position: absolute; left: 14px; bottom: 12px; font-size: 11.5px; color: var(--muted); background: color-mix(in srgb, var(--scene-bg) 80%, transparent); padding: 3px 8px; border-radius: 4px; pointer-events: none; }
+.compass { position: absolute; right: 14px; bottom: 12px; width: 38px; height: 38px; pointer-events: none; }
+.compass svg { width: 100%; height: 100%; }
+#labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.lbl { position: absolute; left: 0; top: 0; white-space: nowrap; font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink); opacity: .7; text-shadow: 0 0 3px var(--scene-bg), 0 0 6px var(--scene-bg); will-change: transform; }
+.lbl.water { color: var(--rail); font-style: italic; text-transform: none; letter-spacing: .02em; font-family: var(--body); font-size: 12px; }
+.lbl.sel { font-family: var(--body); text-transform: none; letter-spacing: 0; font-weight: 600; font-size: 12.5px; opacity: 1; background: var(--ink); color: var(--panel); text-shadow: none; padding: 2px 7px; border-radius: 3px; }
+.card { position: absolute; top: 56px; right: 14px; width: min(340px, calc(100% - 28px)); max-height: calc(100% - 110px); overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 16px 14px; box-shadow: 0 10px 30px rgba(0,0,0,.14); display: grid; gap: 8px; }
+.card h3 { font-family: var(--display); font-weight: 700; font-size: 21px; line-height: 1.1; margin: 0; padding-right: 28px; text-wrap: balance; }
+.card .x { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; border: 0; background: transparent; cursor: pointer; font-size: 18px; color: var(--muted); border-radius: 6px; }
+.card .x:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-family: var(--mono); text-transform: uppercase; letter-spacing: .06em; padding: 3px 8px; border-radius: 999px; color: #fff; justify-self: start; }
+.card .addr { color: var(--muted); font-size: 12.5px; margin: 0; }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 4px 0; font-size: 13px; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; font-variant-numeric: tabular-nums; }
+.card p.note { margin: 0; font-size: 13px; }
+.card .src { font-size: 12px; display: grid; gap: 2px; }
+.card .src a { color: var(--muted); word-break: break-all; }
+.basis { font-family: var(--mono); font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-left: 4px; }
+#loading { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; background: var(--scene-bg); }
+[hidden] { display: none !important; }
+
+@media (max-width: 760px) {
+  body { overflow: auto; }
+  .app { display: flex; flex-direction: column; height: auto; min-height: 100%; }
+  .stage { order: 0; height: 58svh; min-height: 340px; flex: none; }
+  .panel { order: 1; border-right: 0; border-top: 1px solid var(--line); overflow: visible; padding-inline: 16px; }
+  h1 { font-size: 34px; }
+  .year { font-size: 52px; }
+  .card { top: auto; bottom: 10px; right: 10px; left: 10px; width: auto; max-height: 62%; }
+  .hint { display: none; }
+  .views { top: 10px; right: 10px; }
+  .views button { padding: 5px 8px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app">
+  <section class="stage" id="stage" aria-label="3D model of San Rafael">
+    <canvas id="scene"></canvas>
+    <div id="labels" aria-hidden="true"></div>
+    <div class="views" role="group" aria-label="Camera views">
+      <button type="button" data-view="overview">Overview</button>
+      <button type="button" data-view="downtown">Downtown</button>
+      <button type="button" data-view="northgate">Northgate</button>
+      <button type="button" data-view="canal">Canal</button>
+    </div>
+    <div class="compass" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="var(--panel)" stroke="var(--line)"/><g id="needle"><path d="M20 6 L24 20 L16 20 Z" fill="var(--accent)"/><path d="M20 34 L24 20 L16 20 Z" fill="var(--muted)"/></g></svg></div>
+    <div class="hint">Drag to orbit · right-drag or two fingers to pan · scroll to zoom · click a building or flood zone</div>
+    <article id="card" class="card" hidden aria-live="polite"></article>
+    <div id="loading">Raising the hills…</div>
+  </section>
+
+  <aside class="panel">
+    <header>
+      <div class="eyebrow">Marin County · 37.97° N 122.53° W</div>
+      <h1>San Rafael <span id="h1year">2058</span></h1>
+      <p class="lede">A massing model of the city built from what is actually in the pipeline: projects finished since 2020, under construction, approved and proposed, plus state sea level rise projections. Drag the timeline to watch it change.</p>
+    </header>
+
+    <section class="time" aria-label="Timeline">
+      <div class="yearrow">
+        <output class="year" id="yearOut" for="year">2058</output>
+        <button class="play" id="play" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path id="playIcon" d="M2 1 L11 6 L2 11 Z"/></svg><span id="playLbl">Play from 2026</span></button>
+      </div>
+      <label for="year" class="eyebrow" style="position:absolute;left:-9999px">Year</label>
+      <input type="range" id="year" min="2026" max="2058" step="1" value="2058">
+      <div class="ticks"><span>2026</span><span>2034</span><span>2042</span><span>2050</span><span>2058</span></div>
+    </section>
+
+    <section class="stats" aria-label="Totals for the selected year">
+      <div class="stat"><b id="stHomes">0</b><span>new homes in real projects since 2020<em id="stSpec" class="specnote"></em></span></div>
+      <div class="stat"><b id="stPop">0</b><span>residents (est.)</span></div>
+      <div class="stat"><b id="stSea">0″</b><span>bay rise since 2000</span></div>
+    </section>
+
+    <section aria-label="Sea level">
+      <h2>Sea level rise scenario · OPC 2024</h2>
+      <div class="seg" role="group" aria-label="Sea level scenario" id="scen">
+        <button type="button" data-s="Low">Low</button>
+        <button type="button" data-s="IntLow">Int-Low</button>
+        <button type="button" data-s="Int" aria-pressed="true">Interm.</button>
+        <button type="button" data-s="IntHigh">Int-High</button>
+        <button type="button" data-s="High">High</button>
+      </div>
+      <p class="segnote" id="scenNote"></p>
+      <div class="toggles">
+        <label class="tog"><input type="checkbox" id="tStorm"><span>Add a 100-year storm tide<small>About 36 in of extra water on top of the scenario.</small></span></label>
+        <label class="tog"><input type="checkbox" id="tProtect"><span>Build the Canal flood protection<small>Floodgate and levees from the 2025 Canal feasibility study, assumed done by 2045.</small></span></label>
+        <label class="tog"><input type="checkbox" id="tSpec" checked><span>Show illustrative growth after 2034<small>Ghosted buildings on Housing Element and plan-area sites with no project yet.</small></span></label>
+        <label class="tog"><input type="checkbox" id="tLabels" checked><span>Neighborhood labels</span></label>
+      </div>
+    </section>
+
+    <section aria-label="Projects">
+      <h2>Projects by status today</h2>
+      <div class="chips" id="chips"></div>
+      <ul class="plist" id="plist"></ul>
+    </section>
+
+    <details class="about">
+      <summary>How this model was made</summary>
+      <p>Project locations come from street addresses run through the US Census geocoder; heights, unit counts and status come from City of San Rafael project pages, Marin County, CEQA filings and SF YIMBY as of October 2026. Footprints are sized from unit counts and are approximate. Years after 2026 are reported targets where a developer or agency gave one, and model assumptions otherwise; each card says which.</p>
+      <p>Terrain, shoreline, freeways and rail are hand-traced from geocoded points and USGS summit elevations, with hills exaggerated 1.6×. Existing buildings are generated to match each neighborhood's density, not drawn parcel by parcel.</p>
+      <p>Flood zones switch on when the scenario's water level passes the exposure points reported in Marin's BayWAVE assessment, San Rafael's 2020 Flood Risk &amp; SLR Adaptation Report and TAM's 2024 vulnerability memo. The Canal and Spinnaker zones add about 0.4 in a year of measured ground sinking. These are approximations for exploring, not engineering flood maps.</p>
+      <p>Illustrative growth after 2034 fills sites the 2023 Housing Element, Downtown Precise Plan and General Plan 2040 identify for housing, at roughly the pace General Plan 2040 projects. No developer has proposed these buildings.</p>
+      <ul>
+        <li><a href="https://www.cityofsanrafael.org/major-planning-projects-2025" target="_blank" rel="noopener">City of San Rafael, major planning projects</a></li>
+        <li><a href="https://www.cityofsanrafael.org/downtown-precise-plan" target="_blank" rel="noopener">Downtown San Rafael Precise Plan (2021)</a></li>
+        <li><a href="https://cityofsanrafael.org/gp-2040-document-library" target="_blank" rel="noopener">General Plan 2040 documents</a></li>
+        <li><a href="https://www.cityofsanrafael.org/housing-element-certified-by-state" target="_blank" rel="noopener">Housing Element 2023–2031</a></li>
+        <li><a href="https://www.cityofsanrafael.org/northgatetownsquaredev/" target="_blank" rel="noopener">Northgate Town Square</a></li>
+        <li><a href="https://goldengate.org/assets/1/6/srtc_fact_sheet_20241.pdf" target="_blank" rel="noopener">San Rafael Transit Center replacement (GGBHTD)</a></li>
+        <li><a href="https://www.tam.ca.gov/featured-projects/northbound-101-and-eastbound-580-direct-connector/" target="_blank" rel="noopener">US-101/I-580 direct connector (TAM)</a></li>
+        <li><a href="https://documents.coastal.ca.gov/assets/slr/guidance/2024/AppF_2024AdoptedSLRPolicyGuidanceUpdate.pdf" target="_blank" rel="noopener">OPC 2024 sea level rise guidance, San Francisco table</a></li>
+        <li><a href="https://storage.googleapis.com/proudcity/sanrafaelca/uploads/2020/10/SLR-Adaptation-Report-final-9-28-20-v2.pdf" target="_blank" rel="noopener">San Rafael Flood Risk &amp; SLR Adaptation Report (2020)</a></li>
+        <li><a href="https://localnewsmatters.org/2026/01/27/san-rafael-flood-protection-study-canal-sea-level-rise" target="_blank" rel="noopener">Canal flood protection study coverage (2026)</a></li>
+      </ul>
+    </details>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function () {
+"use strict";
+if (!window.THREE) { document.getElementById('loading').textContent = 'The 3D library did not load. Check your connection and reload.'; return; }
+
+/* ---------------- geography ---------------- */
+const D2R = Math.PI / 180, LAT0 = 37.983, LON0 = -122.515;
+const KX = 111320 * Math.cos(LAT0 * D2R), KZ = 110950;
+const EX = 1.6; // vertical exaggeration of terrain
+const LONMIN = -122.665, LONMAX = -122.355, LATMIN = 37.885, LATMAX = 38.105;
+const XY = (lat, lon) => [(lon - LON0) * KX, -(lat - LAT0) * KZ];
+
+// Shoreline traced from geocoded points (est.), Corte Madera Creek → San Quentin → Canal → Pt San Pedro → China Camp → McInnis → north
+const SHORE_LL = [[37.915,-122.531],[37.924,-122.527],[37.932,-122.522],[37.940,-122.516],[37.9455,-122.509],[37.9445,-122.503],[37.943,-122.496],[37.9405,-122.489],[37.9375,-122.487],[37.939,-122.482],[37.9415,-122.476],[37.9440,-122.4712],[37.947,-122.478],[37.951,-122.485],[37.955,-122.489],[37.960,-122.488],[37.9645,-122.4875],[37.96722,-122.48639],[37.970,-122.482],[37.972,-122.479],[37.975,-122.473],[37.979,-122.466],[37.983,-122.460],[37.987,-122.452],[37.9895,-122.447],[37.9935,-122.453],[37.997,-122.457],[38.0005,-122.4615],[38.0045,-122.469],[38.008,-122.477],[38.012,-122.483],[38.017,-122.489],[38.021,-122.495],[38.024,-122.502],[38.027,-122.506],[38.035,-122.508],[38.047,-122.506],[38.062,-122.503],[38.080,-122.497],[38.100,-122.490],[38.120,-122.480]];
+const TIB_LL = [[37.80,-122.54],[37.915,-122.531],[37.912,-122.512],[37.910,-122.494],[37.905,-122.476],[37.896,-122.462],[37.884,-122.452],[37.80,-122.44]];
+const RICH_LL = [[37.80,-122.30],[37.880,-122.355],[37.905,-122.372],[37.925,-122.392],[37.935,-122.407],[37.948,-122.419],[37.962,-122.428],[37.968,-122.420],[37.962,-122.405],[37.972,-122.390],[37.985,-122.372],[37.995,-122.355],[38.000,-122.30]];
+const LAND_LL = [[37.915,-122.70]].concat(SHORE_LL, [[38.13,-122.70]]);
+const SHORE = SHORE_LL.map(p => XY(p[0], p[1]));
+const LAND = LAND_LL.map(p => XY(p[0], p[1]));
+const TIB = TIB_LL.map(p => XY(p[0], p[1])), RICH = RICH_LL.map(p => XY(p[0], p[1]));
+const LANDS = [LAND, TIB, RICH], SHORES = [SHORE, TIB, RICH];
+
+const HWY101 = [[38.054,-122.5335],[38.035,-122.536],[38.0205,-122.537],[38.0165,-122.5385],[38.010,-122.5395],[38.006,-122.5395],[38.0016,-122.536],[37.9985,-122.5345],[37.992,-122.5315],[37.9863,-122.528],[37.979,-122.5245],[37.9725,-122.5215],[37.970,-122.5213],[37.965,-122.515],[37.9605,-122.5115],[37.9545,-122.5135],[37.948,-122.515],[37.9455,-122.5155],[37.938,-122.5168],[37.921,-122.518]];
+const I580 = [[37.9605,-122.5115],[37.959,-122.507],[37.9565,-122.502],[37.954,-122.4975],[37.951,-122.493],[37.9475,-122.4895],[37.945,-122.4855],[37.944,-122.4815],[37.9440,-122.4760],[37.9443,-122.4728]];
+const RSR_BRIDGE = [[37.9443,-122.4728,6],[37.9425,-122.466,16],[37.9405,-122.458,26],[37.9385,-122.450,40],[37.937,-122.444,52],[37.9355,-122.438,40],[37.9347,-122.4338,30],[37.9325,-122.426,44],[37.931,-122.418,30]];
+const SMART = [[38.054,-122.5322],[38.035,-122.5348],[38.020,-122.5375],[38.010,-122.5392],[38.0016,-122.5374],[37.996,-122.5355],[37.990,-122.5315],[37.984,-122.527],[37.979,-122.5235],[37.974,-122.5228],[37.97083,-122.5225],[37.9675,-122.5205],[37.964,-122.519],[37.9605,-122.5195],[37.9555,-122.518],[37.951,-122.515],[37.94785,-122.51248],[37.946,-122.5112]];
+const CREEK = [[37.9712,-122.5235],[37.9695,-122.5215],[37.9690,-122.5195],[37.9695,-122.5170],[37.9685,-122.5110],[37.9675,-122.5090],[37.9672,-122.5030],[37.9670,-122.4985],[37.9670,-122.4930],[37.96722,-122.48639],[37.9675,-122.4825]];
+const FOURTH = [[37.9770,-122.5530],[37.97616,-122.54921],[37.97425,-122.53869],[37.97350,-122.53250],[37.97310,-122.52713],[37.97255,-122.52267],[37.97240,-122.52070],[37.97220,-122.51800]];
+const SANPEDRO = [[37.9695,-122.5125],[37.96843,-122.50599],[37.97367,-122.49832],[37.97436,-122.48448],[37.98222,-122.47306],[37.99015,-122.45773],[37.99609,-122.45652],[38.0005,-122.4620],[38.0065,-122.4750],[38.0085,-122.4890],[38.0030,-122.5050],[37.99674,-122.52833],[37.9975,-122.53028]];
+const LUCAS = [[38.0215,-122.5375],[38.0245,-122.548],[38.0270,-122.560],[38.0285,-122.575],[38.0305,-122.590],[38.034,-122.605]];
+
+// Hills: [lat, lon, height m, radius m] (USGS/GNIS summits; ridges approximated)
+const HILLS = [
+  [37.99378,-122.49947,300,1000],[37.9875,-122.4910,190,850],[37.9905,-122.4790,210,900],[37.9915,-122.4660,140,800],[37.9895,-122.4560,55,480],
+  [38.0005,-122.4920,90,800],[38.0088,-122.4907,30,350],
+  [37.98536,-122.53367,190,700],[37.9800,-122.5270,70,450],[37.993,-122.552,175,900],[37.9990,-122.5700,260,1200],[38.0150,-122.5650,220,1200],[38.0165,-122.5480,140,650],
+  [37.9792,-122.5609,130,500],[37.9828,-122.5561,140,450],[37.9709,-122.5414,115,420],[37.9671,-122.5802,330,1200],[37.9550,-122.5600,170,1000],
+  [37.9290,-122.5778,700,2400],[38.0244,-122.6125,470,2000],[38.0592,-122.6042,560,2500],[38.0426,-122.5315,130,700],
+  [38.0130,-122.5230,120,650],[37.9985,-122.5310,30,260],[37.9840,-122.5120,115,650],[37.9900,-122.5200,80,500],
+  [37.9580,-122.5250,85,550],[37.9471,-122.5326,55,450],[37.9440,-122.4900,32,420],[37.9615,-122.5180,40,300],
+  [37.9800,-122.6250,360,1800],[38.0850,-122.5800,380,2600],[38.0950,-122.6400,420,2600],[37.9097,-122.4857,184,800],[37.9300,-122.5300,120,700],[37.9560,-122.4190,95,600],[37.9300,-122.3800,60,900]
+].map(h => { const p = XY(h[0], h[1]); return [p[0], p[1], h[2], h[3]]; });
+
+// Low-lying flood exposure zones (thresholds approximate BayWAVE / city 2020 report / TAM 2024 memo)
+const ZONES = [
+  { id:'canal', name:'Canal District & Pickleweed', lat:37.9628, lon:-122.5025, rx:850, rz:470, rot:-8, t:10, subs:true, protect:true,
+    note:'About 3 ft above sea level and already sinking into a bowl. TAM puts permanent tidal flooding here at about 10 in of rise, and Bellam Blvd, the main route to US-101, goes under at about 1 ft. Home to roughly 12,000–16,000 people.',
+    src:['http://www.tam.ca.gov/wp-content/uploads/2024/12/Final-Draft-Vulnerable-Locations-Memo.pdf','https://www.canalalliance.org/?p=43506'] },
+  { id:'spinnaker', name:'Spinnaker Point & Baypoint', lat:37.9667, lon:-122.4955, rx:380, rz:240, rot:0, t:15, subs:true, protect:true,
+    note:'Exposed in the near term (10–20 in of rise). The city recommends a levee assessment here.',
+    src:['https://storage.googleapis.com/proudcity/sanrafaelca/uploads/2020/10/SLR-Adaptation-Report-final-9-28-20-v2.pdf'] },
+  { id:'francisco', name:'Francisco Blvd West, Andersen Dr & I-580 corridor', lat:37.9572, lon:-122.5085, rx:620, rz:300, rot:22, t:18, subs:false, protect:true,
+    note:'Business districts and the I-580 commercial corridor are exposed in the near term (10–20 in). Plan Bay Area 2050 calls for a horizontal levee and marsh to protect this stretch of I-580.',
+    src:['https://www.planbayarea.org/sites/default/files/documents/Plan_Bay_Area_2050_Final_Marin_County_Factsheet_012822.pdf'] },
+  { id:'ramps', name:'US-101 ramps at the I-580 junction', lat:37.9605, lon:-122.5130, rx:240, rz:190, rot:0, t:30, subs:false, protect:false,
+    note:'Ramps flood in storm surges in the near term and from tides alone in the medium term.',
+    src:['https://storage.googleapis.com/proudcity/sanrafaelca/uploads/2020/10/SLR-Adaptation-Report-final-9-28-20-v2.pdf'] },
+  { id:'gallinas', name:'Santa Venetia edge along Gallinas Creek', lat:38.0090, lon:-122.5120, rx:620, rz:330, rot:-35, t:16, subs:false, protect:false,
+    note:'Peripheral flooding in the near term. More than 150 homes were damaged in the 1982–83 storms.',
+    src:['https://storage.googleapis.com/proudcity/sanrafaelca/uploads/2020/10/SLR-Adaptation-Report-final-9-28-20-v2.pdf'] },
+  { id:'venetia', name:'Santa Venetia & Marin Lagoon', lat:38.0045, lon:-122.5190, rx:850, rz:480, rot:-35, t:40, subs:false, protect:false,
+    note:'Neighborhood-scale flooding is a long-term exposure, at roughly 40 in of rise or less with a storm.',
+    src:['https://storage.googleapis.com/proudcity/sanrafaelca/uploads/2020/10/SLR-Adaptation-Report-final-9-28-20-v2.pdf'] },
+  { id:'lochlomond', name:'Loch Lomond, Bayside & Glenwood shore', lat:37.9772, lon:-122.4810, rx:900, rz:260, rot:-32, t:45, subs:false, protect:false,
+    note:'Full exposure is long term, around 40–60 in of rise, sooner during storms.',
+    src:['https://storage.googleapis.com/proudcity/sanrafaelca/uploads/2020/10/SLR-Adaptation-Report-final-9-28-20-v2.pdf'] },
+  { id:'peacock', name:'Peacock Gap lowlands', lat:37.9885, lon:-122.4655, rx:500, rz:280, rot:-20, t:50, subs:false, protect:false,
+    note:'Listed among the first neighborhoods affected by storms; tidal exposure is long term (40–60 in).',
+    src:['https://storage.googleapis.com/proudcity/sanrafaelca/uploads/2020/10/SLR-Adaptation-Report-final-9-28-20-v2.pdf'] },
+  { id:'downtown', name:'Downtown along San Rafael Creek', lat:37.9697, lon:-122.5195, rx:880, rz:210, rot:6, t:56, subs:false, protect:false,
+    note:'Exposed in the medium term during storm surge (about 20 in of rise plus a storm), including parts of the transit center area.',
+    src:['https://storage.googleapis.com/proudcity/sanrafaelca/uploads/2020/10/SLR-Adaptation-Report-final-9-28-20-v2.pdf'] }
+];
+ZONES.forEach(z => { const p = XY(z.lat, z.lon); z.x = p[0]; z.z = p[1]; z.r = z.rot * D2R; });
+const MARSH = [[38.0120,-122.4990,1100,330,-52],[38.0215,-122.5085,600,300,-40],[37.9365,-122.5195,500,240,-40],[37.9658,-122.4895,230,130,0]].map(m => { const p = XY(m[0], m[1]); return { x:p[0], z:p[1], rx:m[2], rz:m[3], r:m[4]*D2R }; });
+
+const smooth = t => t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
+function pip(x, z, poly) { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const xi = poly[i][0], zi = poly[i][1], xj = poly[j][0], zj = poly[j][1]; if (((zi > z) !== (zj > z)) && (x < (xj - xi) * (z - zi) / (zj - zi) + xi)) c = !c; } return c; }
+function distPoly(x, z, pts) { let best = 1e12; for (let i = 0; i < pts.length - 1; i++) { const ax = pts[i][0], az = pts[i][1], bx = pts[i+1][0], bz = pts[i+1][1]; const dx = bx - ax, dz = bz - az; let t = ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz); t = t < 0 ? 0 : t > 1 ? 1 : t; const ex = ax + t * dx - x, ez = az + t * dz - z; const d = ex * ex + ez * ez; if (d < best) best = d; } return Math.sqrt(best); }
+function ellipseR(x, z, e) { const dx = x - e.x, dz = z - e.z, c = Math.cos(e.r), s = Math.sin(e.r); const u = dx * c - dz * s, v = dx * s + dz * c; return Math.sqrt((u / e.rx) ** 2 + (v / e.rz) ** 2); }
+const CREEK_XY = CREEK.map(p => XY(p[0], p[1]));
+const ZG = 2.6; // zone ground (m)
+
+function elevRaw(x, z) {
+  const land = pip(x, z, LAND) || pip(x, z, TIB) || pip(x, z, RICH);
+  const d = Math.min(distPoly(x, z, SHORE), distPoly(x, z, TIB), distPoly(x, z, RICH));
+  if (!land) return -1.5 - Math.min(d, 3000) / 600;
+  let e = 1.7 + 5.2 * smooth(d / 2500);
+  let hills = 0;
+  for (const h of HILLS) { const dx = x - h[0], dz = z - h[1]; const q = (dx * dx + dz * dz) / (h[3] * h[3]); if (q < 9) hills += h[2] * Math.exp(-q); }
+  hills *= 0.35 + 0.65 * smooth(d / 380);
+  const n = (Math.sin(x * 0.0021 + 1.3) * Math.sin(z * 0.0017 + 0.4) + 0.5 * Math.sin(x * 0.0053 - z * 0.0041)) * Math.min(1, hills / 50) * 7;
+  e += hills + n;
+  for (const zn of ZONES) { const r = ellipseR(x, z, zn); if (r < 1.5) { const f = (1 - smooth((r - 0.8) / 0.6)) * (1 - smooth((e - 18) / 26)); if (f > 0) e = e * (1 - f) + Math.min(e, ZG) * f; } }
+  for (const m of MARSH) { const r = ellipseR(x, z, m); if (r < 1.3) { const f = 1 - smooth((r - 0.8) / 0.5); e = e * (1 - f) + Math.min(e, 1.9) * f; } }
+  const dc = distPoly(x, z, CREEK_XY);
+  const wide = x > -175 ? 1 : 0.45;
+  if (dc < 90 * wide) { const f = 1 - smooth((dc - 25 * wide) / (65 * wide)); e = e * (1 - f) + (-0.6) * f; }
+  return e;
+}
+
+/* ---------------- terrain grid ---------------- */
+const [X0, Z1] = XY(LATMIN, LONMIN), [X1, Z0] = XY(LATMAX, LONMAX);
+const NX = 470, NZ = 420;
+const GW = X1 - X0, GH = Z1 - Z0;
+const HGT = new Float32Array((NX + 1) * (NZ + 1));
+function heightAt(x, z) { // true metres, bilinear
+  const fx = (x - X0) / GW * NX, fz = (z - Z0) / GH * NZ;
+  const i = Math.max(0, Math.min(NX - 1, Math.floor(fx))), j = Math.max(0, Math.min(NZ - 1, Math.floor(fz)));
+  const tx = Math.min(1, Math.max(0, fx - i)), tz = Math.min(1, Math.max(0, fz - j));
+  const a = HGT[j * (NX + 1) + i], b = HGT[j * (NX + 1) + i + 1], c = HGT[(j + 1) * (NX + 1) + i], d = HGT[(j + 1) * (NX + 1) + i + 1];
+  return (a * (1 - tx) + b * tx) * (1 - tz) + (c * (1 - tx) + d * tx) * tz;
+}
+const yAt = (x, z) => Math.max(heightAt(x, z), -0.5) * EX;
+
+/* ---------------- data: projects ---------------- */
+// st: built | uc | approved | proposed | concept | infra | spec ; yb: 'r' reported target, 'a' model assumption, 'c' completed
+const P = [
+  // Downtown
+  { n:'Residences at Vivalon Healthy Aging Campus', a:'999 3rd St', lat:37.97165, lon:-122.52745, st:'built', y:2024, yb:'c', fl:6, ft:70, u:67, w:40, d:34, note:'67 affordable senior homes over a senior center (Eden Housing and Vivalon, formerly Whistlestop). Opened January 2024.', src:['https://cityofsanrafael.org/999-3rd'] },
+  { n:'Second & B Apartments', a:'815 B St', lat:37.97150, lon:-122.52984, st:'built', y:2021, yb:'c', fl:4, u:41, w:34, d:26, note:'41 apartments over ground-floor retail. Completed June 2021.', src:['https://www.cityofsanrafael.org/815-b'] },
+  { n:'AC Hotel by Marriott', a:'1201 5th Ave', lat:37.97418, lon:-122.52885, st:'built', y:2023, yb:'c', fl:5, ft:54, u:0, sz:'140 rooms + rooftop bar', w:38, d:32, note:'Opened August 2023.', src:['https://www.cityofsanrafael.org/ac-marriott-hotel'] },
+  { n:'Aegis Living San Rafael', a:'800 Mission Ave', lat:37.97445, lon:-122.52405, st:'built', y:2025, yb:'c', fl:4, ft:47, u:0, sz:'About 101 assisted-living suites', w:44, d:34, note:'Assisted living. Opened August 2025.', src:['https://www.cityofsanrafael.org/1203-lincoln/'] },
+  { n:'Public Safety Center', a:'1375 5th Ave', lat:37.97443, lon:-122.53152, st:'built', y:2020, yb:'c', fl:3, u:0, sz:'Police headquarters + Fire Station 51', w:52, d:36, note:'Measure E essential facility, LEED Gold. Completed August 2020. Height estimated.', src:['https://www.cityofsanrafael.org/essential-facilities-and-measure-e/'] },
+  { n:'Modera San Rafael', a:'930 Irwin St', lat:37.97156, lon:-122.52080, st:'uc', y:2028, yb:'r', start:2025.9, fl:8, ft:85, u:210, w:62, d:48, note:'Mill Creek Residential. Foundations poured April 2026; first move-ins planned for 2028.', src:['https://sfyimby.com/2026/04/construction-progress-for-930-irwin-street-san-rafael-marin-county.html'] },
+  { n:'703 Third Street', a:'703 3rd St', lat:37.97149, lon:-122.52327, st:'approved', y:2029, yb:'a', fl:6, ft:73, u:120, w:52, d:44, note:'Approved 2019 and extended twice. The site sold in 2025 and demolition began that August; vertical construction had not been confirmed.', src:['https://www.cityofsanrafael.org/703-third-st','https://www.cityofsanrafael.org/demolition-underway-for-mixed-use-residential-building-at-703-third-street'] },
+  { n:'700 Irwin Street tower', a:'700 Irwin St', lat:37.97012, lon:-122.52117, st:'approved', y:2031, yb:'a', fl:17, ft:180, u:200, kind:'tower', w:56, d:46, note:'Would be the tallest building in San Rafael, using state density-bonus waivers to exceed the 50/70 ft zone. Approved November 2025; appeals denied February 2026.', src:['https://www.cityofsanrafael.org/700-irwin-st'] },
+  { n:'900 A Street', a:'900 A St (1030 3rd St)', lat:37.97225, lon:-122.52805, st:'approved', y:2030, yb:'a', fl:8, u:131, w:44, d:38, note:'Monahan Pacific. 131 homes (11 low-income) with ground-floor commercial. Approved on appeal February 2026.', src:['https://www.cityofsanrafael.org/900astreet'] },
+  { n:'1230 Fifth Avenue', a:'1248 5th Ave', lat:37.97445, lon:-122.53000, st:'approved', y:2030, yb:'a', fl:13, u:188, kind:'tower', w:48, d:44, note:'Monahan Pacific. 188 homes (19 very low income). Planning Commission approval November 2025.', src:['https://cityofsanrafael.org/1230-fifth-avenue'] },
+  { n:'BioMarin Buildings A & B', a:'999 3rd St campus (2nd St & Lindaro)', lat:37.97095, lon:-122.52620, st:'approved', y:2030, yb:'a', fl:4, ft:72, u:0, kind:'multi', n2:2, w:110, d:46, sz:'About 110k sf office/retail + 97k sf lab', note:'Approved March 2020 with a 10-year development agreement. No construction start found.', src:['https://cityofsanrafael.org/999-3rd'] },
+  { n:'Belmont senior living', a:'1515 4th St', lat:37.97370, lon:-122.53441, st:'approved', y:2029, yb:'a', fl:4, u:183, w:58, d:44, note:'183 independent, assisted and memory-care units. Approved April 2023. Story count estimated.', src:['https://www.cityofsanrafael.org/1515-fourth-st/'] },
+  { n:'WildCare wildlife hospital', a:'76 Albert Park Ln', lat:37.96795, lon:-122.52678, st:'approved', y:2028, yb:'a', fl:3, u:0, sz:'11,400 sf animal hospital and offices', w:30, d:22, note:'Approved July 2023.', src:['https://www.cityofsanrafael.org/wildcare-2/'] },
+  { n:'Fourth Street Market Hall & Residences', a:'924 3rd St (through to 4th St)', lat:37.97235, lon:-122.52640, st:'proposed', y:2031, yb:'a', fl:8, u:197, w:84, d:58, sz:'197 senior rentals + ~25,000 sf market hall', note:'Formal application filed October 5, 2026. An April 2026 preliminary version proposed 24 stories and 260 ft.', src:['https://www.cityofsanrafael.org/fourth-street-market-hall-development-application-submitted/'] },
+  { n:'700 B Street (Safeway site)', a:'700 B St', lat:37.97000, lon:-122.52920, st:'proposed', y:2031, yb:'a', fl:8, ft:85, u:331, w:92, d:62, note:'Mill Creek Residential pre-application, 2026. 331 homes (28 low-income); no replacement grocery store.', src:['https://www.cityofsanrafael.org/700-b-street/'] },
+  { n:'515 Third Street (United Markets site)', a:'515 3rd St', lat:37.97096, lon:-122.51919, st:'proposed', y:2031, yb:'a', fl:7, u:285, w:78, d:56, note:'Bayspring Development pre-application filed August 2026.', src:['https://www.cityofsanrafael.org/515-3rd-st/'] },
+  { n:'901 E Street', a:'901 E St', lat:37.97269, lon:-122.53346, st:'proposed', y:2032, yb:'a', fl:8, ft:85, u:200, w:62, d:50, note:'Monahan Pacific pre-application, July 2026. 200 homes (16 very low income).', src:['https://www.cityofsanrafael.org/901-e-street/'] },
+  { n:'790 Mission Avenue', a:'790 Mission Ave', lat:37.97425, lon:-122.52310, st:'proposed', y:2030, yb:'a', fl:8, u:105, w:40, d:34, note:'Monahan Pacific. Application filed February 2026; under review.', src:['https://www.cityofsanrafael.org/790-mission/'] },
+  { n:'519 Fourth Street affordable housing', a:'519 4th St (city-owned)', lat:37.97195, lon:-122.51909, st:'proposed', y:2032, yb:'a', fl:5, u:0, w:34, d:30, sz:'Affordable homes, count not yet stated', note:'City-owned site; exclusive negotiations with Abode recommended in 2024. Size and height are placeholders.', src:['https://www.cityofsanrafael.org/519-4th-street-housing-development'] },
+  { n:'4th & Grand Apartments', a:'4th St & Grand Ave', lat:37.97180, lon:-122.51750, st:'proposed', y:2033, yb:'a', fl:6, u:35, w:30, d:26, note:'SB 35 application from 2022, still in tribal consultation as of mid-2025. Treated as stalled.', src:['https://www.cityofsanrafael.org/4th-and-grand-apartments/'] },
+  { n:'San Rafael Inn', a:'1580 Lincoln Ave', lat:37.98309, lon:-122.52412, st:'proposed', y:2033, yb:'a', fl:4, ft:45, u:0, sz:'46-room boutique hotel', w:34, d:26, note:'Application listed as incomplete since 2021; likely stalled.', src:['https://cityofsanrafael.org/sanrafael-inn'] },
+  { n:'San Rafael Transit Center (relocated)', a:'Block of 3rd, 4th, Tamalpais & Hetherton', lat:37.97220, lon:-122.52250, st:'infra', y:2029, yb:'r', kind:'canopy', w:120, d:62, u:0, sz:'17 bus bays, plaza and café, Tamalpais Ave bikeway', note:'The "Move Whistlestop" alternative, one block north of today\'s center. $25.6M federal grant awarded February 2026; officials target opening as soon as 2028. Today\'s Bettini Transit Center site is to be sold.', src:['https://goldengate.org/assets/1/6/srtc_fact_sheet_20241.pdf','https://govmarketnews.com/san-rafael-transit-center-relocation-federal-grant/'] },
+  { n:'San Rafael Canal Crossing & 620 Canal St park', a:'620 Canal St to 3rd St', lat:37.96800, lon:-122.51170, st:'proposed', y:2034, yb:'a', kind:'bridge', u:0, sz:'Bike/ped drawbridge + 1.65-acre waterfront park', note:'City bought the boatyard site in 2025 and hired designers in May 2026. About $40M total, not yet funded.', src:['https://cityofsanrafael.org/san-rafael-canal-crossing-project'] },
+  // North
+  { n:'Northgate Town Square — Phase 1', a:'5800 Northgate Dr', lat:38.00276, lon:-122.54693, st:'approved', y:2031, yb:'a', start:2028, kind:'ng1', u:907, sz:'About 907 homes, town square, ~220k sf retail', note:'Merlone Geier\'s redevelopment of Northgate Mall, approved December 2024 for up to 1,422 homes on 44.8 acres in 2–7 story buildings. Sears demolition began in 2026; Macy\'s remains open for now.', src:['https://www.cityofsanrafael.org/northgatetownsquaredev/','https://www.cityofsanrafael.org/northgate-mall-redevelopment-city-council-hearing-will-be-held-on-december-2nd'] },
+  { n:'Northgate Town Square — Phase 2', a:'5800 Northgate Dr', lat:38.00276, lon:-122.54693, st:'approved', y:2040, yb:'r', start:2037, kind:'ng2', u:515, sz:'Remaining ~515 homes', note:'The approved plan puts the rest of the 1,422 homes on a 2040 phasing schedule, replacing the Macy\'s wing.', src:['https://cityofsanrafael.org/merlone-geier-submits-revised-project-plans-for-northgate-town-square'] },
+  { n:'555 Northgate Drive', a:'555 Northgate Dr', lat:38.00088, lon:-122.54410, st:'approved', y:2029, yb:'a', fl:7, u:193, w:64, d:52, note:'100% affordable (AMG & Associates): five residential floors over two parking levels. Approved April 2026.', src:['https://www.cityofsanrafael.org/planning-commission-approves-555-northgate/'] },
+  { n:'4040 Civic Center Drive', a:'4040 Civic Center Dr', lat:38.00391, lon:-122.53858, st:'approved', y:2029, yb:'a', fl:5, u:238, w:66, d:40, note:'130 new homes on the north garage site plus 108 in a converted office building. Approved January 2026. Story count estimated.', src:['https://www.cityofsanrafael.org/4040-civic-center-dr'] },
+  { n:'Northgate Walk', a:'1005 & 1010 Northgate Dr', lat:38.00821, lon:-122.54522, st:'approved', y:2034, yb:'a', fl:4, u:136, kind:'multi', n2:3, w:120, d:70, note:'Three 4-story condo buildings approved 2019 and extended to 2023. No construction found; the approval may have lapsed.', src:['https://cityofsanrafael.org/northgate-walk'] },
+  { n:'Los Gamos', a:'1100 Los Gamos Dr', lat:38.01480, lon:-122.54277, st:'proposed', y:2030, yb:'a', fl:7, ft:87, u:192, w:70, d:44, note:'Resubmitted August 2026 as 100% affordable (Community Development Partners).', src:['https://www.cityofsanrafael.org/los-gamos/'] },
+  { n:'350 Merrydale Road', a:'350 Merrydale Rd', lat:37.99958, lon:-122.53797, st:'proposed', y:2031, yb:'a', fl:4, u:80, w:50, d:36, note:'City-owned. Interim cabin shelter through mid-2027 (extendable to 2029), then at least 80 permanent affordable homes; Eden Housing in line to develop.', src:['https://www.cityofsanrafael.org/350-merrydale/'] },
+  { n:'Kaiser San Rafael hospital replacement', a:'99 Montecillo Rd', lat:38.00426, lon:-122.55330, st:'proposed', y:2032, yb:'a', fl:6, ft:116.5, u:0, w:74, d:52, sz:'About 233,000 sf, 92 beds', note:'Driven by the state hospital seismic deadline. EIR scoping held spring 2026. The existing hospital is demolished after opening.', src:['https://www.cityofsanrafael.org/kaiser-hospital/','https://ceqanet.lci.ca.gov/2026041263'] },
+  { n:'245 Nova Albion Way', a:'245 Nova Albion Way (former Nazareth House)', lat:38.00337, lon:-122.55246, st:'proposed', y:2030, yb:'a', kind:'houses', fl:2, u:93, w:170, d:150, note:'93 detached homes on 7.4 acres (Signature Development). Filed July 2026.', src:['https://www.cityofsanrafael.org/245-nova-albion/'] },
+  { n:'50 Merrydale Road', a:'50 Merrydale Rd', lat:37.99327, lon:-122.53300, st:'proposed', y:2028, yb:'a', fl:2, ft:36, u:12, w:40, d:20, note:'12 homes, under review in 2026.', src:['https://www.cityofsanrafael.org/merrydale-2/'] },
+  { n:'Marinwood Apartments', a:'175 Marinwood Ave (unincorporated)', lat:38.03198, lon:-122.53889, st:'uc', y:2028, yb:'r', start:2026.4, kind:'multi', n2:4, fl:3, u:125, w:120, d:90, note:'124 affordable homes on the old Marinwood Plaza site. Permits issued; about 18 months to build.', src:['https://www.marincounty.gov/departments/cda/major-housing-projects/marinwood-apartments'] },
+  { n:'Talus (Legacy at Lucas Valley)', a:'Erin Dr (unincorporated)', lat:38.02794, lon:-122.54560, st:'uc', y:2027, yb:'a', start:2025.8, kind:'houses', fl:2, u:28, w:110, d:90, note:'28 homes, 6 below market rate; 13 permitted and under inspection in 2026.', src:['https://www.marincounty.gov/departments/cda/major-housing-projects/talus-erin-drive-san-rafael'] },
+  { n:'7 Mount Lassen Drive', a:'7 Mount Lassen Dr (unincorporated)', lat:38.02614, lon:-122.56879, st:'proposed', y:2030, yb:'a', kind:'houses', fl:2, u:29, w:120, d:90, note:'29 homes, 6 affordable. Application filed October 2024.', src:['https://www.marincounty.gov/news-releases/county-receives-application-new-homes-lucas-valley'] },
+  { n:'160 N San Pedro Road', a:'160 N San Pedro Rd (unincorporated)', lat:37.99932, lon:-122.52501, st:'proposed', y:2031, yb:'a', kind:'houses', fl:2, u:32, w:130, d:100, note:'Subdivision map for 32 home lots (5 affordable) under county review. No buildings designed yet.', src:['https://www.marincounty.gov/departments/cda/major-housing-projects/metropolis-housing-development-san-rafael'] },
+  { n:'McInnis Marsh restoration', a:'McInnis Park', lat:38.0160, lon:-122.5130, st:'proposed', y:2032, yb:'a', kind:'marsh', w:520, d:260, rot:-35, u:0, sz:'About 30 acres of tidal marsh', note:'Restores tidal marsh with about 100,000 cubic yards of dredged sediment and closes a Bay Trail gap. Being redesigned in 2025.', src:['https://www.parks.marincounty.gov/projectsplans/mcinnis-marsh-restoration'] },
+  // East / southeast
+  { n:'Casa Canal', a:'3301 Kerner Blvd', lat:37.96157, lon:-122.50193, st:'built', y:2025, yb:'c', fl:3, u:41, w:46, d:30, note:'Office building converted to 41 homes, 40 of them permanent supportive housing (Eden Housing). Opened June 2025.', src:['https://sfyimby.com/2025/06/supportive-housing-opens-at-3301-kerner-boulevard-san-rafael.html'] },
+  { n:'Jonathan\'s Place (Homeward Bound)', a:'190 Mill St', lat:37.96600, lon:-122.51250, st:'built', y:2022, yb:'c', fl:3, u:32, w:36, d:26, note:'32 supportive homes plus a shelter of up to 60 beds. Finished 2022.', src:['https://cityofsanrafael.org/homeward_bound'] },
+  { n:'88 Vivian Street', a:'88 Vivian St (former Country Club Bowl)', lat:37.96414, lon:-122.50771, st:'proposed', y:2030, yb:'a', fl:4, u:124, kind:'multi', n2:2, w:110, d:50, note:'Resubmitted September 2026 as 124 affordable rentals in a 3- and a 4-story building.', src:['https://www.cityofsanrafael.org/san-rafael-considers-two-100-affordable-housing-development-applications/'] },
+  { n:'Hampton Inn / Home2 Suites', a:'1075 Francisco Blvd E', lat:37.95827, lon:-122.50299, st:'approved', y:2029, yb:'a', fl:5, ft:54, u:0, sz:'About 185 rooms', w:62, d:28, note:'Dual-brand hotel, approved. Construction status unknown.', src:['https://cityofsanrafael.org/major-planning-projects-2'] },
+  { n:'Marin Square vision', a:'75 Bellam Blvd', lat:37.95941, lon:-122.50651, st:'concept', y:2036, yb:'a', fl:5, u:375, kind:'multi', n2:4, w:170, d:150, note:'A concept plan (Van Meter Williams Pollack) for 375 homes, 47% affordable, on 7.6 acres. No application has been filed.', src:['https://www.vmwp.com/?p=4347'] },
+  { n:'Tiscornia Marsh restoration', a:'Mouth of San Rafael Creek', lat:37.9658, lon:-122.4895, st:'approved', y:2028, yb:'a', kind:'marsh', w:300, d:170, rot:0, u:0, sz:'About 2,000 ft of raised levee + 10–16 acres of marsh', note:'Marin Audubon project that raises the levee with a gentle ecotone slope and widens marsh in front of the Canal.', src:['https://www.sfbayrestore.org/projects/tiscornia-marsh-restoration-and-sea-level-rise-adaptation'] },
+  { n:'US-101 / I-580 direct connector', a:'NB US-101 at Bellam Blvd to EB I-580', lat:37.9580, lon:-122.5090, st:'infra', y:2033, yb:'a', start:2030, kind:'ramp', u:0, sz:'$192–241M', note:'Environmental review began 2024; preferred alternative expected by end of 2027, then about 7 years to design and build. Construction is not fully funded. Shown as the flyover alternative.', src:['https://www.tam.ca.gov/featured-projects/northbound-101-and-eastbound-580-direct-connector/'] },
+  { n:'Village at Loch Lomond Marina', a:'110 Loch Lomond Dr', lat:37.97356, lon:-122.48241, st:'built', y:2023, yb:'c', kind:'houses', fl:2, u:81, w:150, d:90, note:'81 homes and a market building; the last townhomes sold in 2023.', src:['https://cityofsanrafael.org/village-loch-lomond-marina'] },
+  { n:'25 Loch Lomond Drive', a:'25 Loch Lomond Dr', lat:37.97300, lon:-122.48090, st:'approved', y:2028, yb:'a', fl:3, u:14, w:36, d:20, note:'14 homes, approved December 2025.', src:['https://www.cityofsanrafael.org/planning-commission-approves-25-loch-lomond'] },
+  { n:'San Quentin Learning Center', a:'San Quentin Rehabilitation Center', lat:37.9405, lon:-122.4870, st:'built', y:2026, yb:'c', fl:3, u:0, kind:'multi', n2:4, w:110, d:80, sz:'About 80,000 sf in four buildings', note:'Part of converting San Quentin into a rehabilitation center. Opened February 2026 ($239M).', src:['https://www.cdcr.ca.gov/news/2026/02/20/cdcr-announces-the-completion-of-san-quentin-learning-center/'] },
+  // Southwest
+  { n:'Dominican residential development', a:'Magnolia Ave & Deer Park Ave', lat:37.97900, lon:-122.51150, st:'proposed', y:2031, yb:'a', kind:'houses', fl:2, u:50, w:190, d:140, note:'50 homes plus 14 junior ADUs on Dominican land; an EIR is under way and the project is contested.', src:['https://www.cityofsanrafael.org/dominican-residential-development/'] },
+  { n:'Auburn Grove', a:'Woodland Ave & Auburn St (unincorporated)', lat:37.96342, lon:-122.52109, st:'approved', y:2028, yb:'a', kind:'rows', fl:3, ft:38, u:79, w:150, d:120, note:'79 townhomes in 16 buildings. Approved June 2025; permits under review in 2026.', src:['https://www.marincounty.gov/departments/cda/major-housing-projects/pierce-co-properties-auburn-grove-san-rafael'] }
+];
+
+// Illustrative growth: real housing sites with no project yet, placed at GP2040 pace. Clearly not proposals.
+const SPEC = [
+  ['Former Bettini Transit Center site', 37.97083,-122.52250, 2036, 7, 170, 'The district plans to sell today\'s transit center block to help pay for the new one. Downtown Precise Plan zoning allows mid-rise housing here.'],
+  ['Downtown Precise Plan infill', 37.97320,-122.53000, 2039, 6, 110, 'Illustrative infill on a 4th St block. The Downtown Precise Plan allows up to 2,200 new homes by 2040.'],
+  ['Downtown Precise Plan infill', 37.97275,-122.52480, 2041, 8, 160, 'Illustrative infill near the SMART station.'],
+  ['Downtown Precise Plan infill', 37.97080,-122.53120, 2045, 6, 100, 'Illustrative infill on 2nd St.'],
+  ['Downtown Precise Plan infill', 37.97470,-122.52650, 2048, 6, 110, 'Illustrative infill on 5th Ave.'],
+  ['Downtown Precise Plan infill', 37.97480,-122.53350, 2052, 5, 70, 'Illustrative infill at the West End.'],
+  ['Downtown Precise Plan infill', 37.97180,-122.53380, 2056, 5, 70, 'Illustrative infill on 3rd St.'],
+  ['Lincoln Ave corridor infill', 37.97760,-122.52360, 2044, 5, 80, 'Illustrative mid-rise housing along Lincoln Ave between downtown and the freeway.'],
+  ['Lincoln Ave corridor infill', 37.98010,-122.52420, 2049, 5, 80, 'Illustrative mid-rise housing along Lincoln Ave.'],
+  ['Marin Civic Center housing site', 37.99760,-122.53380, 2038, 4, 80, 'Listed in the Housing Element at 80 homes on county land. No proposal yet.'],
+  ['Civic Center station area', 38.00050,-122.53560, 2043, 5, 90, 'General Plan 2040 calls for limited transit-oriented housing near the Civic Center SMART station.'],
+  ['380 Merrydale Road site', 37.99850,-122.53700, 2035, 4, 62, 'Housing Element site listed at 62 homes.'],
+  ['30 Smith Ranch Road site', 38.01650,-122.52850, 2036, 4, 50, 'Housing Element site listed at 50 homes.'],
+  ['25 W Castlewood site', 37.98320,-122.47950, 2037, 3, 52, 'Housing Element site listed at 52 homes.'],
+  ['Loch Lomond Phase II site', 37.97440,-122.48350, 2036, 3, 35, 'Housing Element site listed at 35 homes.'],
+  ['Southeast San Rafael Specific Plan area', 37.96000,-122.50000, 2042, 6, 130, 'The city began a Specific Plan for the Canal and Francisco Blvd East in 2025. Building here would likely require raising ground, as the Canal study\'s third alternative proposes.'],
+  ['Southeast San Rafael Specific Plan area', 37.95850,-122.49800, 2046, 6, 130, 'Illustrative mixed use on Francisco Blvd East, assuming raised ground.'],
+  ['Southeast San Rafael Specific Plan area', 37.96200,-122.49700, 2050, 5, 100, 'Illustrative mixed use on Kerner Blvd, assuming raised ground.'],
+  ['Southeast San Rafael Specific Plan area', 37.95700,-122.50200, 2054, 5, 100, 'Illustrative mixed use near the 580 junction.'],
+  ['Francisco Blvd West infill', 37.95700,-122.51450, 2044, 5, 90, 'Illustrative housing in the Francisco Blvd West mixed-use designation.'],
+  ['Northgate area infill', 38.00480,-122.54130, 2050, 6, 140, 'Illustrative later-phase housing in the North San Rafael Town Center, where General Plan 2040 allows extra height.'],
+  ['Los Ranchitos / Freitas infill', 37.99480,-122.53950, 2055, 4, 60, 'Illustrative small-site housing along the Freitas Pkwy corridor.']
+];
+SPEC.forEach(s => { const w = Math.round(Math.min(80, Math.max(30, Math.sqrt(s[5] * 95 / Math.max(1, s[4] - 1) * 1.3)))); P.push({ n:s[0], a:'Illustrative — no application', lat:s[1], lon:s[2], st:'spec', y:s[3], yb:'a', fl:s[4], u:s[5], w, d:Math.round(w * 0.78), note:s[6], src:['https://www.cityofsanrafael.org/housing-element-certified-by-state','https://cityofsanrafael.org/gp-2040-document-library'] }); });
+
+const STATUS = {
+  built:    { label:'Built since 2020', tok:'--s-built' },
+  uc:       { label:'Under construction', tok:'--s-uc' },
+  approved: { label:'Approved', tok:'--s-approved' },
+  proposed: { label:'Proposed', tok:'--s-proposed' },
+  concept:  { label:'Concept only', tok:'--s-concept' },
+  infra:    { label:'Transit & roads', tok:'--s-infra' },
+  spec:     { label:'Illustrative', tok:'--s-spec' }
+};
+
+/* ---------------- sea level (OPC 2024, San Francisco, ft rel. 2000) ---------------- */
+const SLR_YEARS = [2000, 2030, 2040, 2050, 2060, 2070];
+const SLR = {
+  Low:     { name:'Low', v:[0,0.3,0.4,0.5,0.6,0.7] },
+  IntLow:  { name:'Intermediate-Low', v:[0,0.4,0.5,0.6,0.8,1.0] },
+  Int:     { name:'Intermediate', v:[0,0.4,0.6,0.8,1.1,1.4] },
+  IntHigh: { name:'Intermediate-High', v:[0,0.4,0.7,1.0,1.5,2.2] },
+  High:    { name:'High', v:[0,0.4,0.8,1.3,2.0,2.9] }
+};
+const SCEN_NOTE = {
+  Low: 'Lowest plausible path.', IntLow: 'Below the most likely path.',
+  Int: 'OPC treats this as the most likely path for 2050.', IntHigh: 'A planning case for projects that can adapt.', High: 'A stress test for critical infrastructure.'
+};
+function slrIn(year, s) { const v = SLR[s].v; for (let i = 0; i < SLR_YEARS.length - 1; i++) { if (year <= SLR_YEARS[i + 1]) { const t = (year - SLR_YEARS[i]) / (SLR_YEARS[i + 1] - SLR_YEARS[i]); return (v[i] + t * (v[i + 1] - v[i])) * 12; } } return v[v.length - 1] * 12; }
+
+/* ---------------- three.js setup ---------------- */
+const canvas = document.getElementById('scene'), stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: false, logarithmicDepthBuffer: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(38, 1, 8, 90000);
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.08; controls.maxPolarAngle = 1.42; controls.minDistance = 120; controls.maxDistance = 26000; controls.screenSpacePanning = false;
+const hemi = new THREE.HemisphereLight(0xffffff, 0x77786c, 0.62); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff6e8, 0.62); sun.position.set(-5000, 4200, 2000); scene.add(sun);
+scene.fog = new THREE.Fog(0xdde3dc, 12000, 30000);
+
+const css = getComputedStyle(document.documentElement);
+const tok = n => new THREE.Color((css.getPropertyValue(n) || '#888').trim());
+
+/* terrain */
+const tGeo = new THREE.BufferGeometry();
+const tPos = new Float32Array((NX + 1) * (NZ + 1) * 3), tCol = new Float32Array((NX + 1) * (NZ + 1) * 3), tKind = new Float32Array((NX + 1) * (NZ + 1) * 2);
+function buildTerrain() {
+  for (let j = 0; j <= NZ; j++) for (let i = 0; i <= NX; i++) {
+    const k = j * (NX + 1) + i, x = X0 + GW * i / NX, z = Z0 + GH * j / NZ;
+    const e = elevRaw(x, z); HGT[k] = e;
+    tPos[k * 3] = x; tPos[k * 3 + 1] = e * EX; tPos[k * 3 + 2] = z;
+    let marsh = 0; for (const m of MARSH) { const r = ellipseR(x, z, m); if (r < 1.1) marsh = Math.max(marsh, 1 - smooth((r - 0.7) / 0.4)); }
+    tKind[k * 2] = e; tKind[k * 2 + 1] = marsh;
+  }
+  const idx = [];
+  for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) { const a = j * (NX + 1) + i, b = a + 1, c = a + NX + 1, d = c + 1; idx.push(a, c, b, b, c, d); }
+  tGeo.setIndex(idx); tGeo.setAttribute('position', new THREE.BufferAttribute(tPos, 3)); tGeo.setAttribute('color', new THREE.BufferAttribute(tCol, 3));
+  tGeo.computeVertexNormals();
+}
+const terrainMat = new THREE.MeshLambertMaterial({ vertexColors: true });
+let terrain;
+
+/* water */
+const waterMat = new THREE.MeshLambertMaterial({ transparent: true, opacity: 0.93 });
+const water = new THREE.Mesh(new THREE.PlaneGeometry(90000, 90000), waterMat); water.rotation.x = -Math.PI / 2; water.renderOrder = 1;
+
+/* ribbons */
+function sampleLine(ll, step) {
+  const pts = ll.map(p => { const q = XY(p[0], p[1]); return { x:q[0], z:q[1], alt:p[2] }; });
+  const out = [];
+  for (let i = 0; i < pts.length - 1; i++) { const a = pts[i], b = pts[i + 1]; const len = Math.hypot(b.x - a.x, b.z - a.z), n = Math.max(1, Math.ceil(len / step)); for (let s = 0; s < n; s++) { const t = s / n; out.push({ x:a.x + (b.x - a.x) * t, z:a.z + (b.z - a.z) * t, alt: a.alt != null ? a.alt + (b.alt - a.alt) * t : null }); } }
+  const L = pts[pts.length - 1]; out.push({ x:L.x, z:L.z, alt:L.alt });
+  return out;
+}
+function ribbon(ll, width, mat, lift, yfn) {
+  const s = sampleLine(ll, 18), pos = [], idx = [];
+  for (let i = 0; i < s.length; i++) {
+    const a = s[Math.max(0, i - 1)], b = s[Math.min(s.length - 1, i + 1)];
+    let dx = b.x - a.x, dz = b.z - a.z; const l = Math.hypot(dx, dz) || 1; dx /= l; dz /= l;
+    const w = typeof width === 'function' ? width(s[i]) : width;
+    const nx = -dz * w / 2, nz = dx * w / 2;
+    const y = yfn ? yfn(s[i]) : (s[i].alt != null ? s[i].alt : yAt(s[i].x, s[i].z) + lift);
+    pos.push(s[i].x + nx, y, s[i].z + nz, s[i].x - nx, y, s[i].z - nz);
+    if (i < s.length - 1) { const k = i * 2; idx.push(k, k + 2, k + 1, k + 1, k + 2, k + 3); }
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+  return new THREE.Mesh(g, mat);
+}
+const roadMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+const streetMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+const railMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
+const creekMat = new THREE.MeshLambertMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+let creek; // kept above the bay plane in update() so the two never share a depth
+const infraMat = new THREE.MeshLambertMaterial({ side: THREE.DoubleSide });
+
+/* ---------------- existing city fabric ---------------- */
+// [lat, lon, radius m, type, density, street bearing deg]
+const URBAN = [
+  [37.9733,-122.5270,720,'dt',0.92,9],[37.9718,-122.5195,380,'com',0.7,9],[37.9670,-122.5355,520,'res',0.75,9],[37.9760,-122.5450,620,'res',0.62,12],
+  [37.9850,-122.5480,620,'res',0.62,30],[37.9800,-122.5400,380,'res',0.5,20],[37.9820,-122.5170,600,'res',0.55,40],[37.9780,-122.5230,420,'apt',0.6,15],
+  [38.0040,-122.5497,1150,'res',0.66,-20],[37.9930,-122.5425,420,'res',0.45,0],[38.0010,-122.5410,420,'com',0.45,0],[38.0270,-122.5580,900,'res',0.5,10],
+  [38.0380,-122.5380,700,'res',0.55,0],[38.0160,-122.5270,480,'apt',0.45,-30],[38.0030,-122.5170,700,'res',0.6,-35],[37.9645,-122.5020,600,'apt',0.88,0],
+  [37.9590,-122.5030,600,'com',0.62,25],[37.9664,-122.4957,330,'apt',0.6,0],[37.9560,-122.5190,520,'res',0.62,20],[37.9610,-122.5270,400,'res',0.5,20],
+  [37.9780,-122.4970,450,'res',0.5,-30],[37.9736,-122.4824,450,'res',0.6,-30],[37.9745,-122.4920,300,'res',0.5,-30],[37.9830,-122.4770,500,'res',0.62,-40],
+  [37.9900,-122.4690,700,'res',0.55,-40],[37.9475,-122.5110,350,'com',0.5,40],[37.9413,-122.4850,250,'res',0.45,30],[37.9570,-122.5130,420,'com',0.55,25],
+  [37.9960,-122.5360,420,'com',0.45,20],[37.9450,-122.5300,750,'res',0.5,30],[37.9750,-122.5650,750,'res',0.5,20],[38.0130,-122.5440,450,'com',0.5,0],
+  [38.0180,-122.5350,400,'res',0.4,0],[37.9670,-122.5150,300,'com',0.6,10],
+  [37.9300,-122.5250,800,'res',0.5,20],[38.0700,-122.5500,1100,'res',0.45,0],[37.9050,-122.4750,600,'res',0.4,30],[37.9300,-122.3700,1200,'res',0.5,0],[37.9750,-122.5900,900,'res',0.45,10],[37.9850,-122.6200,700,'res',0.4,10]
+].map(u => { const p = XY(u[0], u[1]); return { x:p[0], z:p[1], r:u[2], t:u[3], dn:u[4], ang:u[5] * D2R }; });
+const NOBUILD = [[38.0028,-122.5469,250],[37.9989,-122.5303,260],[37.9390,-122.4890,260],[38.0043,-122.5539,70],[37.97083,-122.5225,60],[37.9685,-122.5240,110]].map(n => { const p = XY(n[0], n[1]); return { x:p[0], z:p[1], r:n[2] }; });
+const HWY_XY = HWY101.map(p => XY(p[0], p[1])), I580_XY = I580.map(p => XY(p[0], p[1])), SMART_XY = SMART.map(p => XY(p[0], p[1]));
+
+let rngS = 20580;
+const rnd = () => { rngS = (rngS * 16807) % 2147483647; return (rngS - 1) / 2147483646; };
+const fabric = [];
+function genFabric(exclude) {
+  const step = 29;
+  for (let x = X0 + 300; x < X1 - 300; x += step) for (let z = Z0 + 300; z < Z1 - 300; z += step) {
+    const jx = x + (rnd() - 0.5) * 22, jz = z + (rnd() - 0.5) * 22;
+    let best = null, bw = 0;
+    for (const u of URBAN) { const d = Math.hypot(jx - u.x, jz - u.z); if (d < u.r * 1.15) { const w = u.dn * (1 - smooth((d / u.r - 0.55) / 0.6)); if (w > bw) { bw = w; best = u; } } }
+    const roll = rnd();
+    if (!best || roll > bw) continue;
+    const e = heightAt(jx, jz); if (e < 1.0) continue;
+    if (e > (best.t === 'res' ? 105 : 60)) continue;
+    const sl = Math.abs(heightAt(jx + 20, jz) - heightAt(jx - 20, jz)) / 40 + Math.abs(heightAt(jx, jz + 20) - heightAt(jx, jz - 20)) / 40;
+    if (sl > 0.32) continue;
+    let bad = false;
+    for (const n of NOBUILD) if (Math.hypot(jx - n.x, jz - n.z) < n.r) { bad = true; break; }
+    if (!bad) for (const n of exclude) if (Math.hypot(jx - n.x, jz - n.z) < n.r) { bad = true; break; }
+    if (bad) continue;
+    if (distPoly(jx, jz, HWY_XY) < 34 || distPoly(jx, jz, I580_XY) < 30 || distPoly(jx, jz, SMART_XY) < 12 || distPoly(jx, jz, CREEK_XY) < 40) continue;
+    let w, d, h;
+    const r1 = rnd(), r2 = rnd(), r3 = rnd();
+    if (best.t === 'res') { w = 11 + r1 * 6; d = 9 + r2 * 5; h = 4.2 + r3 * (r3 > 0.8 ? 3.2 : 1.8); }
+    else if (best.t === 'apt') { w = 18 + r1 * 14; d = 14 + r2 * 9; h = 6.5 + r3 * 5; }
+    else if (best.t === 'com') { w = 24 + r1 * 30; d = 18 + r2 * 22; h = 5 + r3 * 4.5; }
+    else { w = 16 + r1 * 18; d = 16 + r2 * 16; h = 6 + r3 * r3 * 11; }
+    fabric.push({ x:jx, z:jz, w, d, h, rot: -best.ang + (best.t === 'res' ? (rnd() - 0.5) * 0.5 : (rnd() - 0.5) * 0.12), shade: 0.9 + rnd() * 0.12 });
+  }
+}
+const fabricMat = new THREE.MeshLambertMaterial();
+let fabricMesh;
+
+/* ---------------- project meshes ---------------- */
+const projGroup = new THREE.Group(), pickables = [], projObjs = [];
+const boxGeo = new THREE.BoxGeometry(1, 1, 1); boxGeo.translate(0, 0.5, 0);
+const edgeGeo = new THREE.EdgesGeometry(boxGeo);
+const matCache = {};
+function projMat(st) { if (!matCache[st]) matCache[st] = new THREE.MeshLambertMaterial({ transparent: st === 'spec', opacity: st === 'spec' ? 0.5 : 1, depthWrite: st !== 'spec' }); return matCache[st]; }
+const marshMat = new THREE.MeshLambertMaterial();
+const edgeMat = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.35 });
+const selMat = new THREE.MeshLambertMaterial();
+
+function addPart(obj, x, z, w, d, h, rot, mat) {
+  const m = new THREE.Mesh(boxGeo, mat || projMat(obj.p.st));
+  m.scale.set(w, h, d); m.rotation.y = rot || 0;
+  const g = new THREE.Group(); g.position.set(x, yAt(x, z) - 1.2, z); g.add(m);
+  const e = new THREE.LineSegments(edgeGeo, edgeMat); e.scale.copy(m.scale); e.rotation.y = m.rotation.y; g.add(e);
+  m.userData.obj = obj; m.userData.base = m.material; pickables.push(m); obj.parts.push({ g, h }); obj.meshes.push(m);
+  projGroup.add(g); return g;
+}
+/* NB 101 → EB 580 flyover: one continuous deck that peels off the east (northbound) edge of 101
+   south of Bellam, climbs over Bellam and the existing ramps, and lands on the south (eastbound) edge of 580. */
+function polyPoint(xy, d) { // point + unit tangent at arc length d along a polyline
+  for (let i = 0; i < xy.length - 1; i++) {
+    const a = xy[i], b = xy[i + 1], l = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    if (d <= l || i === xy.length - 2) { const t = Math.min(1, d / l); return { x:a[0] + (b[0] - a[0]) * t, z:a[1] + (b[1] - a[1]) * t, dx:(b[0] - a[0]) / l, dz:(b[1] - a[1]) / l }; }
+    d -= l;
+  }
+}
+function polyLen(xy, upto) { let L = 0; for (let i = 0; i < upto; i++) L += Math.hypot(xy[i + 1][0] - xy[i][0], xy[i + 1][1] - xy[i][1]); return L; }
+function regMesh(obj, m) { m.userData.obj = obj; m.userData.base = m.material; pickables.push(m); obj.meshes.push(m); }
+function buildConnector(obj, exclude) {
+  const W = 10, T = 1.6, PEAK = 14, ROAD = 2.2;
+  // 101 is listed north→south; the 580 junction is vertex 14. Diverge ~800 m south of it (below Bellam), merge ~650 m east along 580.
+  const j101 = polyLen(HWY_XY, 14);
+  const a = polyPoint(HWY_XY, j101 + 800), b = polyPoint(I580_XY, 650);
+  const ta = [-a.dx, -a.dz], tb = [b.dx, b.dz];                 // northbound heading; eastbound heading
+  const right = (dx, dz) => [-dz, dx];                           // x = east, z = south
+  const ra = right(...ta), rb = right(...tb);
+  const P0 = [a.x + ra[0] * 11, a.z + ra[1] * 11], P3 = [b.x + rb[0] * 10, b.z + rb[1] * 10];
+  const L = Math.hypot(P3[0] - P0[0], P3[1] - P0[1]) * 0.45;
+  const P1 = [P0[0] + ta[0] * L, P0[1] + ta[1] * L], P2 = [P3[0] - tb[0] * L, P3[1] - tb[1] * L];
+  const bez = (t, k) => { const u = 1 - t; return u * u * u * P0[k] + 3 * u * u * t * P1[k] + 3 * u * t * t * P2[k] + t * t * t * P3[k]; };
+  const N = 90, pts = [];
+  for (let i = 0; i <= N; i++) { const t = i / N; pts.push({ x:bez(t, 0), z:bez(t, 1) }); }
+  let acc = 0; pts.forEach((p, i) => { if (i) acc += Math.hypot(p.x - pts[i - 1].x, p.z - pts[i - 1].z); p.s = acc; });
+  const len = acc;
+  const y0 = yAt(P0[0], P0[1]) + ROAD, y1 = yAt(P3[0], P3[1]) + ROAD, base = Math.min(y0, y1);
+  pts.forEach(p => {
+    const u = p.s / len, grade = Math.min(smooth(u / 0.32), smooth((1 - u) / 0.32));  // ~5% climb, flat crown
+    p.top = Math.max(y0 + (y1 - y0) * u + 0.3 + PEAK * grade, yAt(p.x, p.z) + ROAD + 0.3) - base;
+  });
+  // deck: extruded rectangle along the curve (relative to `base`, so the build-up animation rises from road level)
+  const pos = [], idx = [], hw = W / 2;
+  pts.forEach((p, i) => {
+    const q = pts[Math.min(N, i + 1)], o = pts[Math.max(0, i - 1)];
+    let dx = q.x - o.x, dz = q.z - o.z; const l = Math.hypot(dx, dz); dx /= l; dz /= l;
+    const nx = -dz * hw, nz = dx * hw;
+    pos.push(p.x + nx, p.top, p.z + nz,  p.x - nx, p.top, p.z - nz,  p.x - nx, p.top - T, p.z - nz,  p.x + nx, p.top - T, p.z + nz);
+  });
+  for (let i = 0; i < N; i++) {
+    const k = i * 4, n = k + 4;
+    [[0, 1], [1, 2], [2, 3], [3, 0]].forEach(([c, d]) => idx.push(k + c, n + c, k + d, k + d, n + c, n + d));
+  }
+  idx.push(0, 1, 2, 0, 2, 3, N * 4, N * 4 + 2, N * 4 + 1, N * 4, N * 4 + 3, N * 4 + 2);
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx);
+  const deckGeo = g.toNonIndexed(); deckGeo.computeVertexNormals();
+  const grp = new THREE.Group(); grp.position.y = base;
+  const deck = new THREE.Mesh(deckGeo, projMat(obj.p.st)); grp.add(deck); regMesh(obj, deck);
+  grp.add(new THREE.LineSegments(new THREE.EdgesGeometry(deckGeo, 20), edgeMat));
+  // piers every ~32 m wherever the deck clears the ground
+  for (let d = 32; d < len - 20; d += 32) {
+    const p = pts.find(q => q.s >= d), gy = yAt(p.x, p.z) - 1 - base, h = p.top - T - gy;
+    if (h < 3) continue;
+    const m = new THREE.Mesh(boxGeo, projMat(obj.p.st)); m.scale.set(2.4, h, 2.4); m.position.set(p.x, gy, p.z);
+    const e = new THREE.LineSegments(edgeGeo, edgeMat); e.scale.copy(m.scale); e.position.copy(m.position);
+    grp.add(m, e); regMesh(obj, m);
+  }
+  pts.forEach((p, i) => { if (i % 2 === 0) exclude.push({ x:p.x, z:p.z, r:18 }); });  // keep fabric from poking through the deck
+  obj.parts.push({ g:grp, h:PEAK + 2 }); projGroup.add(grp);
+}
+function heightM(p) { return p.ft ? p.ft * 0.3048 : (p.fl || 3) * 3.35; }
+function buildProjects() {
+  const exclude = [];
+  P.forEach((p, idx) => {
+    p.id = idx;
+    const [cx, cz] = XY(p.lat, p.lon); p.x = cx; p.z = cz;
+    const obj = { p, parts: [], meshes: [], prog: 0, vis: 0 };
+    const H = heightM(p), rot = (p.rot != null ? p.rot : (p.lat < 37.98 && p.lon > -122.535 && p.lon < -122.515 ? -9 : 0)) * D2R;
+    const kind = p.kind || 'box';
+    if (kind === 'box') { addPart(obj, cx, cz, p.w, p.d, H, rot); exclude.push({ x:cx, z:cz, r:Math.max(p.w, p.d) * 0.75 + 10 }); }
+    else if (kind === 'tower') {
+      const podH = 4 * 3.35; addPart(obj, cx, cz, p.w, p.d, podH, rot);
+      const tg = addPart(obj, cx, cz, p.w * 0.6, p.d * 0.62, H, rot); obj.parts[obj.parts.length - 1].g = tg;
+      exclude.push({ x:cx, z:cz, r:Math.max(p.w, p.d) * 0.75 + 10 });
+    }
+    else if (kind === 'multi') {
+      const n = p.n2 || 2, cols = Math.ceil(Math.sqrt(n)), rows = Math.ceil(n / cols);
+      const bw = p.w / cols * 0.72, bd = p.d / rows * 0.62;
+      for (let k = 0; k < n; k++) { const c = k % cols, r = Math.floor(k / cols); const ox = (c + 0.5) / cols * p.w - p.w / 2, oz = (r + 0.5) / rows * p.d - p.d / 2; const cs = Math.cos(rot), sn = Math.sin(rot); addPart(obj, cx + ox * cs + oz * sn, cz - ox * sn + oz * cs, bw, bd, H * (k % 2 ? 0.86 : 1), rot); }
+      exclude.push({ x:cx, z:cz, r:Math.max(p.w, p.d) * 0.7 + 10 });
+    }
+    else if (kind === 'houses' || kind === 'rows') {
+      const n = kind === 'rows' ? 16 : Math.min(p.u, 60), cols = Math.ceil(Math.sqrt(n * p.w / p.d)), rows = Math.ceil(n / cols);
+      for (let k = 0; k < n; k++) { const c = k % cols, r = Math.floor(k / cols); const ox = (c + 0.5) / cols * p.w - p.w / 2, oz = (r + 0.5) / rows * p.d - p.d / 2; const hw = kind === 'rows' ? 30 : 11, hd = kind === 'rows' ? 11 : 9; addPart(obj, cx + ox, cz + oz, hw, hd, kind === 'rows' ? 10.5 : 7, 0); }
+      exclude.push({ x:cx, z:cz, r:Math.max(p.w, p.d) * 0.65 + 10 });
+    }
+    else if (kind === 'ng1' || kind === 'ng2') {
+      const L = kind === 'ng1'
+        ? [[-120,-60,75,52,6],[-20,-100,70,48,7],[80,-85,70,50,6],[-135,45,70,55,5],[100,20,55,48,5],[-40,95,62,14,3],[30,95,62,14,3],[-40,128,62,14,3],[30,128,62,14,3]]
+        : [[175,-20,62,70,6],[170,-140,62,48,6],[-175,-150,64,50,5],[175,120,58,50,5],[-175,150,64,50,6],[95,140,55,40,4]];
+      L.forEach(b => addPart(obj, cx + b[0], cz + b[1], b[2], b[3], b[4] * 3.35, 0));
+      exclude.push({ x:cx, z:cz, r:260 });
+    }
+    else if (kind === 'canopy') {
+      [-22, 0, 22].forEach(o => addPart(obj, cx, cz + o, p.w, 12, 7, rot));
+      exclude.push({ x:cx, z:cz, r:75 });
+    }
+    else if (kind === 'bridge') {
+      const a = XY(37.96735, -122.51195), b = XY(37.96935, -122.51120);
+      const len = Math.hypot(b[0] - a[0], b[1] - a[1]), ang = Math.atan2(b[0] - a[0], b[1] - a[1]);
+      const mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2;
+      const g = addPart(obj, mx, mz, 6, len, 1.2, ang); g.position.y = 6;
+      addPart(obj, a[0] + 10, a[1] - 40, 70, 50, 0.6, 0, null);
+      exclude.push({ x:mx, z:mz, r:60 });
+    }
+    else if (kind === 'marsh') {
+      addPart(obj, cx, cz, p.w, p.d, 0.6, (p.rot || 0) * D2R, marshMat);
+    }
+    else if (kind === 'ramp') buildConnector(obj, exclude);
+    projObjs.push(obj);
+  });
+  return exclude;
+}
+
+/* landmarks: existing buildings with removal years */
+const landmarkObjs = [];
+const lmMat = new THREE.MeshLambertMaterial(), roofMat = new THREE.MeshLambertMaterial({ color: 0x5b8fc9 });
+function lm(lat, lon, w, d, h, rot, removeY, mat, dy) {
+  const [x, z] = XY(lat, lon);
+  const m = new THREE.Mesh(boxGeo, mat || lmMat); m.scale.set(w, h, d); m.rotation.y = (rot || 0) * D2R;
+  m.position.set(x, yAt(x, z) - 1 + (dy || 0), z); scene.add(m);
+  landmarkObjs.push({ m, removeY: removeY || 9999, h });
+  return m;
+}
+function offsetLL(lat, lon, dx, dz) { return [lat - dz / KZ, lon + dx / KX]; }
+function buildLandmarks() {
+  // Northgate Mall (before redevelopment)
+  const ng = [38.00276, -122.54693];
+  lm(...offsetLL(...ng, 0, 0), 300, 110, 11, 0, 2028);
+  lm(...offsetLL(...ng, -170, -10), 90, 90, 14, 0, 2027); // Sears wing (demolition under way 2026)
+  lm(...offsetLL(...ng, 175, -20), 90, 90, 14, 0, 2037);  // Macy's
+  // Marin County Civic Center (Frank Lloyd Wright): two long wings meeting at a domed library
+  const cc = XY(37.99890, -122.53030);
+  const wing = (len, ang) => { const a = ang * D2R; const m = new THREE.Mesh(boxGeo, roofMat); m.scale.set(26, 16, len); m.rotation.y = a; m.position.set(cc[0] + Math.sin(a) * len / 2, yAt(cc[0], cc[1]) + 2, cc[1] + Math.cos(a) * len / 2); scene.add(m); return m; };
+  wing(170, 20); wing(260, 205);
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(16, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), roofMat); dome.position.set(cc[0], yAt(cc[0], cc[1]) + 18, cc[1]); scene.add(dome);
+  const spire = new THREE.Mesh(new THREE.ConeGeometry(3, 52, 8), new THREE.MeshLambertMaterial({ color: 0xd8b04a })); spire.position.set(cc[0] + 30, yAt(cc[0], cc[1]) + 26, cc[1] - 12); scene.add(spire);
+  // San Quentin cell blocks
+  [[-90,-40,160,26],[60,-50,140,26],[-60,40,26,120],[80,50,170,26],[0,0,60,60]].forEach(b => lm(...offsetLL(37.9390, -122.4885, b[0], b[1]), b[2], b[3], 16, -20));
+  // Kaiser hospital (existing, replaced ~2032)
+  lm(...offsetLL(38.00426, -122.55389, -45, 10), 66, 44, 20, 0, 2033);
+  // Bettini Transit Center canopies (until the new center opens)
+  [-14, 14].forEach(o => lm(...offsetLL(37.97083, -122.52250, 0, o), 110, 10, 6, -9, 2029));
+  // SMART stations
+  [[37.97210,-122.52270],[38.00160,-122.53740],[37.94785,-122.51248]].forEach(s => lm(s[0], s[1], 8, 90, 4, -12, 9999, railStationMat));
+  // Richmond–San Rafael Bridge piers
+  sampleLine(RSR_BRIDGE, 260).forEach(s => { if (s.x > XY(37.944, -122.471)[0]) { const m = new THREE.Mesh(boxGeo, lmMat); m.scale.set(5, s.alt + 6, 5); m.position.set(s.x, -6, s.z); scene.add(m); } });
+}
+const railStationMat = new THREE.MeshLambertMaterial();
+
+/* flood zones */
+const floodMat = new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false,
+  uniforms: { uColor: { value: new THREE.Color(0x2a78c4) }, uOpacity: { value: 0.0 } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+  fragmentShader: 'uniform vec3 uColor; uniform float uOpacity; varying vec2 vUv; void main(){ float r = length(vUv-0.5)*2.0; float a = uOpacity*(1.0-smoothstep(0.55,1.0,r)); if(a<0.01) discard; gl_FragColor = vec4(uColor, a); }'
+});
+const zoneObjs = [];
+function buildZones() {
+  ZONES.forEach(z => {
+    const g = new THREE.Group(); g.position.set(z.x, 0, z.z); g.rotation.y = -z.r;
+    const mat = floodMat.clone(); mat.uniforms.uColor.value = tok('--flood');
+    const m = new THREE.Mesh(new THREE.CircleGeometry(1, 64), mat); m.rotation.x = -Math.PI / 2; m.scale.set(z.rx, z.rz, 1); m.renderOrder = 3;
+    m.userData.zone = z; g.add(m); scene.add(g);
+    zoneObjs.push({ z, g, m, mat, cur: 0, target: 0, level: 0 });
+  });
+}
+
+/* protection: Canal levee line + floodgate */
+let protectGroup;
+function buildProtection() {
+  protectGroup = new THREE.Group();
+  const levee = [[37.9672,-122.4890],[37.9648,-122.4880],[37.9605,-122.4885],[37.9560,-122.4895],[37.9530,-122.4925],[37.9505,-122.4950]];
+  const wallMat = new THREE.MeshLambertMaterial();
+  protectGroup.userData.mat = wallMat;
+  const s = sampleLine(levee, 25);
+  for (let i = 0; i < s.length - 1; i++) { const a = s[i], b = s[i + 1], len = Math.hypot(b.x - a.x, b.z - a.z), ang = Math.atan2(b.x - a.x, b.z - a.z); const m = new THREE.Mesh(boxGeo, wallMat); m.scale.set(9, 8, len + 2); m.rotation.y = ang; m.position.set((a.x + b.x) / 2, 0, (a.z + b.z) / 2); protectGroup.add(m); }
+  const [gx, gz] = XY(37.96722, -122.48760);
+  [-1, 1].forEach(sx => { const t = new THREE.Mesh(boxGeo, wallMat); t.scale.set(10, 16, 10); t.position.set(gx, 0, gz + sx * 34); protectGroup.add(t); });
+  const gate = new THREE.Mesh(boxGeo, wallMat); gate.scale.set(6, 9, 60); gate.position.set(gx, 0, gz); protectGroup.add(gate);
+  scene.add(protectGroup); protectGroup.visible = false;
+}
+
+/* ---------------- labels ---------------- */
+const LABELS = [
+  ['Downtown',37.9748,-122.5300],['Gerstle Park',37.9665,-122.5370],['Sun Valley',37.9860,-122.5480],['Dominican',37.9830,-122.5165],['Terra Linda',38.0070,-122.5520],
+  ['Lucas Valley',38.0290,-122.5620],['Marinwood',38.0400,-122.5400],['Santa Venetia',38.0020,-122.5150],['Peacock Gap',37.9930,-122.4700],['Glenwood',37.9850,-122.4790],
+  ['Loch Lomond',37.9715,-122.4850],['Canal',37.9630,-122.5000],['Bret Harte',37.9555,-122.5215],['Northgate',38.0060,-122.5420],['Civic Center',37.9965,-122.5285],
+  ['San Quentin',37.9375,-122.4880],['Larkspur Landing',37.9485,-122.5085],['China Camp',38.0035,-122.4820],['San Pedro Ridge',37.9925,-122.4930],['San Rafael Hill',37.9858,-122.5340],
+  ['Smith Ranch',38.0180,-122.5260]
+];
+const WLABELS = [['San Rafael Bay',37.9620,-122.4700],['San Pablo Bay',38.0300,-122.4800],['Richmond–San Rafael Bridge',37.9370,-122.4480]];
+const labelEls = [];
+const labelsHost = document.getElementById('labels');
+function makeLabels() {
+  LABELS.forEach(l => { const el = document.createElement('div'); el.className = 'lbl'; el.textContent = l[0]; labelsHost.appendChild(el); const [x, z] = XY(l[1], l[2]); labelEls.push({ el, v:new THREE.Vector3(x, yAt(x, z) + 70, z), kind:'n' }); });
+  WLABELS.forEach(l => { const el = document.createElement('div'); el.className = 'lbl water'; el.textContent = l[0]; labelsHost.appendChild(el); const [x, z] = XY(l[1], l[2]); labelEls.push({ el, v:new THREE.Vector3(x, 30, z), kind:'w' }); });
+}
+const selLabel = document.createElement('div'); selLabel.className = 'lbl sel'; selLabel.hidden = true; labelsHost.appendChild(selLabel);
+const tmpV = new THREE.Vector3();
+function placeLabels() {
+  const w = stage.clientWidth, h = stage.clientHeight, show = document.getElementById('tLabels').checked;
+  const dist = camera.position.distanceTo(controls.target);
+  labelEls.forEach(L => {
+    if (!show) { L.el.hidden = true; return; }
+    tmpV.copy(L.v).project(camera);
+    const vis = tmpV.z < 1 && Math.abs(tmpV.x) < 1.05 && Math.abs(tmpV.y) < 1.05 && camera.position.distanceTo(L.v) < 20000 && (L.kind === 'w' || dist < 16000);
+    L.el.hidden = !vis;
+    if (vis) L.el.style.transform = `translate(${(tmpV.x + 1) / 2 * w}px, ${(1 - tmpV.y) / 2 * h}px) translate(-50%, -50%)`;
+  });
+  if (selected && selLabel.textContent) {
+    const o = selected; const top = o.parts.reduce((mx, pt) => Math.max(mx, pt.g.position.y + pt.h), 0);
+    tmpV.set(o.p.x, top + 30, o.p.z).project(camera);
+    const vis = tmpV.z < 1 && Math.abs(tmpV.x) < 1 && Math.abs(tmpV.y) < 1;
+    selLabel.hidden = !vis;
+    if (vis) selLabel.style.transform = `translate(${(tmpV.x + 1) / 2 * w}px, ${(1 - tmpV.y) / 2 * h}px) translate(-50%, -100%)`;
+  } else selLabel.hidden = true;
+}
+
+/* ---------------- theme ---------------- */
+function applyTheme() {
+  const c = getComputedStyle(document.documentElement);
+  const T = n => new THREE.Color((c.getPropertyValue(n) || '#888').trim());
+  const bg = T('--scene-bg'); scene.background = bg; scene.fog.color = bg;
+  const low = T('--land-low'), high = T('--land-high'), marsh = T('--marsh'), wat = T('--water');
+  const tmp = new THREE.Color();
+  for (let k = 0; k < HGT.length; k++) {
+    const e = tKind[k * 2], m = tKind[k * 2 + 1];
+    if (e < 0) tmp.copy(wat).multiplyScalar(0.85);
+    else { tmp.copy(low).lerp(high, smooth((e - 8) / 140)); if (m > 0) tmp.lerp(marsh, m); }
+    tCol[k * 3] = tmp.r; tCol[k * 3 + 1] = tmp.g; tCol[k * 3 + 2] = tmp.b;
+  }
+  tGeo.attributes.color.needsUpdate = true;
+  waterMat.color = wat;
+  roadMat.color = T('--road'); streetMat.color = T('--street'); railMat.color = T('--rail'); creekMat.color = wat.clone().lerp(T('--rail'), 0.15);
+  railStationMat.color = T('--rail'); infraMat.color = T('--s-infra');
+  const b = T('--bldg'); fabricMat.color.set(0xffffff); lmMat.color = b.clone().multiplyScalar(0.96);
+  if (fabricMesh) { const cc = new THREE.Color(); fabric.forEach((f, i) => { cc.copy(b).multiplyScalar(f.shade); fabricMesh.setColorAt(i, cc); }); fabricMesh.instanceColor.needsUpdate = true; }
+  Object.keys(STATUS).forEach(s => { projMat(s).color = T(STATUS[s].tok); });
+  edgeMat.color = T('--ink'); marshMat.color = T('--marsh').lerp(T('--s-built'), 0.35); selMat.color = T('--ink');
+  if (protectGroup) protectGroup.userData.mat.color = T('--s-infra');
+  zoneObjs.forEach(z => z.mat.uniforms.uColor.value = T('--flood'));
+  const dark = (c.getPropertyValue('color-scheme') || '').includes('dark');
+  hemi.intensity = dark ? 0.55 : 0.62; sun.intensity = dark ? 0.6 : 0.62;
+  document.querySelectorAll('[data-tok]').forEach(el => el.style.background = `var(${el.dataset.tok})`);
+  requestRender();
+}
+
+/* ---------------- state + update ---------------- */
+const state = { year: 2058, scen: 'Int', storm: false, protect: false, spec: true };
+let selected = null;
+const POP = [[2025, 59410], [2040, 68710], [2058, 71400]];
+function popAt(y) { for (let i = 0; i < POP.length - 1; i++) if (y <= POP[i + 1][0]) { const t = (y - POP[i][0]) / (POP[i + 1][0] - POP[i][0]); return POP[i][1] + t * (POP[i + 1][1] - POP[i][1]); } return POP[POP.length - 1][1]; }
+function progressFor(p, Y) {
+  if (p.st === 'spec' && !state.spec) return 0;
+  const start = p.start != null ? p.start : p.y - 2;
+  if (Y >= p.y) return 1;
+  if (Y <= start) return 0;
+  return Math.max(0.04, (Y - start) / (p.y - start));
+}
+function zoneWater(z, Y) { return slrIn(Y, state.scen) + (state.storm ? 36 : 0) + (z.subs ? 0.4 * Math.max(0, Y - 2026) : 0); }
+function zoneThreshold(z, Y) { return z.t + (state.protect && z.protect && Y >= 2045 ? 72 : 0); }
+
+function update() {
+  const Y = state.year;
+  document.getElementById('yearOut').textContent = Y; document.getElementById('h1year').textContent = Y;
+  const yr = document.getElementById('year'); yr.style.setProperty('--pct', ((Y - 2026) / 32 * 100) + '%');
+  let homes = 0;
+  let specHomes = 0;
+  projObjs.forEach(o => { o.target = progressFor(o.p, Y); if (o.target >= 1 && o.p.u) { if (o.p.st === 'spec') specHomes += o.p.u; else homes += o.p.u; } });
+  document.getElementById('stHomes').textContent = homes.toLocaleString('en-US');
+  document.getElementById('stSpec').textContent = specHomes ? ` +${specHomes.toLocaleString('en-US')} illustrative` : '';
+  document.getElementById('stPop').textContent = (Math.round(popAt(Y) / 100) * 100).toLocaleString('en-US');
+  const sea = slrIn(Y, state.scen);
+  document.getElementById('stSea').textContent = sea.toFixed(0) + '″';
+  document.getElementById('scenNote').textContent = `${SLR[state.scen].name}: ${(sea / 12).toFixed(2)} ft above the 2000 level in ${Y}. ${SCEN_NOTE[state.scen]}`;
+  water.position.y = (sea + (state.storm ? 36 : 0)) * 0.0254 - 0.35;
+  if (creek) creek.position.y = Math.max(0, water.position.y + 0.5);
+  zoneObjs.forEach(zo => { const w = zoneWater(zo.z, Y), t = zoneThreshold(zo.z, Y); zo.target = w >= t ? 1 : 0; zo.level = Math.max(0, w - t); zo.g.position.y = (ZG + 0.35 + Math.min(zo.level, 48) * 0.0254 * 2) * EX; });
+  landmarkObjs.forEach(l => l.target = Y < l.removeY ? 1 : 0);
+  protectGroup.visible = state.protect && Y >= 2038;
+  if (protectGroup.visible) { const pr = Math.min(1, (Y - 2038) / 7); protectGroup.children.forEach(c => { c.scale.y = (c.userData.h0 || (c.userData.h0 = c.scale.y)) * pr; c.position.y = 2.6 * EX - 1; }); }
+  renderList(); if (selected) showCard(selected.p.id, false); if (selZone) showZone(selZone);
+  requestRender();
+}
+
+/* ---------------- list + legend ---------------- */
+let filter = 'all';
+const chipsEl = document.getElementById('chips'), listEl = document.getElementById('plist');
+function buildChips() {
+  const counts = {}; P.forEach(p => counts[p.st] = (counts[p.st] || 0) + 1);
+  const all = document.createElement('button'); all.type = 'button'; all.className = 'chip'; all.dataset.f = 'all'; all.innerHTML = `All <em>${P.length}</em>`; chipsEl.appendChild(all);
+  Object.keys(STATUS).forEach(s => { if (!counts[s]) return; const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.f = s; b.innerHTML = `<i data-tok="${STATUS[s].tok}"></i>${STATUS[s].label} <em>${counts[s]}</em>`; chipsEl.appendChild(b); });
+  const fz = document.createElement('span'); fz.className = 'chip'; fz.style.cursor = 'default'; fz.innerHTML = `<i data-tok="--flood" style="border-radius:50%"></i>Flood-exposed`; chipsEl.appendChild(fz);
+  chipsEl.addEventListener('click', e => { const b = e.target.closest('button[data-f]'); if (!b) return; filter = b.dataset.f; renderList(); });
+}
+function renderList() {
+  chipsEl.querySelectorAll('button[data-f]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.f === filter)));
+  const rows = P.filter(p => filter === 'all' || p.st === filter).filter(p => state.spec || p.st !== 'spec').slice().sort((a, b) => a.y - b.y || a.n.localeCompare(b.n));
+  listEl.innerHTML = rows.map(p => `<li class="${p.y > state.year ? 'future' : ''}"><button type="button" data-id="${p.id}" ${selected && selected.p.id === p.id ? 'aria-current="true"' : ''}><i class="dot" data-tok="${STATUS[p.st].tok}" style="background:var(${STATUS[p.st].tok})"></i><span class="nm">${esc(p.n)}<small>${p.u ? p.u.toLocaleString('en-US') + ' homes · ' : ''}${esc(STATUS[p.st].label)}</small></span><span class="yr">${p.y}</span></button></li>`).join('');
+}
+listEl.addEventListener('click', e => { const b = e.target.closest('button[data-id]'); if (!b) return; const id = +b.dataset.id; select(projObjs[id]); flyTo(P[id].x, P[id].z, P[id].kind === 'ng1' || P[id].kind === 'ng2' ? 1500 : 900); });
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c])); }
+
+/* ---------------- card ---------------- */
+const card = document.getElementById('card');
+let selZone = null;
+const BASIS = { r:'reported target', a:'model assumption', c:'completed' };
+function showCard(id, scroll) {
+  const p = P[id], s = STATUS[p.st];
+  const facts = [];
+  if (p.fl && p.kind !== 'houses') facts.push(['Height', `${p.fl} ${p.fl === 1 ? 'story' : 'stories'}${p.ft ? ` · ${Math.round(p.ft)} ft` : ''}`]);
+  if (p.u) facts.push(['Homes', p.u.toLocaleString('en-US')]);
+  if (p.sz) facts.push(['Program', p.sz]);
+  facts.push([p.st === 'built' ? 'Completed' : 'Done by', `${p.y}<span class="basis">${BASIS[p.yb]}</span>`]);
+  const yearState = p.st === 'built' ? '' : (state.year >= p.y ? `Shown complete in ${state.year}.` : (progressFor(p, state.year) > 0 ? `Shown under construction in ${state.year}.` : `Not yet built in ${state.year}.`));
+  card.innerHTML = `<button class="x" type="button" aria-label="Close">×</button>
+    <span class="pill" style="background:var(${s.tok})">${esc(s.label)}</span>
+    <h3>${esc(p.n)}</h3>
+    <p class="addr">${esc(p.a)}</p>
+    <dl class="facts">${facts.map(f => `<dt>${f[0]}</dt><dd>${f[1]}</dd>`).join('')}</dl>
+    <p class="note">${esc(p.note)} ${yearState ? `<em>${yearState}</em>` : ''}</p>
+    <div class="src">${p.src.map(u => `<a href="${u}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join('')}</div>`;
+  card.hidden = false;
+  if (scroll) card.scrollTop = 0;
+}
+function showZone(z) {
+  const Y = state.year, w = zoneWater(z, Y), t = zoneThreshold(z, Y), wet = w >= t;
+  const prot = state.protect && z.protect && Y >= 2045;
+  card.innerHTML = `<button class="x" type="button" aria-label="Close">×</button>
+    <span class="pill" style="background:var(--flood)">Flood exposure</span>
+    <h3>${esc(z.name)}</h3>
+    <dl class="facts"><dt>Exposed at</dt><dd>about ${z.t} in of rise${z.subs ? ' (plus ground sinking)' : ''}</dd>
+    <dt>Water in ${Y}</dt><dd>${w.toFixed(0)} in ${state.storm ? '(with storm tide)' : '(daily high tides)'}</dd>
+    <dt>Status</dt><dd>${prot ? 'Protected by the Canal floodgate and levees' : wet ? 'Flooded in this scenario' : 'Dry in this scenario'}</dd></dl>
+    <p class="note">${esc(z.note)}</p>
+    <div class="src">${z.src.map(u => `<a href="${u}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join('')}</div>`;
+  card.hidden = false;
+}
+card.addEventListener('click', e => { if (e.target.closest('.x')) { card.hidden = true; select(null); selZone = null; } });
+function select(o) {
+  if (selected) selected.meshes.forEach(m => { m.material = m.userData.base; m.userData.u = false; });
+  selected = o; selZone = null;
+  if (o) { o.meshes.forEach(m => m.material = selMat); showCard(o.p.id, true); selLabel.textContent = o.p.n; }
+  else selLabel.textContent = '';
+  renderList(); requestRender();
+}
+
+/* ---------------- picking ---------------- */
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+let downAt = null;
+canvas.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; });
+canvas.addEventListener('pointerup', e => {
+  if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 5) return;
+  const r = canvas.getBoundingClientRect(); mouse.x = (e.clientX - r.left) / r.width * 2 - 1; mouse.y = -(e.clientY - r.top) / r.height * 2 + 1;
+  ray.setFromCamera(mouse, camera);
+  const vis = pickables.filter(m => m.parent.visible && m.parent.scale.y > 0.02);
+  const hit = ray.intersectObjects(vis, false)[0];
+  if (hit) { select(hit.object.userData.obj); return; }
+  const zh = ray.intersectObjects(zoneObjs.filter(z => z.cur > 0.3).map(z => z.m), false)[0];
+  if (zh) { select(null); selZone = zh.object.userData.zone; showZone(selZone); return; }
+  select(null); card.hidden = true;
+});
+
+/* ---------------- camera ---------------- */
+const VIEWS = {
+  overview: { t:[37.9790,-122.5160], off:[4300, 4900, 6600] },
+  downtown: { t:[37.9725,-122.5265], off:[900, 650, 1150] },
+  northgate: { t:[38.0030,-122.5460], off:[1000, 850, 1250] },
+  canal: { t:[37.9635,-122.4985], off:[1700, 1150, 950] }
+};
+let fly = null;
+function viewK() { return camera.aspect < 1 ? 1.45 : 1; }
+function flyToView(name) { const v = VIEWS[name], k = viewK(); const [x, z] = XY(v.t[0], v.t[1]); startFly(new THREE.Vector3(x, yAt(x, z), z), new THREE.Vector3(x + v.off[0] * k, yAt(x, z) + v.off[1] * k, z + v.off[2] * k)); }
+function flyTo(x, z, dist) { const tg = new THREE.Vector3(x, yAt(x, z) + 10, z); const dir = camera.position.clone().sub(controls.target).normalize(); if (dir.y < 0.35) { dir.y = 0.45; dir.normalize(); } startFly(tg, tg.clone().add(dir.multiplyScalar(dist))); }
+function startFly(t, p) { fly = { t0: performance.now(), dur: matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 1100, ft: controls.target.clone(), fp: camera.position.clone(), tt: t, tp: p }; requestRender(); }
+document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => flyToView(b.dataset.view)));
+
+/* ---------------- render loop ---------------- */
+let needs = true, animating = false;
+function requestRender() { needs = true; if (!animating) { animating = true; requestAnimationFrame(loop); } }
+const needle = document.getElementById('needle');
+let lastT = 0;
+function loop(now) {
+  let moving = false;
+  const dt = Math.min(0.12, lastT ? (now - lastT) / 1000 : 0.016); lastT = now;
+  const kB = 1 - Math.exp(-dt * 8), kZ = 1 - Math.exp(-dt * 5);
+  if (fly) { const t = Math.min(1, (now - fly.t0) / fly.dur), k = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; controls.target.lerpVectors(fly.ft, fly.tt, k); camera.position.lerpVectors(fly.fp, fly.tp, k); if (t >= 1) fly = null; moving = true; }
+  if (controls.update()) moving = true;
+  projObjs.forEach(o => {
+    const d = o.target - o.prog;
+    if (Math.abs(d) > 0.002) { o.prog += d * kB; moving = true; } else o.prog = o.target;
+    const vis = o.prog > 0.01;
+    o.parts.forEach(pt => { pt.g.visible = vis; pt.g.scale.y = Math.max(0.001, o.prog); });
+    o.meshes.forEach(m => { if (m.material !== selMat) { const under = o.target < 1 && o.target > 0; if (under && !m.userData.u) { if (!m.userData.um) { m.userData.um = m.userData.base.clone(); m.userData.um.transparent = true; m.userData.um.opacity = 0.55; } m.userData.um.color.copy(m.userData.base.color); m.material = m.userData.um; m.userData.u = true; } else if (!under && m.userData.u) { m.material = m.userData.base; m.userData.u = false; } } });
+  });
+  landmarkObjs.forEach(l => { const d = l.target - (l.cur == null ? 1 : l.cur); l.cur = (l.cur == null ? 1 : l.cur) + d * kB; if (Math.abs(d) > 0.002) moving = true; l.m.visible = l.cur > 0.01; l.m.scale.y = Math.max(0.001, l.h * l.cur); });
+  zoneObjs.forEach(z => { const d = z.target - z.cur; if (Math.abs(d) > 0.003) { z.cur += d * kZ; moving = true; } else z.cur = z.target; z.mat.uniforms.uOpacity.value = z.cur * 0.72; z.g.visible = z.cur > 0.01; });
+  if (playing) moving = true;
+  const az = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z);
+  needle.setAttribute('transform', `rotate(${(az * 180 / Math.PI).toFixed(1)} 20 20)`);
+  if (needs || moving) { renderer.render(scene, camera); placeLabels(); needs = false; }
+  if (moving) requestAnimationFrame(loop); else { animating = false; lastT = 0; }
+}
+controls.addEventListener('change', requestRender);
+
+function resize() { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); requestRender(); }
+new ResizeObserver(resize).observe(stage);
+
+/* ---------------- controls wiring ---------------- */
+const yearIn = document.getElementById('year');
+yearIn.addEventListener('input', () => { state.year = +yearIn.value; stopPlay(); update(); });
+document.getElementById('scen').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if (!b) return; state.scen = b.dataset.s; document.querySelectorAll('#scen button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); update(); });
+document.getElementById('tStorm').addEventListener('change', e => { state.storm = e.target.checked; update(); });
+document.getElementById('tProtect').addEventListener('change', e => { state.protect = e.target.checked; update(); });
+document.getElementById('tSpec').addEventListener('change', e => { state.spec = e.target.checked; update(); });
+document.getElementById('tLabels').addEventListener('change', requestRender);
+let playing = false, playT = 0, lastStep = 0;
+const playBtn = document.getElementById('play');
+function stopPlay() { playing = false; document.getElementById('playLbl').textContent = 'Play from 2026'; document.getElementById('playIcon').setAttribute('d', 'M2 1 L11 6 L2 11 Z'); }
+playBtn.addEventListener('click', () => {
+  if (playing) { stopPlay(); return; }
+  playing = true; state.year = 2026; yearIn.value = 2026; update();
+  document.getElementById('playLbl').textContent = 'Pause'; document.getElementById('playIcon').setAttribute('d', 'M2 1 H5 V11 H2 Z M7 1 H10 V11 H7 Z');
+  lastStep = performance.now();
+  const tick = now => { if (!playing) return; if (now - lastStep > 380) { lastStep = now; state.year++; yearIn.value = state.year; update(); if (state.year >= 2058) { stopPlay(); return; } } requestAnimationFrame(tick); requestRender(); };
+  requestAnimationFrame(tick);
+});
+
+/* ---------------- boot ---------------- */
+function boot() {
+  buildTerrain();
+  terrain = new THREE.Mesh(tGeo, terrainMat); scene.add(terrain); scene.add(water);
+  scene.add(ribbon(HWY101, 32, roadMat, 2.2, s => { const lat = LAT0 - s.z / KZ; return yAt(s.x, s.z) + 2.2 + ((lat > 37.9685 && lat < 37.979) ? 7 : 0); }));
+  scene.add(ribbon(I580, 28, roadMat, 2.2));
+  scene.add(ribbon(RSR_BRIDGE, 18, roadMat, 0));
+  scene.add(ribbon(SMART, 7, railMat, 2.6));
+  scene.add(ribbon(FOURTH, 13, streetMat, 1.6));
+  scene.add(ribbon(SANPEDRO, 10, streetMat, 1.6));
+  scene.add(ribbon(LUCAS, 10, streetMat, 1.6));
+  creek = ribbon(CREEK, s => (s.x > XY(37.97, -122.517)[0] ? 58 : 22), creekMat, 0, () => -0.1); creek.renderOrder = 2; scene.add(creek);
+  const exclude = buildProjects(); scene.add(projGroup);
+  genFabric(exclude);
+  fabricMesh = new THREE.InstancedMesh(boxGeo, fabricMat, fabric.length);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), ps = new THREE.Vector3(), yAx = new THREE.Vector3(0, 1, 0);
+  fabric.forEach((f, i) => { q.setFromAxisAngle(yAx, f.rot); sc.set(f.w, f.h, f.d); ps.set(f.x, yAt(f.x, f.z) - 1, f.z); m4.compose(ps, q, sc); fabricMesh.setMatrixAt(i, m4); fabricMesh.setColorAt(i, new THREE.Color(1, 1, 1)); });
+  scene.add(fabricMesh);
+  buildLandmarks(); buildZones(); buildProtection(); makeLabels(); buildChips();
+  applyTheme();
+  const v = VIEWS.overview, [tx, tz] = XY(v.t[0], v.t[1]);
+  controls.target.set(tx, 0, tz); camera.position.set(tx + v.off[0], v.off[1], tz + v.off[2]);
+  resize(); if (camera.aspect < 1) camera.position.set(tx + v.off[0] * 1.45, v.off[1] * 1.45, tz + v.off[2] * 1.45); update();
+  document.getElementById('loading').hidden = true;
+  window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY };
+}
+const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', applyTheme);
+new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+setTimeout(() => { try { boot(); } catch (err) { document.getElementById('loading').textContent = 'The model failed to build: ' + err.message; console.error(err); } }, 30);
+})();
+</script>
