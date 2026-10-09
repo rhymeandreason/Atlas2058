@@ -73,6 +73,9 @@ a { color: inherit; }
 #scene { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
 #scene:active { cursor: grabbing; }
 #scene.hot { cursor: pointer; }
+.hovtip { position: absolute; left: 0; top: 0; z-index: 6; pointer-events: none; white-space: nowrap; font-size: 12.5px; font-weight: 600; background: var(--ink); color: var(--panel); padding: 3px 8px; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,.2); opacity: 0; transition: opacity .12s; }
+.hovtip.on { opacity: 1; }
+.hovtip small { font-weight: 400; opacity: .7; margin-left: 6px; }
 
 /* Masthead */
 .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
@@ -1140,13 +1143,22 @@ function pick(e) {
   const zh = hit ? null : ray.intersectObjects(zoneObjs.filter(z => z.cur > 0.3).map(z => z.m), false)[0];
   return { hit, zh };
 }
-let hoverEv = null;
+let hoverEv = null, hovered = null, hoverZone = null;
+const hovTip = document.createElement('div'); hovTip.className = 'hovtip'; stage.appendChild(hovTip);
+function setHover(o, z, e) {
+  if (o === hovered && z === hoverZone) { if (o || z) placeTip(e); return; }
+  hovered = o; hoverZone = z; requestRender();
+  if (o || z) { hovTip.innerHTML = o ? `${esc(o.p.n)}<small>${esc(STATUS[o.p.st].label)}</small>` : esc(z.z.name); hovTip.classList.add('on'); placeTip(e); }
+  else hovTip.classList.remove('on');
+}
+function placeTip(e) { const r = stage.getBoundingClientRect(); hovTip.style.transform = `translate(${e.clientX - r.left + 14}px, ${e.clientY - r.top + 16}px)`; }
 canvas.addEventListener('pointermove', e => {
   if (e.buttons || e.pointerType === 'touch') return;
-  if (!hoverEv) requestAnimationFrame(() => { const { hit, zh } = pick(hoverEv); canvas.classList.toggle('hot', !!(hit || zh)); hoverEv = null; });
+  if (!hoverEv) requestAnimationFrame(() => { const { hit, zh } = pick(hoverEv); canvas.classList.toggle('hot', !!(hit || zh)); setHover(hit ? hit.object.userData.obj : null, zh ? zoneObjs.find(z => z.m === zh.object) : null, hoverEv); hoverEv = null; });
   hoverEv = e;
 });
-canvas.addEventListener('pointerleave', () => canvas.classList.remove('hot'));
+canvas.addEventListener('pointerleave', () => { canvas.classList.remove('hot'); setHover(null, null); });
+canvas.addEventListener('pointerdown', () => setHover(null, null));
 canvas.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; });
 canvas.addEventListener('pointerup', e => {
   if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 5) return;
@@ -1579,13 +1591,14 @@ function loop(now) {
       const base = m.userData.base;
       let want = base;
       if (selected === o) want = selMat;
+      else if (hovered === o) { if (!m.userData.hm) { m.userData.hm = base.clone(); m.userData.hm.emissive = new THREE.Color(); } const hm = m.userData.hm; hm.color.copy(base.color); hm.emissive.copy(ringColor).multiplyScalar(0.45); hm.opacity = Math.max(base.opacity, 0.8); want = hm; }
       else if (cine.focus && !cine.focus.has(o.p.id) && o.p.kind !== 'marsh') want = o.p.st === 'spec' ? mutedSpecMat : mutedMat;
       else if (o.target < 1 && o.target > 0) { if (!m.userData.um) { m.userData.um = base.clone(); m.userData.um.transparent = true; m.userData.um.opacity = 0.55; } m.userData.um.color.copy(base.color); want = m.userData.um; }
       if (m.material !== want) m.material = want;
     });
   });
   landmarkObjs.forEach(l => { const d = l.target - (l.cur == null ? 1 : l.cur); l.cur = (l.cur == null ? 1 : l.cur) + d * kB; if (Math.abs(d) > 0.002) moving = true; l.m.visible = l.cur > 0.01; l.m.scale.y = Math.max(0.001, l.h * l.cur); });
-  zoneObjs.forEach(z => { const d = z.target - z.cur; if (Math.abs(d) > 0.003) { z.cur += d * kZ; moving = true; } else z.cur = z.target; z.mat.uniforms.uOpacity.value = z.cur * 0.72; z.g.visible = z.cur > 0.01; });
+  zoneObjs.forEach(z => { const d = z.target - z.cur; if (Math.abs(d) > 0.003) { z.cur += d * kZ; moving = true; } else z.cur = z.target; z.mat.uniforms.uOpacity.value = z.cur * (hoverZone === z ? 0.92 : 0.72); z.g.visible = z.cur > 0.01; });
   const fd = cine.fadeT - cine.fade;
   if (Math.abs(fd) > 0.003) { cine.fade += fd * kZ; moving = true; } else cine.fade = cine.fadeT;
   const fk = cine.fade * 0.6, fc = cine.fadeColor;
