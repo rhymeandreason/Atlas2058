@@ -25,6 +25,9 @@
   --road: #6f7672;
   --street: #a3a99f;
   --street-main: #858c83;
+  --lc-forest: #9db78a; --lc-scrub: #c4c393; --lc-grass: #dde2bd; --lc-sand: #eedcae; --lc-wetland: #a9c9b6;
+  --lc-golf: #aed08e; --lc-sports: #b8d79a; --lc-campus: #e2d9bf; --lc-retail: #ecccbe; --lc-industrial: #d2cdd8;
+  --lc-parking: #b9bbb4; --lc-pier: #9a9282; --lc-cemetery: #c6d2ae; --lc-park: #8fc77a; --os-ink: #3f6e3a;
   --rail: #2c7d8e;
   --flood: #2a78c4;
   --s-built: #5f7d4c;
@@ -49,6 +52,7 @@
     --accent: #3ddc84; --accent-ink: #04180c;
     --scene-bg: #0c1312; --land-low: #1d2623; --land-high: #3b3a2a; --marsh: #22312a; --water: #132430;
     --bldg: #6c7672; --road: #7c8580; --street: #4b5450; --street-main: #66706b; --rail: #3fa8ba; --flood: #3c92e6;
+    --lc-forest: #20362a; --lc-scrub: #2f3a2a; --lc-grass: #2a3428; --lc-sand: #3d3a2e; --lc-wetland: #1f3933; --lc-golf: #284330; --lc-sports: #2b4230; --lc-campus: #2a302b; --lc-retail: #3a3030; --lc-industrial: #302f36; --lc-parking: #343a37; --lc-pier: #5c564c; --lc-cemetery: #2b3a2d; --lc-park: #2e6b3d; --os-ink: #8cc79a;
     --s-built: #8fb378; --s-uc: #f0b23a; --s-approved: #3ddc84; --s-proposed: #a985e3; --s-concept: #c3a3ea; --s-spec: #7f97ad; --s-infra: #3cb3c7;
     color-scheme: dark;
   }
@@ -58,6 +62,7 @@
   --accent: #3ddc84; --accent-ink: #04180c;
   --scene-bg: #0c1312; --land-low: #1d2623; --land-high: #3b3a2a; --marsh: #22312a; --water: #132430;
   --bldg: #6c7672; --road: #7c8580; --street: #4b5450; --street-main: #66706b; --rail: #3fa8ba; --flood: #3c92e6;
+    --lc-forest: #20362a; --lc-scrub: #2f3a2a; --lc-grass: #2a3428; --lc-sand: #3d3a2e; --lc-wetland: #1f3933; --lc-golf: #284330; --lc-sports: #2b4230; --lc-campus: #2a302b; --lc-retail: #3a3030; --lc-industrial: #302f36; --lc-parking: #343a37; --lc-pier: #5c564c; --lc-cemetery: #2b3a2d; --lc-park: #2e6b3d; --os-ink: #8cc79a;
   --s-built: #8fb378; --s-uc: #f0b23a; --s-approved: #3ddc84; --s-proposed: #a985e3; --s-concept: #c3a3ea; --s-spec: #7f97ad; --s-infra: #3cb3c7;
   color-scheme: dark;
 }
@@ -143,6 +148,9 @@ details.about a { word-break: break-word; }
 #labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .lbl { position: absolute; left: 0; top: 0; white-space: nowrap; font-family: var(--body); font-weight: 600; font-size: 12px; color: var(--ink); opacity: .7; text-shadow: 0 0 3px var(--scene-bg), 0 0 6px var(--scene-bg); will-change: transform; }
 .lbl.water { color: var(--rail); font-style: italic; text-transform: none; letter-spacing: .02em; font-family: var(--body); font-size: 12px; }
+.lbl.poi { font-size: 11px; font-weight: 500; opacity: .62; }
+.lbl.os { font-size: 11px; font-weight: 500; font-style: italic; color: var(--os-ink); opacity: .8; }
+.lbl.road { font-size: 10.5px; font-weight: 500; color: var(--muted); opacity: .9; letter-spacing: .01em; }
 .lbl.sel { font-family: var(--body); text-transform: none; letter-spacing: 0; font-weight: 600; font-size: 12.5px; opacity: 1; background: var(--ink); color: var(--panel); text-shadow: none; padding: 2px 7px; border-radius: 3px; }
 .card { position: absolute; z-index: 6; top: 56px; right: 14px; width: min(340px, calc(100% - 28px)); max-height: calc(100% - var(--lbh) - 72px); overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 16px 14px; box-shadow: 0 10px 30px rgba(0,0,0,.14); display: grid; gap: 8px; }
 .card h3 { font-family: var(--display); font-weight: 700; font-size: 21px; line-height: 1.1; margin: 0; padding-right: 28px; text-wrap: balance; }
@@ -405,8 +413,8 @@ details.about a { word-break: break-word; }
     <details class="sect about">
       <summary>How this model was made</summary>
       <p>Project locations come from street addresses run through the US Census geocoder; heights, unit counts and status come from City of San Rafael project pages, Marin County, CEQA filings and SF YIMBY as of October 2026. Footprints are sized from unit counts and are approximate. Years after 2026 are reported targets where a developer or agency gave one, and model assumptions otherwise; each card says which.</p>
-      <p>Terrain is USGS 3DEP elevation data, with hills exaggerated 1.6× and low ground near the flood zones evened out so flooding reads clearly. The shoreline, streets and existing building footprints come from <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a> (ODbL, July 2026). US-101, I-580 and SMART rail are hand-traced from geocoded points. OpenStreetMap records height for very few of them, so most heights are estimated from building type, footprint size and neighborhood.</p>
-      <p>Flood zones switch on when the scenario's water level passes the exposure points reported in Marin's BayWAVE assessment, San Rafael's 2020 Flood Risk &amp; SLR Adaptation Report and TAM's 2024 vulnerability memo. The Canal and Spinnaker zones add about 0.4 in a year of measured ground sinking. These are approximations for exploring, not engineering flood maps.</p>
+      <p>Terrain is USGS 3DEP elevation data, with hills exaggerated 1.6×. Ground cover combines USGS NLCD 2021 vegetation with parks, open space, shopping areas, parking, wetlands and water from OpenStreetMap. The shoreline, streets, landmark and road labels, and existing building footprints come from <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a> (ODbL, July 2026). US-101, I-580 and SMART rail are hand-traced from geocoded points. Heights come from OpenStreetMap where it records them and otherwise from Microsoft's machine-learned estimates via Overture Maps (together about 84% of buildings); the rest are estimated from building type, footprint size and neighborhood.</p>
+      <p>Where the water goes comes from NOAA's Sea Level Rise Viewer, which maps land connected to the bay that floods at each half foot above today's high tide. When the water comes is set by the exposure points for each named low-lying area in Marin's BayWAVE assessment, San Rafael's 2020 Flood Risk &amp; SLR Adaptation Report and TAM's 2024 vulnerability memo: once an area's threshold is passed, its lowest ground floods first and the water spreads uphill as it deepens. Elsewhere the map shows NOAA's extent at the scenario's bay level, with about 3 ft added for a storm. The Canal and Spinnaker zones add about 0.4 in a year of measured ground sinking. These are approximations for exploring, not engineering flood maps.</p>
       <p>Illustrative growth after 2034 fills sites the 2023 Housing Element, Downtown Precise Plan and General Plan 2040 identify for housing, at roughly the pace General Plan 2040 projects. No developer has proposed these buildings.</p>
       <ul>
         <li><a href="https://www.cityofsanrafael.org/major-planning-projects-2025" target="_blank" rel="noopener">City of San Rafael, major planning projects</a></li>
@@ -676,12 +684,14 @@ const tok = n => new THREE.Color((css.getPropertyValue(n) || '#888').trim());
 const tGeo = new THREE.BufferGeometry();
 const tPos = new Float32Array((NX + 1) * (NZ + 1) * 3), tCol = new Float32Array((NX + 1) * (NZ + 1) * 3), tKind = new Float32Array((NX + 1) * (NZ + 1) * 2);
 // dem: USGS 3DEP elevations split along the OSM coastline (terrain.bin, Int16 dm), or null for the procedural fallback
+// The zone/marsh/creek reshaping only serves the fallback flood discs; with ground.png the real ground stays as measured.
 function buildTerrain(dem) {
+  const shape = !ground.cls;
   for (let j = 0; j <= NZ; j++) for (let i = 0; i <= NX; i++) {
     const k = j * (NX + 1) + i, x = X0 + GW * i / NX, z = Z0 + GH * j / NZ;
-    const e = elevAdjust(x, z, dem ? dem[k] / 10 : elevProc(x, z)); HGT[k] = e;
+    const e0 = dem ? dem[k] / 10 : elevProc(x, z), e = shape ? elevAdjust(x, z, e0) : e0; HGT[k] = e;
     tPos[k * 3] = x; tPos[k * 3 + 1] = e * EX; tPos[k * 3 + 2] = z;
-    let marsh = 0; for (const m of MARSH) { const r = ellipseR(x, z, m); if (r < 1.1) marsh = Math.max(marsh, 1 - smooth((r - 0.7) / 0.4)); }
+    let marsh = 0; if (shape) for (const m of MARSH) { const r = ellipseR(x, z, m); if (r < 1.1) marsh = Math.max(marsh, 1 - smooth((r - 0.7) / 0.4)); }
     tKind[k * 2] = e; tKind[k * 2 + 1] = marsh;
   }
   const idx = new Uint32Array(NX * NZ * 6); let w = 0;
@@ -690,6 +700,81 @@ function buildTerrain(dem) {
   tGeo.computeVertexNormals();
 }
 const terrainMat = new THREE.MeshLambertMaterial({ vertexColors: true });
+
+/* ground cover + real flood extents, draped over the terrain from ground.png (tools/ground.py):
+   R ground-cover class, G NOAA SLR threshold ((G-1)/2 ft above today's high tide; 0 = dry at +10 ft), B park flag.
+   Cover colours are composited on the CPU per theme into a mipmapped texture; flood thresholds get their own
+   linearly filtered texture so flood edges stay smooth at a distance. */
+const LC = ['', 'forest', 'scrub', 'grass', 'sand', 'wetland', 'water', '', 'golf', 'sports', 'campus', 'retail', 'industrial', 'parking', 'pier', 'cemetery'];
+const LC_A = [0, 0.62, 0.5, 0.42, 0.7, 0.7, 1, 0, 0.75, 0.7, 0.55, 0.7, 0.6, 0.85, 0.95, 0.6]; // how strongly each class covers the elevation tint
+const ground = { W: 0, H: 0, cls: null, thr: null, park: null, colorTex: null, floodTex: null };
+const groundU = {
+  uCover: { value: null }, uFloodT: { value: null }, uOn: { value: 0 }, uFlood: { value: new THREE.Color() },
+  uX0: { value: 0 }, uZ0: { value: 0 }, uGW: { value: 1 }, uGH: { value: 1 }, uLevel: { value: -99 }, uHover: { value: -1 },
+  uZa: { value: ZONES.map(() => new THREE.Vector4()) }, uZb: { value: ZONES.map(() => new THREE.Vector4(1, 1, -99, 0)) }
+};
+function setupGround(img) {
+  const cv = document.createElement('canvas'); cv.width = img.width; cv.height = img.height;
+  const cx = cv.getContext('2d'); cx.drawImage(img, 0, 0);
+  const px = cx.getImageData(0, 0, img.width, img.height).data, n = img.width * img.height;
+  ground.W = img.width; ground.H = img.height; ground.cls = new Uint8Array(n); ground.thr = new Uint8Array(n); ground.park = new Uint8Array(n);
+  for (let i = 0; i < n; i++) { ground.cls[i] = px[i * 4]; const g = px[i * 4 + 1]; ground.thr[i] = g === 0 ? 255 : g; ground.park[i] = px[i * 4 + 2] > 127 ? 1 : 0; }
+  const mk = (data, fmt) => { const t = new THREE.DataTexture(data, ground.W, ground.H, fmt); t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter; t.anisotropy = 4; t.needsUpdate = true; return t; };
+  ground.colorTex = mk(new Uint8Array(n * 4), THREE.RGBAFormat);
+  ground.floodTex = mk(ground.thr, THREE.LuminanceFormat);
+  Object.assign(groundU, { uCover: { value: ground.colorTex }, uFloodT: { value: ground.floodTex }, uOn: { value: 1 } });
+  groundU.uX0.value = X0; groundU.uZ0.value = Z0; groundU.uGW.value = GW; groundU.uGH.value = GH;
+  // each zone floods NOAA's lowest ground first: when the reports say it goes under, show the lowest quarter of its
+  // inundation footprint, and spread to higher ground as the water deepens
+  ZONES.forEach(z => {
+    const t = [], [ri0, ri1] = [Math.max(0, Math.floor((z.x - Math.max(z.rx, z.rz) - X0) / GW * ground.W)), Math.min(ground.W - 1, Math.ceil((z.x + Math.max(z.rx, z.rz) - X0) / GW * ground.W))];
+    const [rj0, rj1] = [Math.max(0, Math.floor((z.z - Math.max(z.rx, z.rz) - Z0) / GH * ground.H)), Math.min(ground.H - 1, Math.ceil((z.z + Math.max(z.rx, z.rz) - Z0) / GH * ground.H))];
+    for (let j = rj0; j <= rj1; j++) for (let i = ri0; i <= ri1; i++) {
+      const x = X0 + (i + 0.5) / ground.W * GW, zz = Z0 + (j + 0.5) / ground.H * GH, k = j * ground.W + i;
+      if (ellipseR(x, zz, z) < 1 && ground.thr[k] >= 2 && ground.thr[k] < 255) t.push((ground.thr[k] - 1) / 2);
+    }
+    t.sort((a, b) => a - b); z.noaaBase = t.length ? t[Math.floor(t.length * 0.25)] : null; z.noaaPx = t.length;
+  });
+  groundU.uZa.value = ZONES.map(z => new THREE.Vector4(z.x, z.z, Math.cos(z.r), Math.sin(z.r)));
+  groundU.uZb.value = ZONES.map(z => new THREE.Vector4(z.rx, z.rz, -99, 0));
+}
+function paintGround(T) { // theme colours → cover texture (rgb colour, a coverage)
+  if (!ground.cls) return;
+  const pal = LC.map((n, i) => { const c = n ? T('--lc-' + n) : null; return c ? [c.r * 255, c.g * 255, c.b * 255, LC_A[i] * 255] : [0, 0, 0, 0]; });
+  pal[6] = (() => { const c = T('--water'); return [c.r * 255, c.g * 255, c.b * 255, 255]; })();
+  const pk = T('--lc-park'), d = ground.colorTex.image.data, n = ground.W * ground.H;
+  for (let i = 0; i < n; i++) {
+    const p = pal[ground.cls[i]] || pal[0], o = i * 4;
+    if (ground.park[i]) { // parks: lay the park tint (strength k) over the cover, so preserves still show forest vs grass
+      const a = p[3] / 255, k = 0.35, A = 1 - (1 - a) * (1 - k);
+      d[o] = (p[0] * a * (1 - k) + pk.r * 255 * k) / A; d[o + 1] = (p[1] * a * (1 - k) + pk.g * 255 * k) / A; d[o + 2] = (p[2] * a * (1 - k) + pk.b * 255 * k) / A; d[o + 3] = A * 255;
+    } else { d[o] = p[0]; d[o + 1] = p[1]; d[o + 2] = p[2]; d[o + 3] = p[3]; }
+  }
+  ground.colorTex.needsUpdate = true;
+}
+terrainMat.onBeforeCompile = sh => {
+  Object.assign(sh.uniforms, groundU);
+  sh.vertexShader = 'varying vec2 vGxz;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\nvGxz = (modelMatrix * vec4(transformed, 1.0)).xz;');
+  sh.fragmentShader = `uniform sampler2D uCover, uFloodT; uniform float uOn, uX0, uZ0, uGW, uGH, uLevel, uHover; uniform vec3 uFlood;
+uniform vec4 uZa[${ZONES.length}], uZb[${ZONES.length}]; varying vec2 vGxz;\n` + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+if (uOn > 0.5) {
+  vec2 guv = vec2((vGxz.x - uX0) / uGW, (vGxz.y - uZ0) / uGH);
+  vec4 cv = texture2D(uCover, guv);
+  diffuseColor.rgb = mix(diffuseColor.rgb, cv.rgb, cv.a);
+  // flooding: inside a named zone the zone's level applies (timing from local reports), elsewhere the open-bay level
+  float th = texture2D(uFloodT, guv).r * 255.0;
+  if (th >= 1.5 && th < 200.0) {
+    float lvl = uLevel, fade = 1.0, hov = 0.0, best = 1.0;
+    for (int i = 0; i < ${ZONES.length}; i++) {
+      vec2 d = vGxz - uZa[i].xy; float u = d.x * uZa[i].z - d.y * uZa[i].w, v = d.x * uZa[i].w + d.y * uZa[i].z;
+      float r = length(vec2(u / uZb[i].x, v / uZb[i].y));
+      if (r < best) { best = r; lvl = uZb[i].z; fade = uZb[i].w; hov = abs(float(i) - uHover) < 0.5 ? 0.15 : 0.0; }
+    }
+    float dep = (lvl - (th - 1.0) * 0.5) * 12.0;
+    if (dep >= 0.0) diffuseColor.rgb = mix(diffuseColor.rgb, uFlood, fade * min(1.0, 0.32 + 0.63 * min(1.0, dep / 48.0) + hov));
+  }
+}`);
+};
 let terrain;
 
 /* water */
@@ -1108,6 +1193,7 @@ function buildZones() {
     const g = new THREE.Group(); g.position.set(z.x, 0, z.z); g.rotation.y = -z.r;
     const mat = floodMat.clone(); mat.uniforms.uColor.value = tok('--flood');
     const m = new THREE.Mesh(new THREE.CircleGeometry(1, 64), mat); m.rotation.x = -Math.PI / 2; m.scale.set(z.rx, z.rz, 1); m.renderOrder = 3;
+    if (ground.cls) mat.visible = false; // the ground layer draws the water; the disc stays as the hover/click target
     m.userData.zone = z; g.add(m); scene.add(g);
     zoneObjs.push({ z, g, m, mat, cur: 0, target: 0, level: 0 });
   });
@@ -1139,7 +1225,10 @@ const LABELS = [
 const WLABELS = [['San Rafael Bay',37.9620,-122.4700],['San Pablo Bay',38.0300,-122.4800],['Richmond–San Rafael Bridge',37.9370,-122.4480]];
 const labelEls = [];
 const labelsHost = document.getElementById('labels');
-function makeLabels() {
+// OSM landmark (p), open-space (o) and road (r) labels: shown only once zoomed in far enough to place them
+const XLABEL = { p: { cls: 'lbl poi', lift: 30, near: 7000 }, o: { cls: 'lbl os', lift: 40, near: 14000 }, r: { cls: 'lbl road', lift: 10, near: 4200 } };
+function makeLabels(extra) {
+  (extra ? extra.l : []).forEach(([k, n, lat, lon]) => { const c = XLABEL[k]; if (!c) return; const el = document.createElement('div'); el.className = c.cls; el.textContent = n; labelsHost.appendChild(el); const [x, z] = XY(lat, lon); labelEls.push({ el, v:new THREE.Vector3(x, yAt(x, z) + c.lift, z), kind:k, near:c.near }); });
   LABELS.forEach(l => { const el = document.createElement('div'); el.className = 'lbl'; el.textContent = l[0]; labelsHost.appendChild(el); const [x, z] = XY(l[1], l[2]); labelEls.push({ el, v:new THREE.Vector3(x, yAt(x, z) + 70, z), kind:'n' }); });
   WLABELS.forEach(l => { const el = document.createElement('div'); el.className = 'lbl water'; el.textContent = l[0]; labelsHost.appendChild(el); const [x, z] = XY(l[1], l[2]); labelEls.push({ el, v:new THREE.Vector3(x, 30, z), kind:'w' }); });
 }
@@ -1151,7 +1240,7 @@ function placeLabels() {
   labelEls.forEach(L => {
     if (!show) { L.el.hidden = true; return; }
     tmpV.copy(L.v).project(camera);
-    const vis = tmpV.z < 1 && Math.abs(tmpV.x) < 1.05 && Math.abs(tmpV.y) < 1.05 && camera.position.distanceTo(L.v) < 20000 && (L.kind === 'w' || dist < 16000);
+    const vis = tmpV.z < 1 && Math.abs(tmpV.x) < 1.05 && Math.abs(tmpV.y) < 1.05 && camera.position.distanceTo(L.v) < (L.near || 20000) && (L.kind === 'w' || dist < 16000);
     L.el.hidden = !vis;
     if (vis) L.el.style.transform = `translate(${(tmpV.x + 1) / 2 * w}px, ${(1 - tmpV.y) / 2 * h}px) translate(-50%, -50%)`;
   });
@@ -1189,6 +1278,7 @@ function applyTheme() {
   edgeMat.color = T('--ink'); marshMat.color = T('--marsh').lerp(T('--s-built'), 0.35); selMat.color = T('--ink');
   if (protectGroup) protectGroup.userData.mat.color = T('--s-infra');
   zoneObjs.forEach(z => z.mat.uniforms.uColor.value = T('--flood'));
+  groundU.uFlood.value.copy(T('--flood')); paintGround(T);
   const dark = (c.getPropertyValue('color-scheme') || '').includes('dark');
   hemi.intensity = dark ? 0.55 : 0.62; sun.intensity = dark ? 0.6 : 0.62;
   document.querySelectorAll('[data-tok]').forEach(el => el.style.background = `var(${el.dataset.tok})`);
@@ -1768,6 +1858,12 @@ function loop(now) {
   });
   landmarkObjs.forEach(l => { const d = l.target - (l.cur == null ? 1 : l.cur); l.cur = (l.cur == null ? 1 : l.cur) + d * kB; if (Math.abs(d) > 0.002) moving = true; l.m.visible = l.cur > 0.01; l.m.scale.y = Math.max(0.001, l.h * l.cur); });
   zoneObjs.forEach(z => { const d = z.target - z.cur; if (Math.abs(d) > 0.003) { z.cur += d * kZ; moving = true; } else z.cur = z.target; z.dep = (z.dep == null ? z.level : z.dep) + (z.level - (z.dep == null ? z.level : z.dep)) * kZ; if (Math.abs(z.level - z.dep) > 0.05) moving = true; z.mat.uniforms.uOpacity.value = z.cur * Math.min(1, 0.32 + 0.63 * Math.min(1, z.dep / 48) + (hoverZone === z ? 0.15 : 0)); z.g.visible = z.cur > 0.01; });
+  if (ground.cls) {
+    zoneObjs.forEach((z, i) => { const b = groundU.uZb.value[i]; b.z = z.cur > 0.01 && z.z.noaaBase != null ? z.z.noaaBase + (z.dep || 0) / 12 : -99; b.w = z.cur; });
+    const lt = (slrIn(state.year, state.scen) + (state.storm ? 36 : 0)) / 12, dl = lt - groundU.uLevel.value;
+    if (groundU.uLevel.value < -50 || Math.abs(dl) < 0.01) groundU.uLevel.value = lt; else { groundU.uLevel.value += dl * kZ; moving = true; }
+    groundU.uHover.value = hoverZone ? zoneObjs.indexOf(hoverZone) : -1;
+  }
   const fd = cine.fadeT - cine.fade;
   if (Math.abs(fd) > 0.003) { cine.fade += fd * kZ; moving = true; } else cine.fade = cine.fadeT;
   const fk = cine.fade * 0.6, fc = cine.fadeColor;
@@ -1804,7 +1900,8 @@ document.getElementById('tSpec').addEventListener('change', e => { state.spec = 
 document.getElementById('tLabels').addEventListener('change', requestRender);
 
 /* ---------------- boot ---------------- */
-function boot({ osm, dem, roads }) {
+function boot({ osm, dem, roads, groundImg, labels }) {
+  if (groundImg) setupGround(groundImg);
   buildTerrain(dem);
   terrain = new THREE.Mesh(tGeo, terrainMat); scene.add(terrain); scene.add(water);
   scene.add(ribbon(HWY101, 32, roadMat, 2.2, s => { const lat = LAT0 - s.z / KZ; return yAt(s.x, s.z) + 2.2 + ((lat > 37.9685 && lat < 37.979) ? 7 : 0); }));
@@ -1813,7 +1910,7 @@ function boot({ osm, dem, roads }) {
   scene.add(ribbon(SMART, 7, railMat, 2.6));
   if (roads) scene.add(buildStreets(roads));
   else { scene.add(ribbon(FOURTH, 13, streetMat, 1.6)); scene.add(ribbon(SANPEDRO, 10, streetMat, 1.6)); scene.add(ribbon(LUCAS, 10, streetMat, 1.6)); }
-  creek = ribbon(CREEK, s => (s.x > XY(37.97, -122.517)[0] ? 58 : 22), creekMat, 0, () => -0.1); creek.renderOrder = 2; scene.add(creek);
+  if (!ground.cls) { creek = ribbon(CREEK, s => (s.x > XY(37.97, -122.517)[0] ? 58 : 22), creekMat, 0, () => -0.1); creek.renderOrder = 2; scene.add(creek); }
   const exclude = buildProjects(); scene.add(projGroup);
   if (osm) fabricMesh = buildOSM(osm, exclude);
   else { // offline / file:// fallback: procedurally generated blocks
@@ -1827,7 +1924,7 @@ function boot({ osm, dem, roads }) {
       q.setFromAxisAngle(yAx, f.rot); sc.set(f.w, f.h + hi - lo, f.d); ps.set(f.x, lo - 1, f.z); m4.compose(ps, q, sc); fabricMesh.setMatrixAt(i, m4); fabricMesh.setColorAt(i, new THREE.Color(f.shade, f.shade, f.shade)); });
   }
   scene.add(fabricMesh);
-  buildLandmarks(); buildZones(); buildProtection(); makeLabels(); buildChips();
+  buildLandmarks(); buildZones(); buildProtection(); makeLabels(labels); buildChips();
   applyTheme();
   const v = VIEWS.overview, [tx, tz] = XY(v.t[0], v.t[1]);
   controls.target.set(tx, 0, tz); camera.position.set(tx + v.off[0], v.off[1], tz + v.off[2]);
@@ -1839,9 +1936,10 @@ const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) 
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 // baked real-world data; each falls back to the hand-built model if it can't be fetched (e.g. opened from file://)
 const getJSON = u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null);
-const realData = Promise.all([getJSON('buildings.json'), getJSON('roads.json'),
+const realData = Promise.all([getJSON('buildings.json'), getJSON('roads.json'), getJSON('labels.json'),
   fetch('terrain.bin').then(r => r.ok ? r.arrayBuffer() : null).then(b => b && b.byteLength === (NX + 1) * (NZ + 1) * 2 ? new Int16Array(b) : null).catch(() => null)
-]).then(([osm, roads, dem]) => ({ osm, roads, dem }));
+  , new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = 'ground.png'; })
+]).then(([osm, roads, labels, dem, groundImg]) => ({ osm, roads, labels, dem, groundImg }));
 setTimeout(() => realData.then(data => { try { boot(data); } catch (err) { document.getElementById('loading').classList.add('err'); document.getElementById('loadMsg').textContent = 'The model failed to build: ' + err.message; console.error(err); } }), 1200);
 })();
 </script>

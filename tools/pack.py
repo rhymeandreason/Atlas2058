@@ -1,9 +1,18 @@
 # Pack OSM building footprints into the map's local metre frame (see XY() in index.html).
 # Fetch raw.json from Overpass (overpass.kumi.systems if the main server is busy):
-#   [out:json][timeout:240];(way["building"](37.885,-122.665,38.105,-122.355);relation["building"](37.885,-122.665,38.105,-122.355););out tags geom qt;
-# then: python3 tools/pack.py raw.json buildings.json
+#   [out:json][timeout:240];way["building"](37.885,-122.665,38.105,-122.355);out tags geom qt;
+#   [out:json][timeout:240];rel["building"](37.885,-122.665,38.105,-122.355);out geom;   (members need full `out geom`)
+# Optional heights.csv (t,osm_id,h): Overture Maps building heights for OSM footprints, mostly Microsoft ML
+# estimates from imagery (ODbL). Used when OSM has no height or levels tag. Export with DuckDB from
+#   s3://overturemaps-us-west-2/release/<release>/theme=buildings/type=building/*  (sources[1].record_id = w123@1)
+# then: python3 tools/pack.py ways.json rels.json [heights.csv] buildings.json
 import json, sys, math, re
-src, out = sys.argv[1], sys.argv[2]
+srcs, out = [a for a in sys.argv[1:-1] if not a.endswith('.csv')], sys.argv[-1]
+ML = {}
+for a in sys.argv[1:-1]:
+    if a.endswith('.csv'):
+        for line in open(a).read().splitlines()[1:]:
+            t, i, h = line.split(','); ML[(t, int(i))] = float(h)
 D2R = math.pi / 180; LAT0, LON0 = 37.983, -122.515
 KX = 111320 * math.cos(LAT0 * D2R); KZ = 110950
 def xy(lat, lon): return ((lon - LON0) * KX, -(lat - LAT0) * KZ)
@@ -54,14 +63,15 @@ def stitch(ways):
         if cur[0] == cur[-1] and len(cur) >= 4: rings.append(cur)
     return rings
 
-data = json.load(open(src))
+datas = [json.load(open(f)) for f in srcs]
 outl, npts = [], 0
-for e in data['elements']:
+for e in (e for d in datas for e in d['elements']):
     t = e.get('tags', {})
     if e['type'] == 'way': rings = [[(g['lat'], g['lon']) for g in e.get('geometry', [])]]; rings = [r for r in rings if len(r) >= 4 and r[0] == r[-1]]
     else: rings = stitch([[(g['lat'], g['lon']) for g in m.get('geometry', [])] for m in e.get('members', []) if m.get('type') == 'way' and m.get('role') in ('outer', '')])
     kind = KIND.get(t.get('building'), 0)
     h = num(t.get('height')); lv = num(t.get('building:levels'))
+    if not h and not lv: h = ML.get(('w' if e['type'] == 'way' else 'r', e['id']))
     hdm = int(round((h if h else lv * 3.3 if lv else 0) * 10))
     for r in rings:
         p = [xy(a, b) for a, b in r]
@@ -74,5 +84,5 @@ for e in data['elements']:
         dq = [q[0][0], q[0][1]]
         for i in range(1, len(q)): dq += [q[i][0] - q[i - 1][0], q[i][1] - q[i - 1][1]]
         outl.append([kind, hdm] + dq); npts += len(q)
-json.dump({ 'src': 'OpenStreetMap contributors, ODbL', 'date': data['osm3s']['timestamp_osm_base'][:10], 'q': 0.5, 'b': outl }, open(out, 'w'), separators=(',', ':'))
+json.dump({ 'src': 'OpenStreetMap contributors, ODbL', 'date': datas[0]['osm3s']['timestamp_osm_base'][:10], 'q': 0.5, 'b': outl }, open(out, 'w'), separators=(',', ':'))
 print(len(outl), 'buildings', npts, 'points')

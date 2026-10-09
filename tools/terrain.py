@@ -9,10 +9,11 @@
 #              &pixelType=F32&interpolation=RSP_BilinearInterpolation&f=image
 #   coast.json Overpass: [out:json];way["natural"="coastline"](37.885,-122.665,38.105,-122.355);out geom;
 # Usage: python3 tools/terrain.py dem.tif coast.json terrain.bin
-import sys, json, math
+import sys, os, math
 import numpy as np
 from PIL import Image
-from scipy.spatial import cKDTree
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from coast import land_mask
 
 NX, NZ = 620, 554
 LONMIN, LONMAX, LATMIN, LATMAX = -122.665, -122.355, 37.885, 38.105
@@ -37,42 +38,7 @@ a, b, c, d = dem[iy, ix], dem[iy, ix + 1], dem[iy + 1, ix], dem[iy + 1, ix + 1]
 elev = (a * (1 - tx) + b * tx) * (1 - ty) + (c * (1 - tx) + d * tx) * ty
 elev = np.where(np.isnan(elev), np.nanmax(np.stack([a, b, c, d]), axis=0), elev)  # one missing corner → use the rest
 
-# coastline: OSM ways run with land on the left. Rasterise them at ~8 m so they cut the map into regions,
-# then call each region land or bay by majority vote of the side test on pixels right beside the line
-# (a nearest-segment side test alone fails at sharp corners and far from the shore).
-from scipy import ndimage
-pts, side_a, side_b = [], [], []
-for w in json.load(open(coast_path))['elements']:
-    g = [(p['lon'] * KX, p['lat'] * KZ) for p in w.get('geometry', [])]
-    for (ax, ay), (bx, by) in zip(g, g[1:]):
-        n = max(1, int(math.hypot(bx - ax, by - ay) / 2))
-        for k in range(n + 1):
-            t = k / n; pts.append((ax + (bx - ax) * t, ay + (by - ay) * t)); side_a.append((ax, ay)); side_b.append((bx, by))
-pts, side_a, side_b = np.array(pts), np.array(side_a), np.array(side_b)
-tree = cKDTree(pts)
-def side(q):
-    dist, nn = tree.query(q); A, B = side_a[nn], side_b[nn]
-    return dist, (B[:, 0] - A[:, 0]) * (q[:, 1] - A[:, 1]) - (B[:, 1] - A[:, 1]) * (q[:, 0] - A[:, 0]) > 0
-PX = 8.0
-# the raster must stay inside the Overpass bbox: past it the coastline has gaps and regions leak together
-mx0, my1 = LONMIN * KX, LATMAX * KZ
-W, H = int((LONMAX - LONMIN) * KX / PX), int((LATMAX - LATMIN) * KZ / PX)
-wall = np.zeros((H, W), bool)
-ci = ((pts[:, 0] - mx0) / PX).astype(int); cj = ((my1 - pts[:, 1]) / PX).astype(int)
-ok = (ci >= 0) & (ci < W) & (cj >= 0) & (cj < H); wall[cj[ok], ci[ok]] = True
-lab, nlab = ndimage.label(~wall, structure=[[0, 1, 0], [1, 1, 1], [0, 1, 0]])
-near = ndimage.binary_dilation(wall, iterations=3) & ~wall
-jj, ii = np.where(near)
-_, s_near = side(np.stack([mx0 + (ii + 0.5) * PX, my1 - (jj + 0.5) * PX], axis=1))
-votes = np.zeros(nlab + 1); cnt = np.zeros(nlab + 1)
-np.add.at(votes, lab[jj, ii], s_near.astype(float)); np.add.at(cnt, lab[jj, ii], 1)
-is_land = votes / np.maximum(cnt, 1) > 0.5
-q = np.stack([LON.ravel() * KX, LAT.ravel() * KZ], axis=1)
-dist, s_q = side(q)
-gi = np.clip(((q[:, 0] - mx0) / PX).astype(int), 0, W - 1); gj = np.clip(((my1 - q[:, 1]) / PX).astype(int), 0, H - 1)
-L = lab[gj, gi]
-land = np.where(L > 0, is_land[L], s_q).reshape(elev.shape)
-dist = dist.reshape(elev.shape)
+land, dist = land_mask(coast_path, LON, LAT)
 
 e = np.where(land, np.maximum(np.nan_to_num(elev - DATUM, nan=LAND_MIN), LAND_MIN), -1.5 - np.minimum(dist, 3000) / 600)
 out = np.round(e * 10).astype('<i2')
