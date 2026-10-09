@@ -22,8 +22,9 @@
   --marsh: #a9bb93;
   --water: #8eaebd;
   --bldg: #f7f6f1;
-  --road: #7b827e;
+  --road: #6f7672;
   --street: #a3a99f;
+  --street-main: #858c83;
   --rail: #2c7d8e;
   --flood: #2a78c4;
   --s-built: #5f7d4c;
@@ -47,7 +48,7 @@
     --bg: #0e1413; --panel: #141c1a; --ink: #e4ebe6; --muted: #91a099; --line: #2a3632;
     --accent: #3ddc84; --accent-ink: #04180c;
     --scene-bg: #0c1312; --land-low: #1d2623; --land-high: #3b3a2a; --marsh: #22312a; --water: #132430;
-    --bldg: #6c7672; --road: #59605c; --street: #3e4542; --rail: #3fa8ba; --flood: #3c92e6;
+    --bldg: #6c7672; --road: #7c8580; --street: #4b5450; --street-main: #66706b; --rail: #3fa8ba; --flood: #3c92e6;
     --s-built: #8fb378; --s-uc: #f0b23a; --s-approved: #3ddc84; --s-proposed: #a985e3; --s-concept: #c3a3ea; --s-spec: #7f97ad; --s-infra: #3cb3c7;
     color-scheme: dark;
   }
@@ -56,7 +57,7 @@
   --bg: #0e1413; --panel: #141c1a; --ink: #e4ebe6; --muted: #91a099; --line: #2a3632;
   --accent: #3ddc84; --accent-ink: #04180c;
   --scene-bg: #0c1312; --land-low: #1d2623; --land-high: #3b3a2a; --marsh: #22312a; --water: #132430;
-  --bldg: #6c7672; --road: #59605c; --street: #3e4542; --rail: #3fa8ba; --flood: #3c92e6;
+  --bldg: #6c7672; --road: #7c8580; --street: #4b5450; --street-main: #66706b; --rail: #3fa8ba; --flood: #3c92e6;
   --s-built: #8fb378; --s-uc: #f0b23a; --s-approved: #3ddc84; --s-proposed: #a985e3; --s-concept: #c3a3ea; --s-spec: #7f97ad; --s-infra: #3cb3c7;
   color-scheme: dark;
 }
@@ -717,28 +718,47 @@ function ribbon(ll, width, mat, lift, yfn) {
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
   return new THREE.Mesh(g, mat);
 }
-// OSM streets (roads.json, packed by tools/roads.py): every way merged into one ribbon mesh
+// OSM streets (roads.json, packed by tools/roads.py), merged into two ribbon meshes: main roads and residential streets.
+// Vertices sit on the centreline with a sideways unit vector and half-width; the shader widens a street when its
+// real width would draw thinner than uMinPx on screen, so the network stays legible when zoomed out.
 const STREET_W = [0, 14, 11, 9, 6.5, 6];
+const streetPx = { value: 0.001 }; // metres per pixel at 1 m from the camera; set in resize()
+function streetMaterial(minPx, offset) {
+  const m = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: offset, polygonOffsetUnits: offset });
+  m.onBeforeCompile = sh => {
+    sh.uniforms.uPxK = streetPx; sh.uniforms.uMinPx = { value: minPx };
+    sh.vertexShader = 'attribute vec3 aSide;\nuniform float uPxK, uMinPx;\n' + sh.vertexShader.replace('#include <begin_vertex>',
+      'vec3 transformed = vec3(position);\nfloat mpp = -(modelViewMatrix * vec4(position, 1.0)).z * uPxK;\ntransformed += vec3(aSide.x, 0.0, aSide.y) * max(aSide.z, uMinPx * mpp * 0.5);');
+  };
+  return m;
+}
+const streetMainMat = streetMaterial(2.2, -1.5), streetMinorMat = streetMaterial(1.1, -1);
 function buildStreets(data) {
-  const q = data.q, pos = [], idx = [];
+  const q = data.q, g = new THREE.Group(), buf = [{ pos: [], side: [], idx: [] }, { pos: [], side: [], idx: [] }];
   for (const r of data.r) {
+    const o = buf[r[0] === 4 ? 1 : 0];
     const pts = []; let x = 0, z = 0;
     for (let k = 2; k < r.length; k += 2) { x += r[k] * q; z += r[k + 1] * q; pts.push([x, z]); }
     const s = sampleLine(pts.map(p => [LAT0 - p[1] / KZ, LON0 + p[0] / KX]), 14), hw = STREET_W[r[0]] / 2;
     // bridges span straight between their banks instead of dipping into the channel
     const ya = yAt(s[0].x, s[0].z), yb = yAt(s[s.length - 1].x, s[s.length - 1].z);
-    const v0 = pos.length / 3;
+    const v0 = o.pos.length / 3;
     for (let i = 0; i < s.length; i++) {
       const a = s[Math.max(0, i - 1)], b = s[Math.min(s.length - 1, i + 1)];
       let dx = b.x - a.x, dz = b.z - a.z; const l = Math.hypot(dx, dz) || 1; dx /= l; dz /= l;
       const y = (r[1] ? ya + (yb - ya) * i / (s.length - 1) : yAt(s[i].x, s[i].z)) + 1.4;
-      pos.push(s[i].x - dz * hw, y, s[i].z + dx * hw, s[i].x + dz * hw, y, s[i].z - dx * hw);
-      if (i < s.length - 1) { const k = v0 + i * 2; idx.push(k, k + 2, k + 1, k + 1, k + 2, k + 3); }
+      o.pos.push(s[i].x, y, s[i].z, s[i].x, y, s[i].z);
+      o.side.push(-dz, dx, hw, dz, -dx, hw);
+      if (i < s.length - 1) { const k = v0 + i * 2; o.idx.push(k, k + 2, k + 1, k + 1, k + 2, k + 3); }
     }
   }
-  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(new THREE.BufferAttribute(new Uint32Array(idx), 1));
-  g.computeBoundingSphere();
-  return new THREE.Mesh(g, streetMat);
+  buf.forEach((o, n) => {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(o.pos, 3)); geo.setAttribute('aSide', new THREE.Float32BufferAttribute(o.side, 3));
+    geo.setIndex(new THREE.BufferAttribute(new Uint32Array(o.idx), 1)); geo.computeBoundingSphere();
+    const m = new THREE.Mesh(geo, n ? streetMinorMat : streetMainMat); m.frustumCulled = false; g.add(m);
+  });
+  return g;
 }
 const roadMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
 const streetMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
@@ -1159,7 +1179,7 @@ function applyTheme() {
   }
   tGeo.attributes.color.needsUpdate = true;
   waterMat.color = wat;
-  roadMat.color = T('--road'); streetMat.color = T('--street'); railMat.color = T('--rail'); creekMat.color = wat.clone().lerp(T('--rail'), 0.15);
+  roadMat.color = T('--road'); streetMat.color = T('--street'); streetMinorMat.color = T('--street'); streetMainMat.color = T('--street-main'); railMat.color = T('--rail'); creekMat.color = wat.clone().lerp(T('--rail'), 0.15);
   railStationMat.color = T('--rail'); infraMat.color = T('--s-infra');
   const b = T('--bldg'); fabricBase.copy(b); fabricMat.color.copy(b); lmMat.color = b.clone().multiplyScalar(0.96);
   Object.keys(STATUS).forEach(s => { projMat(s).color = T(STATUS[s].tok); });
@@ -1771,7 +1791,7 @@ canvas.addEventListener('wheel', e => {
   camera.position.add(d); controls.target.add(d); fly = null; requestRender();
 }, { capture: true, passive: false });
 
-function resize() { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; frameForStory(); requestRender(); }
+function resize() { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; streetPx.value = 2 * Math.tan(camera.fov * Math.PI / 360) / h; frameForStory(); requestRender(); }
 // In story mode the frame is shifted down a little so the subject sits above the caption.
 function frameForStory() { const w = stage.clientWidth, h = stage.clientHeight; if (cine.active && w && h) camera.setViewOffset(w, h, 0, Math.round(h * (w < h ? 0.17 : 0.13)), w, h); else camera.clearViewOffset(); camera.updateProjectionMatrix(); }
 new ResizeObserver(resize).observe(stage);
