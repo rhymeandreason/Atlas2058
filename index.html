@@ -112,6 +112,14 @@ h2 { font-family: var(--display); font-weight: 700; font-size: 15px; color: var(
 .tog input:checked { background: var(--accent); }
 .tog input:checked::after { transform: translateX(12px); }
 .tog small { display: block; color: var(--muted); font-size: 12px; }
+.layers .tog.lead { font-weight: 600; }
+.layers .tog.lead small { font-weight: 400; }
+.bikekey { list-style: none; margin: 8px 0 0 40px; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); }
+.bikekey li { display: inline-flex; align-items: center; gap: 6px; }
+.bikekey svg { width: 24px; height: 8px; flex: none; }
+.layers:has(#tBike:not(:checked)) .bikekey { opacity: .4; }
+.toggles.minor { gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; }
+.toggles.minor small { font-size: 11.5px; }
 
 /* Legend + list */
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -162,8 +170,13 @@ details.about a { word-break: break-word; }
 .facts dt { color: var(--muted); }
 .facts dd { margin: 0; font-variant-numeric: tabular-nums; }
 .card p.note { margin: 0; font-size: 13px; }
-.card .src { font-size: 12px; display: grid; gap: 2px; }
-.card .src a { color: var(--muted); word-break: break-all; }
+.card .src { display: grid; gap: 6px; margin-top: 4px; padding-top: 10px; border-top: 1px solid var(--line); }
+.card .srcmain { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-family: var(--body); font-weight: 700; font-size: 14px; color: var(--ink); background: color-mix(in srgb, var(--ink) 5%, transparent); text-decoration: none; border: 1px solid color-mix(in srgb, var(--ink) 35%, transparent); border-radius: 8px; padding: 10px 14px; transition: background .15s, border-color .15s, transform .15s; }
+.card .srcmain:hover { border-color: var(--ink); background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.card .srcmain:active { transform: translateY(1px); }
+.card .srcmain span { font-size: 16px; line-height: 1; color: var(--accent); }
+.card .srcmore { margin: 0; font-size: 12px; color: var(--muted); }
+.card .srcmore a { color: inherit; }
 .basis { font-family: var(--body); font-weight: 600; font-size: 12px; color: var(--muted); margin-left: 4px; }
 #loading { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-family: var(--body); font-weight: 600; font-size: 13.5px; color: var(--muted); background: radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--accent) 9%, var(--scene-bg)), var(--scene-bg) 62%); transition: opacity .7s ease, visibility 0s .7s; }
 #loading.done { opacity: 0; visibility: hidden; }
@@ -399,9 +412,21 @@ details.about a { word-break: break-word; }
       <div class="toggles">
         <label class="tog"><input type="checkbox" id="tStorm"><span>Add a major storm<small>A once-a-century storm adds about 3 feet.</small></span></label>
         <label class="tog"><input type="checkbox" id="tProtect"><span>Protect the Canal neighborhood<small>A planned floodgate and levees, done by 2045.</small></span></label>
-        <label class="tog"><input type="checkbox" id="tSpec" checked><span>Imagine growth after 2034<small>Faded buildings where housing is allowed but not yet proposed.</small></span></label>
-        <label class="tog"><input type="checkbox" id="tBike"><span>Bike routes<small>Solid lines are today’s bikeways. Dashes are the city’s draft plan, bold where it’s a top priority.</small></span></label>
-        <label class="tog"><input type="checkbox" id="tLabels" checked><span>Neighborhood labels</span></label>
+      </div>
+    </section>
+
+    <section aria-label="Map layers" class="layers">
+      <h2>On the map</h2>
+      <label class="tog lead"><input type="checkbox" id="tBike" checked><span>Bike routes<small>Today’s bikeways and the city’s draft plan.</small></span></label>
+      <ul class="bikekey" aria-label="Bike route key">
+        <li><svg viewBox="0 0 24 8" aria-hidden="true"><line x1="1" y1="4" x2="23" y2="4" stroke="var(--s-built)" stroke-width="2.5" stroke-linecap="round"/></svg>Today</li>
+        <li><svg viewBox="0 0 24 8" aria-hidden="true"><line x1="1" y1="4" x2="23" y2="4" stroke="var(--s-proposed)" stroke-width="2.5" stroke-dasharray="5 3"/></svg>Planned</li>
+        <li><svg viewBox="0 0 24 8" aria-hidden="true"><line x1="1" y1="4" x2="23" y2="4" stroke="var(--s-proposed)" stroke-width="5" stroke-dasharray="6 3"/></svg>Top priority</li>
+        <li><svg viewBox="0 0 24 8" aria-hidden="true"><circle cx="12" cy="4" r="3.5" fill="var(--s-proposed)"/></svg>Crossing fix</li>
+      </ul>
+      <div class="toggles minor">
+        <label class="tog"><input type="checkbox" id="tSpec" checked><span>Growth after 2034<small>Faded buildings where housing is allowed but not yet proposed.</small></span></label>
+        <label class="tog"><input type="checkbox" id="tLabels" checked><span>Neighborhood names</span></label>
       </div>
     </section>
 
@@ -980,7 +1005,7 @@ function showBike(b) {
     <h3>${esc(n)}</h3>
     <dl class="facts">${facts.map(f => `<dt>${f[0]}</dt><dd>${f[1]}</dd>`).join('')}</dl>
     <p class="note">From the city’s draft Citywide Bicycle &amp; Pedestrian Plan, which the City Council is scheduled to consider adopting on October 19, 2026. The plan sets priorities for the next 5–10 years; it gives no build dates or funding for individual projects, so this route has no year on the timeline.</p>
-    <div class="src">${['https://www.cityofsanrafael.org/cbpp', 'https://sanrafaelrecommendations.altaplanning.cloud/'].map(u => `<a href="${u}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join('')}</div>`;
+    ${srcLinks(['https://www.cityofsanrafael.org/cbpp', 'https://sanrafaelrecommendations.altaplanning.cloud/'])}`;
   card.hidden = false;
 }
 const roadMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
@@ -1486,6 +1511,15 @@ function renderList() {
   listEl.innerHTML = rows.map(p => `<li class="${p.y > state.year ? 'future' : ''}"><button type="button" data-id="${p.id}" ${selected && selected.p.id === p.id ? 'aria-current="true"' : ''}><i class="dot" data-tok="${STATUS[p.st].tok}" style="background:var(${STATUS[p.st].tok})"></i><span class="nm">${esc(p.n)}<small>${p.u ? p.u.toLocaleString('en-US') + ' homes · ' : ''}${esc(STATUS[p.st].label)}</small></span><span class="yr">${p.y}</span></button></li>`).join('');
 }
 listEl.addEventListener('click', e => { const b = e.target.closest('button[data-id]'); if (!b) return; const id = +b.dataset.id; select(projObjs[id]); flyTo(P[id].x, P[id].z, P[id].kind === 'ng1' || P[id].kind === 'ng2' ? 1500 : 900); });
+/* card sources: the first link is the primary one (usually the city's project page); the rest are listed small beneath it */
+const SRC_HOSTS = [[/cityofsanrafael\.org|proudcity\/sanrafaelca/, 'City of San Rafael'], [/marincounty\.gov/, 'Marin County'], [/tam\.ca\.gov/, 'Transportation Authority of Marin'], [/goldengate\.org/, 'Golden Gate Transit'], [/planbayarea\.org/, 'Plan Bay Area'], [/sfyimby\.com/, 'SF YIMBY'], [/localnewsmatters\.org/, 'Local News Matters'], [/canalalliance\.org/, 'Canal Alliance'], [/ceqanet/, 'CEQA filing'], [/cdcr\.ca\.gov/, 'CA Corrections'], [/sfbayrestore\.org/, 'SF Bay Restoration Authority'], [/altaplanning/, 'Plan map (Alta Planning)'], [/govmarketnews/, 'GovMarket News']];
+function srcName(u) { const h = SRC_HOSTS.find(([re]) => re.test(u)); return h ? h[1] : u.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]; }
+function srcLinks(urls) {
+  if (!urls || !urls.length) return '';
+  const pdf = u => /\.pdf($|\?)/i.test(u), [first, ...rest] = urls, name = srcName(first);
+  const main = name === 'City of San Rafael' ? (pdf(first) ? 'City report (PDF)' : 'City project page') : `${name}${pdf(first) ? ' (PDF)' : ''}`;
+  return `<div class="src"><a class="srcmain" href="${esc(first)}" target="_blank" rel="noopener">${esc(main)}<span aria-hidden="true">↗</span></a>${rest.length ? `<p class="srcmore">Also: ${rest.map(u => { const n = srcName(u); return `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(n === 'City of San Rafael' ? (pdf(u) ? 'City report' : 'City update') : n)}${pdf(u) ? ' (PDF)' : ''}</a>`; }).join(', ')}</p>` : ''}</div>`;
+}
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c])); }
 
 /* ---------------- card ---------------- */
@@ -1506,7 +1540,7 @@ function showCard(id, scroll) {
     <p class="addr">${esc(p.a)}</p>
     <dl class="facts">${facts.map(f => `<dt>${f[0]}</dt><dd>${f[1]}</dd>`).join('')}</dl>
     <p class="note">${esc(p.note)} ${yearState ? `<em>${yearState}</em>` : ''}</p>
-    <div class="src">${p.src.map(u => `<a href="${u}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join('')}</div>`;
+    ${srcLinks(p.src)}`;
   card.hidden = false;
   if (scroll) card.scrollTop = 0;
 }
@@ -1520,7 +1554,7 @@ function showZone(z) {
     <dt>Water in ${Y}</dt><dd>${w.toFixed(0)} in ${state.storm ? '(with storm tide)' : '(daily high tides)'}</dd>
     <dt>Status</dt><dd>${prot ? 'Protected by the Canal floodgate and levees' : wet ? 'Flooded in this scenario' : 'Dry in this scenario'}</dd></dl>
     <p class="note">${esc(z.note)}</p>
-    <div class="src">${z.src.map(u => `<a href="${u}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join('')}</div>`;
+    ${srcLinks(z.src)}`;
   card.hidden = false;
 }
 card.addEventListener('click', e => { if (e.target.closest('.x')) { card.hidden = true; select(null); selZone = null; selBike = null; } });
@@ -2071,7 +2105,7 @@ function boot({ osm, dem, roads, groundImg, labels, bikes }) {
   if (roads) scene.add(buildStreets(roads));
   else { scene.add(ribbon(FOURTH, 13, streetMat, 1.6)); scene.add(ribbon(SANPEDRO, 10, streetMat, 1.6)); scene.add(ribbon(LUCAS, 10, streetMat, 1.6)); }
   if (bikes) { bikeGroup = buildBikes(bikes); bikeGroup.visible = document.getElementById('tBike').checked; scene.add(bikeGroup); }
-  else document.getElementById('tBike').closest('label').hidden = true;
+  else { document.getElementById('tBike').closest('label').hidden = true; document.querySelector('.bikekey').hidden = true; }
   if (!ground.cls) { creek = ribbon(CREEK, s => (s.x > XY(37.97, -122.517)[0] ? 58 : 22), creekMat, 0, () => -0.1); creek.renderOrder = 2; scene.add(creek); }
   const exclude = buildProjects(); scene.add(projGroup);
   if (osm) fabricMesh = buildOSM(osm, exclude);
