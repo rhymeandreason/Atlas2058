@@ -634,7 +634,7 @@ const P = [
   { n:'Talus (Legacy at Lucas Valley)', a:'Erin Dr (unincorporated)', lat:38.02794, lon:-122.54560, st:'uc', y:2027, yb:'a', start:2025.8, kind:'houses', fl:2, u:28, w:110, d:90, note:'28 homes, 6 below market rate; 13 permitted and under inspection in 2026.', src:['https://www.marincounty.gov/departments/cda/major-housing-projects/talus-erin-drive-san-rafael'] },
   { n:'7 Mount Lassen Drive', a:'7 Mount Lassen Dr (unincorporated)', lat:38.02614, lon:-122.56879, st:'proposed', y:2030, yb:'a', kind:'houses', fl:2, u:29, w:120, d:90, note:'29 homes, 6 affordable. Application filed October 2024.', src:['https://www.marincounty.gov/news-releases/county-receives-application-new-homes-lucas-valley'] },
   { n:'160 N San Pedro Road', a:'160 N San Pedro Rd (unincorporated)', lat:37.99932, lon:-122.52501, st:'proposed', y:2031, yb:'a', kind:'houses', fl:2, u:32, w:130, d:100, note:'Subdivision map for 32 home lots (5 affordable) under county review. No buildings designed yet.', src:['https://www.marincounty.gov/departments/cda/major-housing-projects/metropolis-housing-development-san-rafael'] },
-  { n:'McInnis Marsh restoration', a:'McInnis Park', lat:38.0160, lon:-122.5130, st:'proposed', y:2032, yb:'a', kind:'marsh', w:520, d:260, rot:-35, u:0, sz:'About 30 acres of tidal marsh', note:'Restores tidal marsh with about 100,000 cubic yards of dredged sediment and closes a Bay Trail gap. Being redesigned in 2025.', src:['https://www.parks.marincounty.gov/projectsplans/mcinnis-marsh-restoration'] },
+  { n:'McInnis Marsh restoration', a:'McInnis Park, along Gallinas Creek', lat:38.0210, lon:-122.5120, st:'proposed', y:2032, yb:'a', kind:'marsh', w:420, d:260, rot:-20, u:0, sz:'22–30 acres of tidal marsh, from ~110,000 cubic yards of creek dredge spoils', note:'Marin County Parks would dredge the South Fork of Gallinas Creek and use the sediment to raise part of the park’s diked basin back into tidal marsh, buffering park and sanitary district facilities from rising seas. Redesigned in 2025 to protect a treated-wastewater pipeline under the basin. A $1.3M Bay Restoration Authority grant (plus $640K in 2026) pays for design and permits through 2027; construction still needs funding, so the 2032 date is a model assumption. Footprint is approximate.', src:['https://www.sfbayrestore.org/projects/mcinnis-marsh-beneficial-dredge-sediment-reuse-and-tidal-wetlands-restoration-project','https://www.parks.marincounty.gov/projectsplans/mcinnis-marsh-restoration'] },
   // East / southeast
   { n:'Pickleweed Park upgrades', a:'50 Canal St', lat:37.96915, lon:-122.49735, st:'built', y:2026, yb:'r', start:2024.7, kind:'park', w:96, d:60, u:0, sz:'All-weather turf field, basketball court, toddler playground, gazebo, new restroom, 18 more parking spaces', note:'The Canal’s busiest field no longer closes six months a year for repairs. Paid for with a $4.24M National Park Service Land and Water Conservation Fund grant plus city money. Work began September 2024; the field, court, gazebo and parking were done by early 2026, with the toddler playground and restroom due later that year. The park sits in the Canal flood zone, which the city’s reports expect to flood at about 10 inches of bay rise.', src:['https://www.cityofsanrafael.org/pickleweed-3/'] },
   { n:'Casa Canal', a:'3301 Kerner Blvd', lat:37.96157, lon:-122.50193, st:'built', y:2025, yb:'c', fl:3, u:41, w:46, d:30, note:'Office building converted to 41 homes, 40 of them permanent supportive housing (Eden Housing). Opened June 2025.', src:['https://sfyimby.com/2025/06/supportive-housing-opens-at-3301-kerner-boulevard-san-rafael.html'] },
@@ -1307,6 +1307,21 @@ function buildConnector(obj, exclude) {
   pts.forEach((p, i) => { if (i % 2 === 0) exclude.push({ x:p.x, z:p.z, r:18 }); });  // keep fabric from poking through the deck
   obj.parts.push({ g:grp, h:PEAK + 2 }); projGroup.add(grp);
 }
+// A marsh is draped over the ground (or today's water surface, where that is higher) and sits just above it; a flat box
+// would be buried on the shore's slope. The group's origin is the lowest point, so build-up rises from there.
+function addMarsh(obj, cx, cz, w, d, rot) {
+  const geo = new THREE.PlaneGeometry(w, d, Math.ceil(w / 12), Math.ceil(d / 12)); geo.rotateX(-Math.PI / 2);
+  const pos = geo.attributes.position, c = Math.cos(rot), sn = Math.sin(rot), ys = [];
+  for (let i = 0; i < pos.count; i++) {
+    const lx = pos.getX(i), lz = pos.getZ(i), x = cx + lx * c + lz * sn, z = cz - lx * sn + lz * c;
+    pos.setXYZ(i, x, 0, z); ys.push(Math.max(yAt(x, z), -0.25) + 0.7);
+  }
+  const base = Math.min(...ys); ys.forEach((y, i) => pos.setY(i, y - base)); geo.computeVertexNormals();
+  const g = new THREE.Group(); g.position.y = base;
+  const m = new THREE.Mesh(geo, marshMat); m.renderOrder = 2; g.add(m);
+  m.userData.obj = obj; m.userData.base = m.material; pickables.push(m); obj.parts.push({ g, h: 1 }); obj.meshes.push(m);
+  projGroup.add(g);
+}
 function heightM(p) { return p.ft ? p.ft * 0.3048 : (p.fl || 3) * 3.35; }
 function buildProjects() {
   const exclude = [];
@@ -1361,9 +1376,7 @@ function buildProjects() {
       addPart(obj, cx, cz, p.w, p.d, 2.2, rot); // parts sit 1.2 m into the ground, so the field shows 1 m proud
       addPart(obj, cx - p.w / 2 - 14, cz - p.d / 2 + 8, 12, 8, 5, rot); addPart(obj, cx + p.w / 2 + 10, cz - p.d / 2 + 6, 8, 8, 4.5, rot);
     }
-    else if (kind === 'marsh') {
-      addPart(obj, cx, cz, p.w, p.d, 0.6, (p.rot || 0) * D2R, marshMat);
-    }
+    else if (kind === 'marsh') addMarsh(obj, cx, cz, p.w, p.d, (p.rot || 0) * D2R);
     else if (kind === 'ramp') buildConnector(obj, exclude);
     projObjs.push(obj);
   });
