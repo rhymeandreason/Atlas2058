@@ -37,6 +37,7 @@
   --s-concept: #a47ccf;
   --s-spec: #9fb1c2;
   --s-infra: #1f7a8c;
+  --tree: #7fa566;
   --display: "Bricolage Grotesque", "Avenir Next Condensed", "Arial Narrow", system-ui, sans-serif;
   --body: "Public Sans", "Helvetica Neue", Arial, system-ui, sans-serif;
   --mono: var(--body);
@@ -54,6 +55,7 @@
     --bldg: #6c7672; --road: #7c8580; --street: #4b5450; --street-main: #66706b; --rail: #3fa8ba; --flood: #3c92e6;
     --lc-forest: #20362a; --lc-scrub: #2f3a2a; --lc-grass: #2a3428; --lc-sand: #3d3a2e; --lc-wetland: #1f3933; --lc-golf: #284330; --lc-sports: #2b4230; --lc-campus: #2a302b; --lc-retail: #3a3030; --lc-industrial: #302f36; --lc-parking: #343a37; --lc-pier: #5c564c; --lc-cemetery: #2b3a2d; --lc-park: #2e6b3d; --os-ink: #8cc79a;
     --s-built: #8fb378; --s-uc: #f0b23a; --s-approved: #3ddc84; --s-proposed: #a985e3; --s-concept: #c3a3ea; --s-spec: #7f97ad; --s-infra: #3cb3c7;
+    --tree: #4f8556;
     color-scheme: dark;
   }
 }
@@ -64,6 +66,7 @@
   --bldg: #6c7672; --road: #7c8580; --street: #4b5450; --street-main: #66706b; --rail: #3fa8ba; --flood: #3c92e6;
     --lc-forest: #20362a; --lc-scrub: #2f3a2a; --lc-grass: #2a3428; --lc-sand: #3d3a2e; --lc-wetland: #1f3933; --lc-golf: #284330; --lc-sports: #2b4230; --lc-campus: #2a302b; --lc-retail: #3a3030; --lc-industrial: #302f36; --lc-parking: #343a37; --lc-pier: #5c564c; --lc-cemetery: #2b3a2d; --lc-park: #2e6b3d; --os-ink: #8cc79a;
   --s-built: #8fb378; --s-uc: #f0b23a; --s-approved: #3ddc84; --s-proposed: #a985e3; --s-concept: #c3a3ea; --s-spec: #7f97ad; --s-infra: #3cb3c7;
+  --tree: #4f8556;
   color-scheme: dark;
 }
 html, body { height: 100%; }
@@ -425,6 +428,7 @@ details.about a { word-break: break-word; }
         <li><svg viewBox="0 0 24 8" aria-hidden="true"><circle cx="12" cy="4" r="3.5" fill="var(--s-proposed)"/></svg>Crossing fix</li>
       </ul>
       <div class="toggles minor">
+        <label class="tog"><input type="checkbox" id="tTrees"><span>Trees<small>Estimated from satellite imagery. About 6% of the Canal is under trees, against 42% of Gerstle Park.</small></span></label>
         <label class="tog"><input type="checkbox" id="tSpec" checked><span>Growth after 2034<small>Faded buildings where housing is allowed but not yet proposed.</small></span></label>
         <label class="tog"><input type="checkbox" id="tLabels" checked><span>Neighborhood names</span></label>
       </div>
@@ -442,6 +446,7 @@ details.about a { word-break: break-word; }
       <p>Terrain is USGS 3DEP elevation data, with hills exaggerated 1.6×. Ground cover combines USGS NLCD 2021 vegetation with parks, open space, shopping areas, parking, wetlands and water from OpenStreetMap. The shoreline, streets, landmark and road labels, and existing building footprints come from <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a> (ODbL, July 2026). US-101, I-580 and SMART rail are hand-traced from geocoded points. Heights come from OpenStreetMap where it records them and otherwise from Microsoft's machine-learned estimates via Overture Maps (together about 84% of buildings); the rest are estimated from building type, footprint size and neighborhood.</p>
       <p>Where the water goes comes from NOAA's Sea Level Rise Viewer, which maps land connected to the bay that floods at each half foot above today's high tide. When the water comes is set by the exposure points for each named low-lying area in Marin's BayWAVE assessment, San Rafael's 2020 Flood Risk &amp; SLR Adaptation Report and TAM's 2024 vulnerability memo: once an area's threshold is passed, its lowest ground floods first and the water spreads uphill as it deepens. Elsewhere the map shows NOAA's extent at the scenario's bay level, with about 3 ft added for a storm. The Canal and Spinnaker zones add about 0.4 in a year of measured ground sinking. These are approximations for exploring, not engineering flood maps.</p>
       <p>Bike routes come from the map behind San Rafael’s draft Citywide Bicycle &amp; Pedestrian Plan (Alta Planning for the City, 2026): today’s bikeways plus the plan’s proposed routes and crossing fixes. The plan was still a draft as of October 2026 and gives no build dates, so its routes appear in every year. A route takes on the flood colour where NOAA’s map puts the ground under it under water.</p>
+      <p>Trees come from Meta and the World Resources Institute’s 1 m global canopy height map (CC BY 4.0), which estimates tree height from satellite imagery taken mostly between 2018 and 2020. Each tree in town is a treetop found in that map; on the wooded hills only the tallest tree in every 25 m patch is drawn. Crown widths are estimated from height. Tree cover figures are the share of ground under canopy at least 10 ft tall within about a quarter mile of each neighborhood’s center.</p>
       <p>Illustrative growth after 2034 fills sites the 2023 Housing Element, Downtown Precise Plan and General Plan 2040 identify for housing, at roughly the pace General Plan 2040 projects. No developer has proposed these buildings.</p>
       <ul>
         <li><a href="https://www.cityofsanrafael.org/major-planning-projects-2025" target="_blank" rel="noopener">City of San Rafael, major planning projects</a></li>
@@ -451,6 +456,7 @@ details.about a { word-break: break-word; }
         <li><a href="https://www.cityofsanrafael.org/northgatetownsquaredev/" target="_blank" rel="noopener">Northgate Town Square</a></li>
         <li><a href="https://goldengate.org/assets/1/6/srtc_fact_sheet_20241.pdf" target="_blank" rel="noopener">San Rafael Transit Center replacement (GGBHTD)</a></li>
         <li><a href="https://www.cityofsanrafael.org/cbpp" target="_blank" rel="noopener">Citywide Bicycle &amp; Pedestrian Plan update</a></li>
+        <li><a href="https://sustainability.atmeta.com/blog/2024/04/22/using-artificial-intelligence-to-map-the-earths-forests/" target="_blank" rel="noopener">Meta &amp; WRI global canopy height map</a></li>
         <li><a href="https://www.cityofsanrafael.org/measure-p-albert-park-library-community-center/" target="_blank" rel="noopener">Measure P library &amp; community center</a></li>
         <li><a href="https://www.tam.ca.gov/featured-projects/northbound-101-and-eastbound-580-direct-connector/" target="_blank" rel="noopener">US-101/I-580 direct connector (TAM)</a></li>
         <li><a href="https://documents.coastal.ca.gov/assets/slr/guidance/2024/AppF_2024AdoptedSLRPolicyGuidanceUpdate.pdf" target="_blank" rel="noopener">OPC 2024 sea level rise guidance, San Francisco table</a></li>
@@ -618,6 +624,7 @@ const P = [
   { n:'555 Northgate Drive', a:'555 Northgate Dr', lat:38.00088, lon:-122.54410, st:'approved', y:2029, yb:'a', fl:7, u:193, w:64, d:52, note:'100% affordable (AMG & Associates): five residential floors over two parking levels. Approved April 2026.', src:['https://www.cityofsanrafael.org/planning-commission-approves-555-northgate/'] },
   { n:'4040 Civic Center Drive', a:'4040 Civic Center Dr', lat:38.00391, lon:-122.53858, st:'approved', y:2029, yb:'a', fl:5, u:238, w:66, d:40, note:'130 new homes on the north garage site plus 108 in a converted office building. Approved January 2026. Story count estimated.', src:['https://www.cityofsanrafael.org/4040-civic-center-dr'] },
   { n:'Northgate Walk', a:'1005 & 1010 Northgate Dr', lat:38.00821, lon:-122.54522, st:'approved', y:2034, yb:'a', fl:4, u:136, kind:'multi', n2:3, w:120, d:70, note:'Three 4-story condo buildings approved 2019 and extended to 2023. No construction found; the approval may have lapsed.', src:['https://cityofsanrafael.org/northgate-walk'] },
+  { n:'Terra Linda Park & Community Center plan', a:'670 Del Ganado Rd', lat:38.01473, lon:-122.56020, st:'concept', y:2038, yb:'a', fl:2, ft:32, u:0, w:52, d:34, sz:'Two-story community center (arts, fitness, meeting rooms, library space), entry plaza, bigger playground', note:'The plan, finished in June 2025, sets a design for the site the community picked in 2024 outreach. The city says it “isn’t funded in near-term workplans” and may build it in phases as money allows, so the 2038 date is a model assumption. Footprint and placement are placeholders; the pool is not part of the plan.', src:['https://cityofsanrafael.org/terra-linda-park-and-community-center-plan'] },
   { n:'Los Gamos', a:'1100 Los Gamos Dr', lat:38.01480, lon:-122.54277, st:'proposed', y:2030, yb:'a', fl:7, ft:87, u:192, w:70, d:44, note:'Resubmitted August 2026 as 100% affordable (Community Development Partners).', src:['https://www.cityofsanrafael.org/los-gamos/'] },
   { n:'350 Merrydale Road', a:'350 Merrydale Rd', lat:37.99958, lon:-122.53797, st:'proposed', y:2031, yb:'a', fl:4, u:80, w:50, d:36, note:'City-owned. Interim cabin shelter through mid-2027 (extendable to 2029), then at least 80 permanent affordable homes; Eden Housing in line to develop.', src:['https://www.cityofsanrafael.org/350-merrydale/'] },
   { n:'Kaiser San Rafael hospital replacement', a:'99 Montecillo Rd', lat:38.00426, lon:-122.55330, st:'proposed', y:2032, yb:'a', fl:6, ft:116.5, u:0, w:74, d:52, sz:'About 233,000 sf, 92 beds', note:'Driven by the state hospital seismic deadline. EIR scoping held spring 2026. The existing hospital is demolished after opening.', src:['https://www.cityofsanrafael.org/kaiser-hospital/','https://ceqanet.lci.ca.gov/2026041263'] },
@@ -629,6 +636,7 @@ const P = [
   { n:'160 N San Pedro Road', a:'160 N San Pedro Rd (unincorporated)', lat:37.99932, lon:-122.52501, st:'proposed', y:2031, yb:'a', kind:'houses', fl:2, u:32, w:130, d:100, note:'Subdivision map for 32 home lots (5 affordable) under county review. No buildings designed yet.', src:['https://www.marincounty.gov/departments/cda/major-housing-projects/metropolis-housing-development-san-rafael'] },
   { n:'McInnis Marsh restoration', a:'McInnis Park', lat:38.0160, lon:-122.5130, st:'proposed', y:2032, yb:'a', kind:'marsh', w:520, d:260, rot:-35, u:0, sz:'About 30 acres of tidal marsh', note:'Restores tidal marsh with about 100,000 cubic yards of dredged sediment and closes a Bay Trail gap. Being redesigned in 2025.', src:['https://www.parks.marincounty.gov/projectsplans/mcinnis-marsh-restoration'] },
   // East / southeast
+  { n:'Pickleweed Park upgrades', a:'50 Canal St', lat:37.96915, lon:-122.49735, st:'built', y:2026, yb:'r', start:2024.7, kind:'park', w:96, d:60, u:0, sz:'All-weather turf field, basketball court, toddler playground, gazebo, new restroom, 18 more parking spaces', note:'The Canal’s busiest field no longer closes six months a year for repairs. Paid for with a $4.24M National Park Service Land and Water Conservation Fund grant plus city money. Work began September 2024; the field, court, gazebo and parking were done by early 2026, with the toddler playground and restroom due later that year. The park sits in the Canal flood zone, which the city’s reports expect to flood at about 10 inches of bay rise.', src:['https://www.cityofsanrafael.org/pickleweed-3/'] },
   { n:'Casa Canal', a:'3301 Kerner Blvd', lat:37.96157, lon:-122.50193, st:'built', y:2025, yb:'c', fl:3, u:41, w:46, d:30, note:'Office building converted to 41 homes, 40 of them permanent supportive housing (Eden Housing). Opened June 2025.', src:['https://sfyimby.com/2025/06/supportive-housing-opens-at-3301-kerner-boulevard-san-rafael.html'] },
   { n:'Jonathan\'s Place (Homeward Bound)', a:'190 Mill St', lat:37.96600, lon:-122.51250, st:'built', y:2022, yb:'c', fl:3, u:32, w:36, d:26, note:'32 supportive homes plus a shelter of up to 60 beds. Finished 2022.', src:['https://cityofsanrafael.org/homeward_bound'] },
   { n:'88 Vivian Street', a:'88 Vivian St (former Country Club Bowl)', lat:37.96414, lon:-122.50771, st:'proposed', y:2030, yb:'a', fl:4, u:124, kind:'multi', n2:2, w:110, d:50, note:'Resubmitted September 2026 as 124 affordable rentals in a 3- and a 4-story building.', src:['https://www.cityofsanrafael.org/san-rafael-considers-two-100-affordable-housing-development-applications/'] },
@@ -1113,6 +1121,53 @@ function genFabric(exclude) {
 const fabricMat = new THREE.MeshPhongMaterial({ flatShading: true, specular: 0x000000, shininess: 0 }), fabricBase = new THREE.Color(1, 1, 1);
 let fabricMesh;
 
+/* trees: treetops from Meta & WRI's 1 m canopy height map, baked by tools/trees.py into trees.bin
+   (uint32 n, int16 x[n], int16 z[n] in metres, uint8 h[n] in quarter metres). One instanced mesh: a faceted crown on a
+   short trunk, scaled per tree to its measured height with a crown width from a simple height–width rule. */
+const treeMat = new THREE.MeshPhongMaterial({ flatShading: true, specular: 0x000000, shininess: 0, vertexColors: true }), treeBase = new THREE.Color(1, 1, 1);
+let treeMesh = null, treeExclude = null, treeLoad = null;
+// trees.bin is fetched the first time the Trees switch is turned on; if it can't be had, the switch goes away
+function loadTrees() {
+  if (treeLoad) return treeLoad;
+  const tog = document.getElementById('tTrees');
+  treeLoad = fetch('trees.bin').then(r => r.ok ? r.arrayBuffer() : null).catch(() => null).then(buf => {
+    treeMesh = buf && buildTrees(buf, treeExclude);
+    if (!treeMesh) { tog.checked = false; tog.closest('label').hidden = true; return; }
+    treeMesh.visible = tog.checked; scene.add(treeMesh); requestRender();
+  });
+  return treeLoad;
+}
+function treeGeometry() {
+  const crown = new THREE.IcosahedronGeometry(1, 0).toNonIndexed(); crown.scale(1, 0.36, 1); crown.translate(0, 0.64, 0);
+  const trunk = new THREE.CylinderGeometry(0.1, 0.13, 0.42, 4, 1, true).toNonIndexed(); trunk.translate(0, 0.21, 0);
+  const pos = [], col = [];
+  [[crown, 1], [trunk, 0.55]].forEach(([g, k]) => { const p = g.attributes.position.array; for (let i = 0; i < p.length; i += 3) { pos.push(p[i], p[i + 1], p[i + 2]); col.push(k, k * 0.9, k * 0.8); } });
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); g.computeVertexNormals();
+  return g;
+}
+function buildTrees(buf, exclude) {
+  const dv = new DataView(buf), n = dv.getUint32(0, true);
+  if (buf.byteLength !== 4 + n * 5) return null;
+  const xs = new Int16Array(buf.slice(4, 4 + n * 2)), zs = new Int16Array(buf.slice(4 + n * 2, 4 + n * 4)), hs = new Uint8Array(buf, 4 + n * 4, n);
+  // keep trees off project sites, as with the OSM buildings (bucketed so the check stays cheap)
+  const keepOut = NOBUILD.concat(exclude), CELL = 200, grid = new Map();
+  keepOut.forEach(k => { for (let i = Math.floor((k.x - k.r) / CELL); i <= Math.floor((k.x + k.r) / CELL); i++) for (let j = Math.floor((k.z - k.r) / CELL); j <= Math.floor((k.z + k.r) / CELL); j++) { const key = i * 4096 + j; if (!grid.has(key)) grid.set(key, []); grid.get(key).push(k); } });
+  const mesh = new THREE.InstancedMesh(treeGeometry(), treeMat, n);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), ps = new THREE.Vector3(), yAx = new THREE.Vector3(0, 1, 0), c = new THREE.Color();
+  let k = 0;
+  for (let i = 0; i < n; i++) {
+    const x = xs[i], z = zs[i], h = hs[i] / 4;
+    const near = grid.get(Math.floor(x / CELL) * 4096 + Math.floor(z / CELL));
+    if (near && near.some(o => Math.hypot(x - o.x, z - o.z) < o.r)) continue;
+    const r = Math.min(10, Math.max(2.4, 1.6 + 0.34 * h)) * (0.85 + hrnd(i, 3) * 0.3);
+    q.setFromAxisAngle(yAx, hrnd(i, 4) * 6.28); sc.set(r, h, r); ps.set(x, yAt(x, z) - 0.6, z);
+    m4.compose(ps, q, sc); mesh.setMatrixAt(k, m4);
+    const v = 0.86 + hrnd(i, 5) * 0.24; mesh.setColorAt(k, c.setRGB(v, v * (0.97 + hrnd(i, 6) * 0.06), v)); k++;
+  }
+  mesh.count = k; mesh.instanceMatrix.needsUpdate = true; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  return mesh;
+}
+
 /* real footprints: OpenStreetMap buildings (ODbL), packed by tools/pack.py into the local metre frame.
    Each entry is [kind, tagged height in dm (0 if none), x0, z0, dx1, dz1, …] in units of data.q metres. */
 const hrnd = (i, k) => { const s = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return s - Math.floor(s); };
@@ -1302,6 +1357,10 @@ function buildProjects() {
       addPart(obj, cx, cz, 30, 30, 3, rot); // parts sit 1.2 m into the ground; this pad tops out just above the street ribbons
       [[-14, -14], [14, -14], [-14, 14], [14, 14]].forEach(([ox, oz]) => addPart(obj, cx + ox * cs + oz * sn, cz - ox * sn + oz * cs, 1.2, 1.2, 9, rot));
     }
+    else if (kind === 'park') {
+      addPart(obj, cx, cz, p.w, p.d, 2.2, rot); // parts sit 1.2 m into the ground, so the field shows 1 m proud
+      addPart(obj, cx - p.w / 2 - 14, cz - p.d / 2 + 8, 12, 8, 5, rot); addPart(obj, cx + p.w / 2 + 10, cz - p.d / 2 + 6, 8, 8, 4.5, rot);
+    }
     else if (kind === 'marsh') {
       addPart(obj, cx, cz, p.w, p.d, 0.6, (p.rot || 0) * D2R, marshMat);
     }
@@ -1439,6 +1498,7 @@ function applyTheme() {
   roadMat.color = T('--road'); streetMat.color = T('--street'); streetMinorMat.color = T('--street'); streetMainMat.color = T('--street-main'); railMat.color = T('--rail'); creekMat.color = wat.clone().lerp(T('--rail'), 0.15);
   railStationMat.color = T('--rail'); infraMat.color = T('--s-infra');
   bikeExistMat.color = T('--s-built'); bikePlanMat.color = bikeTopMat.color = bikeDotMat.color = bikeDotTopMat.color = T('--s-proposed');
+  treeBase.copy(T('--tree')); treeMat.color.copy(treeBase);
   const b = T('--bldg'); fabricBase.copy(b); fabricMat.color.copy(b); lmMat.color = b.clone().multiplyScalar(0.96);
   Object.keys(STATUS).forEach(s => { projMat(s).color = T(STATUS[s].tok); });
   const sbg = T('--scene-bg'); mutedMat.color = b.clone().lerp(sbg, 0.18); mutedSpecMat.color = b.clone().lerp(sbg, 0.3);
@@ -2049,6 +2109,7 @@ function loop(now) {
   if (Math.abs(fd) > 0.003) { cine.fade += fd * kZ; moving = true; } else cine.fade = cine.fadeT;
   const fk = cine.fade * 0.6, fc = cine.fadeColor;
   fabricMat.color.setRGB(fabricBase.r * (1 + (fc.r - 1) * fk), fabricBase.g * (1 + (fc.g - 1) * fk), fabricBase.b * (1 + (fc.b - 1) * fk));
+  treeMat.color.copy(treeBase).lerp(mutedMat.color, fk * 0.6);
   if (cine.active) { moving = true; pulseRings(now); }
   const az = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z);
   needle.setAttribute('transform', `rotate(${(az * 180 / Math.PI).toFixed(1)} 20 20)`);
@@ -2091,6 +2152,7 @@ document.getElementById('tStorm').addEventListener('change', e => { state.storm 
 document.getElementById('tProtect').addEventListener('change', e => { state.protect = e.target.checked; update(); });
 document.getElementById('tSpec').addEventListener('change', e => { state.spec = e.target.checked; update(); });
 document.getElementById('tLabels').addEventListener('change', requestRender);
+document.getElementById('tTrees').addEventListener('change', e => { if (treeMesh) treeMesh.visible = e.target.checked; else if (e.target.checked && treeExclude) loadTrees(); requestRender(); });
 document.getElementById('tBike').addEventListener('change', e => { if (bikeGroup) bikeGroup.visible = e.target.checked; if (!e.target.checked && selBike) { selBike = null; bikeHi.value = -1; card.hidden = true; } requestRender(); });
 
 /* ---------------- boot ---------------- */
@@ -2108,6 +2170,7 @@ function boot({ osm, dem, roads, groundImg, labels, bikes }) {
   else { document.getElementById('tBike').closest('label').hidden = true; document.querySelector('.bikekey').hidden = true; }
   if (!ground.cls) { creek = ribbon(CREEK, s => (s.x > XY(37.97, -122.517)[0] ? 58 : 22), creekMat, 0, () => -0.1); creek.renderOrder = 2; scene.add(creek); }
   const exclude = buildProjects(); scene.add(projGroup);
+  treeExclude = exclude; if (document.getElementById('tTrees').checked) loadTrees();
   if (osm) fabricMesh = buildOSM(osm, exclude);
   else { // offline / file:// fallback: procedurally generated blocks
     genFabric(exclude);
