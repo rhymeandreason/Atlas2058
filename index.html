@@ -335,7 +335,7 @@ details.about a { word-break: break-word; }
       <button type="button" data-view="canal">Canal</button>
     </div>
     <div class="cyear" aria-hidden="true"><span class="cyear-l" id="cYearL"></span><span id="cYear">2058</span></div>
-    <div class="hint">Drag to orbit · right-drag or two fingers to pan · scroll to zoom · click a building or flood zone</div>
+    <div class="hint">Drag to pan · right-drag or two fingers to rotate · scroll to zoom · click a building or flood zone</div>
     <div class="compass" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="var(--panel)" stroke="var(--line)"/><g id="needle"><path d="M20 6 L24 20 L16 20 Z" fill="var(--accent)"/><path d="M20 34 L24 20 L16 20 Z" fill="var(--muted)"/></g></svg></div>
     <div id="callouts" aria-hidden="true"></div>
     <div class="cine" id="cine" inert>
@@ -673,6 +673,9 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(38, 1, 8, 90000);
 const controls = new THREE.OrbitControls(camera, canvas);
 controls.enableDamping = true; controls.dampingFactor = 0.08; controls.maxPolarAngle = 1.42; controls.minDistance = 120; controls.maxDistance = 26000; controls.screenSpacePanning = false;
+// map-style controls: left-drag / one finger pans; right-drag (or shift/⌘-drag) / two fingers rotate
+controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
+controls.touches = { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_ROTATE };
 const hemi = new THREE.HemisphereLight(0xffffff, 0x77786c, 0.62); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff6e8, 0.62); sun.position.set(-5000, 4200, 2000); scene.add(sun);
 scene.fog = new THREE.Fog(0xdde3dc, 12000, 30000);
@@ -1876,9 +1879,20 @@ function loop(now) {
 }
 controls.addEventListener('change', requestRender);
 /* trackpad: two-finger swipe pans, pinch (ctrlKey) and mouse wheels still zoom */
-const isMouseWheel = e => e.deltaMode !== 0 || (e.deltaX === 0 && e.wheelDeltaY !== undefined && e.wheelDeltaY !== 0 && e.wheelDeltaY % 120 === 0);
+// Chromium reports trackpad scrolls with wheelDeltaY === -3 * deltaY and mouse wheels (even accelerated ones) with
+// something else. Safari uses that ratio for mice too, and Firefox has no wheelDeltaY, so elsewhere only sideways motion
+// marks a trackpad. Once a gesture looks like a trackpad it stays one until the stream pauses, so its vertical-only
+// stretches keep panning.
+const isChromium = !!window.chrome || /Chrome\//.test(navigator.userAgent);
+let padUntil = 0;
+const isTrackpad = e => {
+  const now = performance.now();
+  const pad = e.deltaMode === 0 && (e.deltaX !== 0 || (isChromium && e.wheelDeltaY !== undefined && e.deltaY !== 0 && Math.abs(e.wheelDeltaY + 3 * e.deltaY) < 1));
+  if (pad || now < padUntil) { padUntil = now + 150; return true; }
+  return false;
+};
 canvas.addEventListener('wheel', e => {
-  if (!controls.enabled || e.ctrlKey || isMouseWheel(e)) return;
+  if (!controls.enabled || e.ctrlKey || !isTrackpad(e)) return;
   e.preventDefault(); e.stopImmediatePropagation();
   const k = camera.position.distanceTo(controls.target) * 2 * Math.tan(camera.fov * Math.PI / 360) / canvas.clientHeight;
   const right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0); right.y = 0; right.normalize();
