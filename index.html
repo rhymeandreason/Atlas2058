@@ -400,6 +400,7 @@ details.about a { word-break: break-word; }
         <label class="tog"><input type="checkbox" id="tStorm"><span>Add a major storm<small>A once-a-century storm adds about 3 feet.</small></span></label>
         <label class="tog"><input type="checkbox" id="tProtect"><span>Protect the Canal neighborhood<small>A planned floodgate and levees, done by 2045.</small></span></label>
         <label class="tog"><input type="checkbox" id="tSpec" checked><span>Imagine growth after 2034<small>Faded buildings where housing is allowed but not yet proposed.</small></span></label>
+        <label class="tog"><input type="checkbox" id="tBike"><span>Bike routes<small>Solid lines are today’s bikeways. Dashes are the city’s draft plan, bold where it’s a top priority.</small></span></label>
         <label class="tog"><input type="checkbox" id="tLabels" checked><span>Neighborhood labels</span></label>
       </div>
     </section>
@@ -415,6 +416,7 @@ details.about a { word-break: break-word; }
       <p>Project locations come from street addresses run through the US Census geocoder; heights, unit counts and status come from City of San Rafael project pages, Marin County, CEQA filings and SF YIMBY as of October 2026. Footprints are sized from unit counts and are approximate. Years after 2026 are reported targets where a developer or agency gave one, and model assumptions otherwise; each card says which.</p>
       <p>Terrain is USGS 3DEP elevation data, with hills exaggerated 1.6×. Ground cover combines USGS NLCD 2021 vegetation with parks, open space, shopping areas, parking, wetlands and water from OpenStreetMap. The shoreline, streets, landmark and road labels, and existing building footprints come from <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a> (ODbL, July 2026). US-101, I-580 and SMART rail are hand-traced from geocoded points. Heights come from OpenStreetMap where it records them and otherwise from Microsoft's machine-learned estimates via Overture Maps (together about 84% of buildings); the rest are estimated from building type, footprint size and neighborhood.</p>
       <p>Where the water goes comes from NOAA's Sea Level Rise Viewer, which maps land connected to the bay that floods at each half foot above today's high tide. When the water comes is set by the exposure points for each named low-lying area in Marin's BayWAVE assessment, San Rafael's 2020 Flood Risk &amp; SLR Adaptation Report and TAM's 2024 vulnerability memo: once an area's threshold is passed, its lowest ground floods first and the water spreads uphill as it deepens. Elsewhere the map shows NOAA's extent at the scenario's bay level, with about 3 ft added for a storm. The Canal and Spinnaker zones add about 0.4 in a year of measured ground sinking. These are approximations for exploring, not engineering flood maps.</p>
+      <p>Bike routes come from the map behind San Rafael’s draft Citywide Bicycle &amp; Pedestrian Plan (Alta Planning for the City, 2026): today’s bikeways plus the plan’s proposed routes and crossing fixes. The plan was still a draft as of October 2026 and gives no build dates, so its routes appear in every year. A route takes on the flood colour where NOAA’s map puts the ground under it under water.</p>
       <p>Illustrative growth after 2034 fills sites the 2023 Housing Element, Downtown Precise Plan and General Plan 2040 identify for housing, at roughly the pace General Plan 2040 projects. No developer has proposed these buildings.</p>
       <ul>
         <li><a href="https://www.cityofsanrafael.org/major-planning-projects-2025" target="_blank" rel="noopener">City of San Rafael, major planning projects</a></li>
@@ -423,6 +425,8 @@ details.about a { word-break: break-word; }
         <li><a href="https://www.cityofsanrafael.org/housing-element-certified-by-state" target="_blank" rel="noopener">Housing Element 2023–2031</a></li>
         <li><a href="https://www.cityofsanrafael.org/northgatetownsquaredev/" target="_blank" rel="noopener">Northgate Town Square</a></li>
         <li><a href="https://goldengate.org/assets/1/6/srtc_fact_sheet_20241.pdf" target="_blank" rel="noopener">San Rafael Transit Center replacement (GGBHTD)</a></li>
+        <li><a href="https://www.cityofsanrafael.org/cbpp" target="_blank" rel="noopener">Citywide Bicycle &amp; Pedestrian Plan update</a></li>
+        <li><a href="https://www.cityofsanrafael.org/measure-p-albert-park-library-community-center/" target="_blank" rel="noopener">Measure P library &amp; community center</a></li>
         <li><a href="https://www.tam.ca.gov/featured-projects/northbound-101-and-eastbound-580-direct-connector/" target="_blank" rel="noopener">US-101/I-580 direct connector (TAM)</a></li>
         <li><a href="https://documents.coastal.ca.gov/assets/slr/guidance/2024/AppF_2024AdoptedSLRPolicyGuidanceUpdate.pdf" target="_blank" rel="noopener">OPC 2024 sea level rise guidance, San Francisco table</a></li>
         <li><a href="https://storage.googleapis.com/proudcity/sanrafaelca/uploads/2020/10/SLR-Adaptation-Report-final-9-28-20-v2.pdf" target="_blank" rel="noopener">San Rafael Flood Risk &amp; SLR Adaptation Report (2020)</a></li>
@@ -571,6 +575,7 @@ const P = [
   { n:'BioMarin Buildings A & B', a:'999 3rd St campus (2nd St & Lindaro)', lat:37.97095, lon:-122.52620, st:'approved', y:2030, yb:'a', fl:4, ft:72, u:0, kind:'multi', n2:2, w:110, d:46, sz:'About 110k sf office/retail + 97k sf lab', note:'Approved March 2020 with a 10-year development agreement. No construction start found.', src:['https://cityofsanrafael.org/999-3rd'] },
   { n:'Belmont senior living', a:'1515 4th St', lat:37.97370, lon:-122.53441, st:'approved', y:2029, yb:'a', fl:4, u:183, w:58, d:44, note:'183 independent, assisted and memory-care units. Approved April 2023. Story count estimated.', src:['https://www.cityofsanrafael.org/1515-fourth-st/'] },
   { n:'WildCare wildlife hospital', a:'76 Albert Park Ln', lat:37.96795, lon:-122.52678, st:'approved', y:2028, yb:'a', fl:3, u:0, sz:'11,400 sf animal hospital and offices', w:30, d:22, note:'Approved July 2023.', src:['https://www.cityofsanrafael.org/wildcare-2/'] },
+  { n:'Main library & community center (Measure P)', a:'Albert Park, B St at 1st St (city-owned)', lat:37.96946, lon:-122.52913, st:'proposed', y:2031, yb:'r', start:2028, fl:2, ft:36, u:0, w:58, d:40, sz:'New main library + community center; size not yet set', note:'Paid for by Measure P, the parcel tax voters passed in November 2024, to replace today’s main library on E St. A design-build team is being picked in 2026, with concepts due that winter. The city targets construction from 2028 to 2030 and opening in early 2031. No site plan has been released, so the footprint, two-story height and exact spot in the park are placeholders.', src:['https://www.cityofsanrafael.org/measure-p-albert-park-library-community-center/','https://localnewsmatters.org/2025/10/13/getting-a-read-on-san-rafaels-new-library-council-picks-project-manager-in-4-4m-deal/'] },
   { n:'Fourth Street Market Hall & Residences', a:'924 3rd St (through to 4th St)', lat:37.97235, lon:-122.52640, st:'proposed', y:2031, yb:'a', fl:8, u:197, w:84, d:58, sz:'197 senior rentals + ~25,000 sf market hall', note:'Formal application filed October 5, 2026. An April 2026 preliminary version proposed 24 stories and 260 ft.', src:['https://www.cityofsanrafael.org/fourth-street-market-hall-development-application-submitted/'] },
   { n:'700 B Street (Safeway site)', a:'700 B St', lat:37.97000, lon:-122.52920, st:'proposed', y:2031, yb:'a', fl:8, ft:85, u:331, w:92, d:62, note:'Mill Creek Residential pre-application, 2026. 331 homes (28 low-income); no replacement grocery store.', src:['https://www.cityofsanrafael.org/700-b-street/'] },
   { n:'515 Third Street (United Markets site)', a:'515 3rd St', lat:37.97096, lon:-122.51919, st:'proposed', y:2031, yb:'a', fl:7, u:285, w:78, d:56, note:'Bayspring Development pre-application filed August 2026.', src:['https://www.cityofsanrafael.org/515-3rd-st/'] },
@@ -581,6 +586,7 @@ const P = [
   { n:'San Rafael Inn', a:'1580 Lincoln Ave', lat:37.98309, lon:-122.52412, st:'proposed', y:2033, yb:'a', fl:4, ft:45, u:0, sz:'46-room boutique hotel', w:34, d:26, note:'Application listed as incomplete since 2021; likely stalled.', src:['https://cityofsanrafael.org/sanrafael-inn'] },
   { n:'San Rafael Transit Center (relocated)', a:'Block of 3rd, 4th, Tamalpais & Hetherton', lat:37.97220, lon:-122.52250, st:'infra', y:2029, yb:'r', kind:'canopy', w:120, d:62, u:0, sz:'17 bus bays, plaza and café, Tamalpais Ave bikeway', note:'The "Move Whistlestop" alternative, one block north of today\'s center. $25.6M federal grant awarded February 2026; officials target opening as soon as 2028. Today\'s Bettini Transit Center site is to be sold.', src:['https://goldengate.org/assets/1/6/srtc_fact_sheet_20241.pdf','https://govmarketnews.com/san-rafael-transit-center-relocation-federal-grant/'] },
   { n:'San Rafael Canal Crossing & 620 Canal St park', a:'620 Canal St to 3rd St', lat:37.96800, lon:-122.51170, st:'proposed', y:2034, yb:'a', kind:'bridge', u:0, sz:'Bike/ped drawbridge + 1.65-acre waterfront park', note:'City bought the boatyard site in 2025 and hired designers in May 2026. About $40M total, not yet funded.', src:['https://cityofsanrafael.org/san-rafael-canal-crossing-project'] },
+  { n:'Second & Fourth St intersection rebuild', a:'2nd St & 4th St, West End', lat:37.97424, lon:-122.54167, st:'infra', y:2027, yb:'a', start:2026.8, kind:'xing', u:0, sz:'Five-way signal cut to four legs, shorter crosswalks, protected bike lane', note:'Straightens the skewed West End gateway, replaces the old signals, brings curb ramps up to ADA standards and finishes the protected bike lane from West St to West End Ave. About $4M, roughly $3M from a regional OBAG 3 grant that must be spent by January 2030. Bids opened in September 2026 and the council is set to award the contract in October; work starts once Marin Water finishes replacing its pipe under Fourth St. A new signal at West Crescent Dr is also planned nearby.', src:['https://www.cityofsanrafael.org/second-and-fourth-street-intersection-improvements/','https://www.cityofsanrafael.org/west-crescent-drive-and-fourth-street-signalization/'] },
   // North
   { n:'Northgate Town Square — Phase 1', a:'5800 Northgate Dr', lat:38.00276, lon:-122.54693, st:'approved', y:2031, yb:'a', start:2028, kind:'ng1', u:907, sz:'About 907 homes, town square, ~220k sf retail', note:'Merlone Geier\'s redevelopment of Northgate Mall, approved December 2024 for up to 1,422 homes on 44.8 acres in 2–7 story buildings. Sears demolition began in 2026; Macy\'s remains open for now.', src:['https://www.cityofsanrafael.org/northgatetownsquaredev/','https://www.cityofsanrafael.org/northgate-mall-redevelopment-city-council-hearing-will-be-held-on-december-2nd'] },
   { n:'Northgate Town Square — Phase 2', a:'5800 Northgate Dr', lat:38.00276, lon:-122.54693, st:'approved', y:2040, yb:'r', start:2037, kind:'ng2', u:515, sz:'Remaining ~515 homes', note:'The approved plan puts the rest of the 1,422 homes on a 2040 phasing schedule, replacing the Macy\'s wing.', src:['https://cityofsanrafael.org/merlone-geier-submits-revised-project-plans-for-northgate-town-square'] },
@@ -847,6 +853,135 @@ function buildStreets(data) {
     const m = new THREE.Mesh(geo, n ? streetMinorMat : streetMainMat); m.frustumCulled = false; g.add(m);
   });
   return g;
+}
+/* bikeways (bikes.json, packed by tools/bikes.py from the city's draft Bicycle & Pedestrian Plan map), drawn like the
+   streets but just above them. Proposed routes are dashed, with the dash length snapped to the zoom so dashes stay a
+   steady size on screen. Each vertex carries NOAA's flood threshold, so a route goes under the flood colour when the
+   ground beneath it does, using the same zone timing as the terrain shader. */
+const BIKE_CLS = ['', 'Off-street path for biking and walking', 'Painted bike lanes', 'Shared street marked for bikes', 'Bike lanes separated from traffic', 'Bike boulevard: a calm side street that favors bikes', 'Bike improvement, type still to be decided'];
+const BIKE_SHORT = ['', 'Path', 'Bike lanes', 'Bike route', 'Protected bike lanes', 'Bike boulevard', 'Type to be decided'];
+// the plan's stock descriptions, which the Type line already says in plain words
+const BIKE_STOCK = ['Class I Multi-Use Path', 'Class II Bike Lane', 'Class III Bike Route', 'Class III+ Bike Boulevard', 'Class IV Separated Bikeway', 'Bicycle Facility Improvement - TBD', 'Pedestrian Intersection Improvements', 'Bicycle Intersection Improvement'];
+const bikeDash = { value: 24 }, bikeHi = { value: -1 };
+const bikeExistMat = bikeMaterial(1.6, -2, false), bikePlanMat = bikeMaterial(2.4, -2.5, true), bikeTopMat = bikeMaterial(4.2, -3, true);
+const bikeDotMat = new THREE.PointsMaterial({ size: 7, sizeAttenuation: false, alphaTest: 0.5, transparent: false });
+const bikeDotTopMat = new THREE.PointsMaterial({ size: 11, sizeAttenuation: false, alphaTest: 0.5, transparent: false });
+(() => { const c = document.createElement('canvas'); c.width = c.height = 32; const x = c.getContext('2d'); x.fillStyle = '#fff'; x.beginPath(); x.arc(16, 16, 15, 0, Math.PI * 2); x.fill(); const t = new THREE.CanvasTexture(c); bikeDotMat.map = bikeDotTopMat.map = t; })();
+let bikeGroup = null, bikeData = null;
+const bikeLines = [], bikeDots = [];
+function bikeMaterial(minPx, offset, dashed) {
+  const m = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: offset, polygonOffsetUnits: offset });
+  m.onBeforeCompile = sh => {
+    Object.assign(sh.uniforms, { uPxK: streetPx, uMinPx: { value: minPx }, uDash: bikeDash, uHi: bikeHi, uLevel: groundU.uLevel, uOn: groundU.uOn, uZa: groundU.uZa, uZb: groundU.uZb, uFlood: groundU.uFlood });
+    sh.vertexShader = `attribute vec3 aSide; attribute float aDist, aThr, aId; uniform float uPxK, uMinPx, uHi, uLevel, uOn;
+uniform vec4 uZa[${ZONES.length}], uZb[${ZONES.length}]; varying float vDist, vWet;\n` + sh.vertexShader.replace('#include <begin_vertex>', `vec3 transformed = vec3(position);
+float mpp = -(modelViewMatrix * vec4(position, 1.0)).z * uPxK, hi = abs(aId - uHi) < 0.5 ? 1.0 : 0.0;
+transformed += vec3(aSide.x, 0.0, aSide.y) * max(aSide.z, uMinPx * (1.0 + hi) * mpp * 0.5);
+vDist = aDist; vWet = 0.0;
+if (uOn > 0.5 && aThr >= 1.5 && aThr < 200.0) {
+  float lvl = uLevel, fade = 1.0, best = 1.0;
+  for (int i = 0; i < ${ZONES.length}; i++) {
+    vec2 d = position.xz - uZa[i].xy; float u = d.x * uZa[i].z - d.y * uZa[i].w, v = d.x * uZa[i].w + d.y * uZa[i].z;
+    float r = length(vec2(u / uZb[i].x, v / uZb[i].y));
+    if (r < best) { best = r; lvl = uZb[i].z; fade = uZb[i].w; }
+  }
+  if (lvl >= (aThr - 1.0) * 0.5) vWet = fade;
+}`);
+    sh.fragmentShader = 'uniform float uDash; uniform vec3 uFlood; varying float vDist, vWet;\n' + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+${dashed ? 'if (fract(vDist / uDash) > 0.6) discard;' : ''}
+diffuseColor.rgb = mix(diffuseColor.rgb, uFlood, vWet * 0.65);`);
+  };
+  return m;
+}
+function groundThr(x, z) { // NOAA threshold byte under a point (see ground.png), 255 if dry or unknown
+  if (!ground.cls) return 255;
+  const i = Math.floor((x - X0) / GW * ground.W), j = Math.floor((z - Z0) / GH * ground.H);
+  return i < 0 || j < 0 || i >= ground.W || j >= ground.H ? 255 : ground.thr[j * ground.W + i];
+}
+function sampleXZ(pts, step) {
+  const out = [];
+  for (let i = 0; i < pts.length - 1; i++) { const [ax, az] = pts[i], [bx, bz] = pts[i + 1], n = Math.max(1, Math.ceil(Math.hypot(bx - ax, bz - az) / step)); for (let s = 0; s < n; s++) out.push([ax + (bx - ax) * s / n, az + (bz - az) * s / n]); }
+  out.push(pts[pts.length - 1]); return out;
+}
+function buildBikes(data) {
+  const q = data.q, g = new THREE.Group(), bufs = [0, 1, 2].map(() => ({ pos: [], side: [], dist: [], thr: [], id: [], idx: [] }));
+  const decode = (r, k0) => { const pts = []; let x = 0, z = 0; for (let k = k0; k < r.length; k += 2) { x += r[k] * q; z += r[k + 1] * q; pts.push([x, z]); } return pts; };
+  const add = (o, pts, hw, id) => {
+    const s = sampleXZ(pts, 10), v0 = o.pos.length / 3; let acc = 0;
+    for (let i = 0; i < s.length; i++) {
+      const a = s[Math.max(0, i - 1)], b = s[Math.min(s.length - 1, i + 1)];
+      let dx = b[0] - a[0], dz = b[1] - a[1]; const l = Math.hypot(dx, dz) || 1; dx /= l; dz /= l;
+      if (i) acc += Math.hypot(s[i][0] - s[i - 1][0], s[i][1] - s[i - 1][1]);
+      const y = yAt(s[i][0], s[i][1]) + 1.9, t = groundThr(s[i][0], s[i][1]);
+      o.pos.push(s[i][0], y, s[i][1], s[i][0], y, s[i][1]); o.side.push(-dz, dx, hw, dz, -dx, hw);
+      o.dist.push(acc, acc); o.thr.push(t, t); o.id.push(id, id);
+      if (i < s.length - 1) { const k = v0 + i * 2; o.idx.push(k, k + 2, k + 1, k + 1, k + 2, k + 3); }
+    }
+    return s;
+  };
+  data.e.forEach(r => add(bufs[0], decode(r, 1), 1.5, -1));
+  data.p.forEach(r => { const s = add(bufs[r[1] ? 2 : 1], decode(r, 3), r[1] ? 2.5 : 2, r[2]); bikeLines.push({ cls: r[0], top: r[1], id: r[2], s }); });
+  bufs.forEach((o, n) => {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(o.pos, 3)); geo.setAttribute('aSide', new THREE.Float32BufferAttribute(o.side, 3));
+    geo.setAttribute('aDist', new THREE.Float32BufferAttribute(o.dist, 1)); geo.setAttribute('aThr', new THREE.Float32BufferAttribute(o.thr, 1)); geo.setAttribute('aId', new THREE.Float32BufferAttribute(o.id, 1));
+    geo.setIndex(new THREE.BufferAttribute(new Uint32Array(o.idx), 1)); geo.computeBoundingSphere();
+    const m = new THREE.Mesh(geo, [bikeExistMat, bikePlanMat, bikeTopMat][n]); m.frustumCulled = false; m.renderOrder = 2; g.add(m);
+  });
+  [0, 1].forEach(top => {
+    const ps = data.i.filter(p => p[0] === top), pos = [];
+    ps.forEach(p => { const x = p[2] * q, z = p[3] * q; pos.push(x, yAt(x, z) + 3, z); bikeDots.push({ top, id: p[1], x, z }); });
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    const pts = new THREE.Points(geo, top ? bikeDotTopMat : bikeDotMat); pts.frustumCulled = false; pts.renderOrder = 3; g.add(pts);
+  });
+  g.visible = false; bikeData = data;
+  return g;
+}
+// the proposed route or crossing nearest the pointer, if one is within a few pixels of it on the ground
+function bikeAt() {
+  if (!bikeGroup || !bikeGroup.visible) return null;
+  const o = ray.ray.origin, d = ray.ray.direction; if (d.y > -0.02) return null;
+  let x = 0, z = 0, y = yAt(controls.target.x, controls.target.z);
+  for (let k = 0; k < 3; k++) { const t = (y - o.y) / d.y; x = o.x + d.x * t; z = o.z + d.z * t; y = yAt(x, z); }
+  const tol = Math.hypot(x - camera.position.x, y - camera.position.y, z - camera.position.z) * streetPx.value * 8;
+  let best = null, bd = tol;
+  bikeDots.forEach(p => { const dd = Math.hypot(p.x - x, p.z - z) * 0.8; if (dd < bd) { bd = dd; best = { kind: 'dot', ...p }; } });
+  bikeLines.forEach(L => { for (let i = 0; i < L.s.length - 1; i++) { const dd = segDist(x, z, L.s[i], L.s[i + 1]); if (dd < bd) { bd = dd; best = { kind: 'line', cls: L.cls, top: L.top, id: L.id }; } } });
+  return best;
+}
+function segDist(x, z, a, b) { const dx = b[0] - a[0], dz = b[1] - a[1], l2 = dx * dx + dz * dz || 1, t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / l2)); return Math.hypot(x - a[0] - dx * t, z - a[1] - dz * t); }
+// how much of a proposed route is under water in the chosen year and scenario (mirrors the terrain shader)
+function bikeFlood(id, Y) {
+  const open = (slrIn(Y, state.scen) + (state.storm ? 36 : 0)) / 12;
+  let wet = 0, len = 0;
+  bikeLines.filter(L => L.id === id).forEach(L => L.s.forEach((p, i) => {
+    const seg = i ? Math.hypot(p[0] - L.s[i - 1][0], p[1] - L.s[i - 1][1]) : 0; len += seg;
+    const t = groundThr(p[0], p[1]); if (t < 2 || t >= 200) return;
+    let lvl = open, best = 1;
+    ZONES.forEach(zn => { const r = ellipseR(p[0], p[1], zn); if (r < best) { best = r; const w = zoneWater(zn, Y), th = zoneThreshold(zn, Y); lvl = w >= th && zn.noaaBase != null ? zn.noaaBase + (w - th) / 12 : -99; } });
+    if (lvl >= (t - 1) / 2) wet += seg;
+  }));
+  return { wet, len };
+}
+const mi = m => { const v = m / 1609.34; return v < 0.1 ? 'under 0.1 mi' : `${v.toFixed(1)} mi`; };
+function bikeTip(b) { const [n] = bikeData.n[b.id]; return `${esc(n)}<small>${b.kind === 'dot' ? 'Crossing fix' : BIKE_SHORT[b.cls]} · draft plan${b.top ? ', top priority' : ''}</small>`; }
+function showBike(b) {
+  const [n, desc] = bikeData.n[b.id], Y = state.year, facts = [];
+  facts.push(['Type', b.kind === 'dot' ? 'Safer intersection or crossing for people walking and biking' : BIKE_CLS[b.cls]]);
+  facts.push(['Priority', b.top ? 'One of the plan’s top priorities' : 'In the plan, not a top priority']);
+  const extra = desc.split('; ').filter(d => !BIKE_STOCK.includes(d)).join('; ');
+  if (extra) facts.push(['Plan wording', esc(extra)]);
+  if (b.kind === 'line' && ground.cls) {
+    const f = bikeFlood(b.id, Y);
+    facts.push([`Water in ${Y}`, f.wet > 5 ? `About ${mi(f.wet)} of this ${mi(f.len)} route is flooded ${state.storm ? 'in the storm' : 'at high tide'}` : `Dry along its ${mi(f.len)} in this scenario`]);
+  }
+  card.innerHTML = `<button class="x" type="button" aria-label="Close">×</button>
+    <span class="pill" style="background:var(--s-proposed)">Draft bike &amp; walking plan</span>
+    <h3>${esc(n)}</h3>
+    <dl class="facts">${facts.map(f => `<dt>${f[0]}</dt><dd>${f[1]}</dd>`).join('')}</dl>
+    <p class="note">From the city’s draft Citywide Bicycle &amp; Pedestrian Plan, which the City Council is scheduled to consider adopting on October 19, 2026. The plan sets priorities for the next 5–10 years; it gives no build dates or funding for individual projects, so this route has no year on the timeline.</p>
+    <div class="src">${['https://www.cityofsanrafael.org/cbpp', 'https://sanrafaelrecommendations.altaplanning.cloud/'].map(u => `<a href="${u}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join('')}</div>`;
+  card.hidden = false;
 }
 const roadMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
 const streetMat = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
@@ -1137,6 +1272,11 @@ function buildProjects() {
       addPart(obj, a[0] + 10, a[1] - 40, 70, 50, 0.6, 0, null);
       exclude.push({ x:mx, z:mz, r:60 });
     }
+    else if (kind === 'xing') {
+      const cs = Math.cos(rot), sn = Math.sin(rot);
+      addPart(obj, cx, cz, 30, 30, 3, rot); // parts sit 1.2 m into the ground; this pad tops out just above the street ribbons
+      [[-14, -14], [14, -14], [-14, 14], [14, 14]].forEach(([ox, oz]) => addPart(obj, cx + ox * cs + oz * sn, cz - ox * sn + oz * cs, 1.2, 1.2, 9, rot));
+    }
     else if (kind === 'marsh') {
       addPart(obj, cx, cz, p.w, p.d, 0.6, (p.rot || 0) * D2R, marshMat);
     }
@@ -1273,6 +1413,7 @@ function applyTheme() {
   waterMat.color = wat;
   roadMat.color = T('--road'); streetMat.color = T('--street'); streetMinorMat.color = T('--street'); streetMainMat.color = T('--street-main'); railMat.color = T('--rail'); creekMat.color = wat.clone().lerp(T('--rail'), 0.15);
   railStationMat.color = T('--rail'); infraMat.color = T('--s-infra');
+  bikeExistMat.color = T('--s-built'); bikePlanMat.color = bikeTopMat.color = bikeDotMat.color = bikeDotTopMat.color = T('--s-proposed');
   const b = T('--bldg'); fabricBase.copy(b); fabricMat.color.copy(b); lmMat.color = b.clone().multiplyScalar(0.96);
   Object.keys(STATUS).forEach(s => { projMat(s).color = T(STATUS[s].tok); });
   const sbg = T('--scene-bg'); mutedMat.color = b.clone().lerp(sbg, 0.18); mutedSpecMat.color = b.clone().lerp(sbg, 0.3);
@@ -1324,7 +1465,7 @@ function update() {
   landmarkObjs.forEach(l => l.target = Y < l.removeY ? 1 : 0);
   protectGroup.visible = state.protect && Y >= 2038;
   if (protectGroup.visible) { const pr = Math.min(1, (Y - 2038) / 7); protectGroup.children.forEach(c => { c.scale.y = (c.userData.h0 || (c.userData.h0 = c.scale.y)) * pr; c.position.y = 2.6 * EX - 1; }); }
-  renderList(); if (selected) showCard(selected.p.id, false); if (selZone) showZone(selZone);
+  renderList(); if (selected) showCard(selected.p.id, false); if (selZone) showZone(selZone); if (selBike) showBike(selBike);
   requestRender();
 }
 
@@ -1349,7 +1490,7 @@ function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'
 
 /* ---------------- card ---------------- */
 const card = document.getElementById('card');
-let selZone = null;
+let selZone = null, selBike = null;
 const BASIS = { r:'reported target', a:'model assumption', c:'completed' };
 function showCard(id, scroll) {
   const p = P[id], s = STATUS[p.st];
@@ -1382,9 +1523,9 @@ function showZone(z) {
     <div class="src">${z.src.map(u => `<a href="${u}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join('')}</div>`;
   card.hidden = false;
 }
-card.addEventListener('click', e => { if (e.target.closest('.x')) { card.hidden = true; select(null); selZone = null; } });
+card.addEventListener('click', e => { if (e.target.closest('.x')) { card.hidden = true; select(null); selZone = null; selBike = null; } });
 function select(o) {
-  selected = o; selZone = null;
+  selected = o; selZone = null; selBike = null; bikeHi.value = -1;
   if (o) { showCard(o.p.id, true); selLabel.textContent = o.p.n; }
   else selLabel.textContent = '';
   renderList(); requestRender();
@@ -1397,15 +1538,17 @@ function pick(e) {
   const r = canvas.getBoundingClientRect(); mouse.x = (e.clientX - r.left) / r.width * 2 - 1; mouse.y = -(e.clientY - r.top) / r.height * 2 + 1;
   ray.setFromCamera(mouse, camera);
   const hit = ray.intersectObjects(pickables.filter(m => m.parent.visible && m.parent.scale.y > 0.02), false)[0];
-  const zh = hit ? null : ray.intersectObjects(zoneObjs.filter(z => z.cur > 0.3).map(z => z.m), false)[0];
-  return { hit, zh };
+  const bk = hit ? null : bikeAt();
+  const zh = hit || bk ? null : ray.intersectObjects(zoneObjs.filter(z => z.cur > 0.3).map(z => z.m), false)[0];
+  return { hit, zh, bk };
 }
-let hoverEv = null, hovered = null, hoverZone = null;
+let hoverEv = null, hovered = null, hoverZone = null, hoverBike = null;
 const hovTip = document.createElement('div'); hovTip.className = 'hovtip'; stage.appendChild(hovTip);
-function setHover(o, z, e) {
-  if (o === hovered && z === hoverZone) { if (o || z) placeTip(e); return; }
-  hovered = o; hoverZone = z; requestRender();
-  if (o || z) { hovTip.innerHTML = o ? `${esc(o.p.n)}<small>${esc(STATUS[o.p.st].label)}</small>` : zoneTip(z); hovTip.classList.add('on'); placeTip(e); }
+function setHover(o, z, e, b) {
+  const bkey = b ? b.kind + b.id : null;
+  if (o === hovered && z === hoverZone && bkey === hoverBike) { if (o || z || b) placeTip(e); return; }
+  hovered = o; hoverZone = z; hoverBike = bkey; bikeHi.value = b && b.kind === 'line' ? b.id : (selBike && selBike.kind === 'line' ? selBike.id : -1); requestRender();
+  if (o || z || b) { hovTip.innerHTML = o ? `${esc(o.p.n)}<small>${esc(STATUS[o.p.st].label)}</small>` : b ? bikeTip(b) : zoneTip(z); hovTip.classList.add('on'); placeTip(e); }
   else hovTip.classList.remove('on');
 }
 function zoneTip(zo) {
@@ -1416,7 +1559,7 @@ function zoneTip(zo) {
 function placeTip(e) { const r = stage.getBoundingClientRect(), w = hovTip.offsetWidth, h = hovTip.offsetHeight; let x = e.clientX - r.left + 14, y = e.clientY - r.top + 16; if (x + w > r.width - 8) x = Math.max(8, e.clientX - r.left - w - 14); if (y + h > r.height - 8) y = Math.max(8, e.clientY - r.top - h - 12); hovTip.style.transform = `translate(${x}px, ${y}px)`; }
 canvas.addEventListener('pointermove', e => {
   if (e.buttons || e.pointerType === 'touch') return;
-  if (!hoverEv) requestAnimationFrame(() => { const { hit, zh } = pick(hoverEv); canvas.classList.toggle('hot', !!(hit || zh)); setHover(hit ? hit.object.userData.obj : null, zh ? zoneObjs.find(z => z.m === zh.object) : null, hoverEv); hoverEv = null; });
+  if (!hoverEv) requestAnimationFrame(() => { const { hit, zh, bk } = pick(hoverEv); canvas.classList.toggle('hot', !!(hit || zh || bk)); setHover(hit ? hit.object.userData.obj : null, zh ? zoneObjs.find(z => z.m === zh.object) : null, hoverEv, bk); hoverEv = null; });
   hoverEv = e;
 });
 canvas.addEventListener('pointerleave', () => { canvas.classList.remove('hot'); setHover(null, null); });
@@ -1424,8 +1567,9 @@ canvas.addEventListener('pointerdown', () => setHover(null, null));
 canvas.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; });
 canvas.addEventListener('pointerup', e => {
   if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 5) return;
-  const { hit, zh } = pick(e);
+  const { hit, zh, bk } = pick(e);
   if (hit) { select(hit.object.userData.obj); return; }
+  if (bk) { select(null); selBike = bk; bikeHi.value = bk.kind === 'line' ? bk.id : -1; showBike(bk); return; }
   if (zh) { select(null); selZone = zh.object.userData.zone; showZone(selZone); return; }
   select(null); card.hidden = true;
 });
@@ -1874,6 +2018,7 @@ function loop(now) {
   if (cine.active) { moving = true; pulseRings(now); }
   const az = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z);
   needle.setAttribute('transform', `rotate(${(az * 180 / Math.PI).toFixed(1)} 20 20)`);
+  if (bikeGroup && bikeGroup.visible) bikeDash.value = Math.pow(2, Math.round(Math.log2(Math.max(1, camera.position.distanceTo(controls.target) * streetPx.value * 18))));
   if (needs || moving) { renderer.render(scene, camera); placeLabels(); if (cine.active) placeCallouts(); needs = false; }
   if (moving) requestAnimationFrame(loop); else { animating = false; lastT = 0; }
 }
@@ -1912,9 +2057,10 @@ document.getElementById('tStorm').addEventListener('change', e => { state.storm 
 document.getElementById('tProtect').addEventListener('change', e => { state.protect = e.target.checked; update(); });
 document.getElementById('tSpec').addEventListener('change', e => { state.spec = e.target.checked; update(); });
 document.getElementById('tLabels').addEventListener('change', requestRender);
+document.getElementById('tBike').addEventListener('change', e => { if (bikeGroup) bikeGroup.visible = e.target.checked; if (!e.target.checked && selBike) { selBike = null; bikeHi.value = -1; card.hidden = true; } requestRender(); });
 
 /* ---------------- boot ---------------- */
-function boot({ osm, dem, roads, groundImg, labels }) {
+function boot({ osm, dem, roads, groundImg, labels, bikes }) {
   if (groundImg) setupGround(groundImg);
   buildTerrain(dem);
   terrain = new THREE.Mesh(tGeo, terrainMat); scene.add(terrain); scene.add(water);
@@ -1924,6 +2070,8 @@ function boot({ osm, dem, roads, groundImg, labels }) {
   scene.add(ribbon(SMART, 7, railMat, 2.6));
   if (roads) scene.add(buildStreets(roads));
   else { scene.add(ribbon(FOURTH, 13, streetMat, 1.6)); scene.add(ribbon(SANPEDRO, 10, streetMat, 1.6)); scene.add(ribbon(LUCAS, 10, streetMat, 1.6)); }
+  if (bikes) { bikeGroup = buildBikes(bikes); bikeGroup.visible = document.getElementById('tBike').checked; scene.add(bikeGroup); }
+  else document.getElementById('tBike').closest('label').hidden = true;
   if (!ground.cls) { creek = ribbon(CREEK, s => (s.x > XY(37.97, -122.517)[0] ? 58 : 22), creekMat, 0, () => -0.1); creek.renderOrder = 2; scene.add(creek); }
   const exclude = buildProjects(); scene.add(projGroup);
   if (osm) fabricMesh = buildOSM(osm, exclude);
@@ -1944,16 +2092,16 @@ function boot({ osm, dem, roads, groundImg, labels }) {
   controls.target.set(tx, 0, tz); camera.position.set(tx + v.off[0], v.off[1], tz + v.off[2]);
   resize(); if (camera.aspect < 1) camera.position.set(tx + v.off[0] * 1.45, v.off[1] * 1.45, tz + v.off[2] * 1.45); update();
   document.getElementById('loading').classList.add('done');
-  window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY, cine, camera, controls, cineTick };
+  window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY, cine, camera, controls, cineTick, bikeGroup, bikeDash };
 }
 const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 // baked real-world data; each falls back to the hand-built model if it can't be fetched (e.g. opened from file://)
 const getJSON = u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null);
-const realData = Promise.all([getJSON('buildings.json'), getJSON('roads.json'), getJSON('labels.json'),
+const realData = Promise.all([getJSON('buildings.json'), getJSON('roads.json'), getJSON('labels.json'), getJSON('bikes.json'),
   fetch('terrain.bin').then(r => r.ok ? r.arrayBuffer() : null).then(b => b && b.byteLength === (NX + 1) * (NZ + 1) * 2 ? new Int16Array(b) : null).catch(() => null)
   , new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = 'ground.png'; })
-]).then(([osm, roads, labels, dem, groundImg]) => ({ osm, roads, labels, dem, groundImg }));
+]).then(([osm, roads, labels, bikes, dem, groundImg]) => ({ osm, roads, labels, bikes, dem, groundImg }));
 setTimeout(() => realData.then(data => { try { boot(data); } catch (err) { document.getElementById('loading').classList.add('err'); document.getElementById('loadMsg').textContent = 'The model failed to build: ' + err.message; console.error(err); } }), 1200);
 })();
 </script>
