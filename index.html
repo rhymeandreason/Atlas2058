@@ -932,7 +932,7 @@ const LC_A = [0, 0.62, 0.5, 0.42, 0.7, 0.7, 1, 0, 0.75, 0.7, 0.55, 0.7, 0.6, 0.8
 const ground = { W: 0, H: 0, cls: null, thr: null, park: null, colorTex: null, floodTex: null };
 const groundU = {
   uCover: { value: null }, uFloodT: { value: null }, uOn: { value: 0 }, uFlood: { value: new THREE.Color() },
-  uX0: { value: 0 }, uZ0: { value: 0 }, uGW: { value: 1 }, uGH: { value: 1 }, uLevel: { value: -99 }, uHover: { value: -1 }, uNoise: { value: noiseTex },
+  uX0: { value: 0 }, uZ0: { value: 0 }, uGW: { value: 1 }, uGH: { value: 1 }, uLevel: { value: -99 }, uHover: { value: -1 }, uNoise: { value: noiseTex }, uRise: { value: 1 }, uFloodK: { value: 0 },
   uZa: { value: ZONES.map(() => new THREE.Vector4()) }, uZb: { value: ZONES.map(() => new THREE.Vector4(1, 1, -99, 0)) }
 };
 function setupGround(img) {
@@ -977,7 +977,7 @@ function paintGround(T) { // theme colours → cover texture (rgb colour, a cove
 terrainMat.onBeforeCompile = sh => {
   Object.assign(sh.uniforms, groundU);
   sh.vertexShader = 'varying vec2 vGxz;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\nvGxz = (modelMatrix * vec4(transformed, 1.0)).xz;');
-  sh.fragmentShader = `uniform sampler2D uCover, uFloodT, uNoise; uniform float uOn, uX0, uZ0, uGW, uGH, uLevel, uHover; uniform vec3 uFlood;
+  sh.fragmentShader = `uniform sampler2D uCover, uFloodT, uNoise; uniform float uOn, uX0, uZ0, uGW, uGH, uLevel, uHover, uRise, uFloodK; uniform vec3 uFlood;
 uniform vec4 uZa[${ZONES.length}], uZb[${ZONES.length}]; varying vec2 vGxz;\n` + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
 // watercolour washes: broad uneven blooms over everything, and blotted dabs (about tree-crown size) where the cover is green
 {
@@ -1000,8 +1000,14 @@ if (uOn > 0.5) {
       float r = length(vec2(u / uZb[i].x, v / uZb[i].y));
       if (r < best) { best = r; lvl = uZb[i].z; fade = uZb[i].w; hov = abs(float(i) - uHover) < 0.5 ? 0.15 : 0.0; }
     }
-    float dep = (lvl - (th - 1.0) * 0.5) * 12.0;
-    if (dep >= 0.0) diffuseColor.rgb = mix(diffuseColor.rgb, uFlood * (0.9 + 0.2 * nd.g), fade * min(1.0, 0.46 + 0.5 * min(1.0, dep / 48.0) + hov));
+    // uRise scales the water from today's high tide (0) up to this year's level (1), so as it animates the bay
+    // creeps inland lowest ground first; uFloodK strengthens the wash in the story's flooding steps
+    float dep = (lvl * uRise - (th - 1.0) * 0.5) * 12.0;
+    if (dep >= 0.0) {
+      float a = fade * min(1.0, mix(0.46, 0.7, uFloodK) + 0.5 * min(1.0, dep / 48.0) + hov);
+      diffuseColor.rgb = mix(diffuseColor.rgb, uFlood * (0.9 + 0.2 * nd.g), a);
+      diffuseColor.rgb *= 1.0 - (1.0 - smoothstep(0.0, 2.5, dep)) * 0.22 * a; // pigment pools darker at the water's edge
+    }
   }
 }`);
 };
@@ -1105,8 +1111,8 @@ function bikeMaterial(minPx, offset, planned) {
   // variant separately or all three end up sharing whichever shader compiled first
   m.customProgramCacheKey = () => planned ? 'bike-planned' : 'bike-today';
   m.onBeforeCompile = sh => {
-    Object.assign(sh.uniforms, { uPxK: streetPx, uMinPx: { value: minPx }, uDash: bikeDash, uDraw: bikeDraw, uHi: bikeHi, uLevel: groundU.uLevel, uOn: groundU.uOn, uZa: groundU.uZa, uZb: groundU.uZb, uFlood: groundU.uFlood });
-    sh.vertexShader = `attribute vec3 aSide; attribute float aDist, aThr, aId, aT; varying float vT; uniform float uPxK, uMinPx, uHi, uLevel, uOn;
+    Object.assign(sh.uniforms, { uPxK: streetPx, uMinPx: { value: minPx }, uDash: bikeDash, uDraw: bikeDraw, uHi: bikeHi, uLevel: groundU.uLevel, uRise: groundU.uRise, uOn: groundU.uOn, uZa: groundU.uZa, uZb: groundU.uZb, uFlood: groundU.uFlood });
+    sh.vertexShader = `attribute vec3 aSide; attribute float aDist, aThr, aId, aT; varying float vT; uniform float uPxK, uMinPx, uHi, uLevel, uRise, uOn;
 uniform vec4 uZa[${ZONES.length}], uZb[${ZONES.length}]; varying float vDist, vWet;\n` + sh.vertexShader.replace('#include <begin_vertex>', `vec3 transformed = vec3(position);
 float mpp = -(modelViewMatrix * vec4(position, 1.0)).z * uPxK, hi = abs(aId - uHi) < 0.5 ? 1.0 : 0.0;
 transformed += vec3(aSide.x, 0.0, aSide.y) * max(aSide.z, uMinPx * (1.0 + hi) * mpp * 0.5);
@@ -1118,7 +1124,7 @@ if (uOn > 0.5 && aThr >= 1.5 && aThr < 200.0) {
     float r = length(vec2(u / uZb[i].x, v / uZb[i].y));
     if (r < best) { best = r; lvl = uZb[i].z; fade = uZb[i].w; }
   }
-  if (lvl >= (aThr - 1.0) * 0.5) vWet = fade;
+  if (lvl * uRise >= (aThr - 1.0) * 0.5) vWet = fade;
 }`);
     sh.fragmentShader = 'uniform float uDash, uDraw; uniform vec3 uFlood; varying float vDist, vWet, vT;\n' + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
 ${planned ? `if (vT > uDraw) discard;
@@ -1787,7 +1793,7 @@ function update() {
   const sea = slrIn(Y, state.scen);
   document.getElementById('stSea').textContent = sea.toFixed(0) + '″';
   document.getElementById('cYear').textContent = Y;
-  document.getElementById('cYearL').textContent = `${SLR[state.scen].name} · bay +${sea.toFixed(0)}″`;
+  document.getElementById('cYearL').textContent = `${SLR[state.scen].name} · bay +${(sea * groundU.uRise.value).toFixed(0)}″`;
   document.getElementById('dYear').textContent = Y;
   document.getElementById('dYearL').textContent = `bay +${sea.toFixed(0)}″${state.storm ? ' · storm' : ''}`;
   yrEl.value = Y; yrEl.style.setProperty('--p', (Y - 2026) / 32);
@@ -1955,6 +1961,9 @@ const CROSSINGS = ['US-101 / I-580 direct connector', 'San Rafael Canal Crossing
 const MARSHES = ['Tiscornia Marsh restoration', 'McInnis Marsh restoration'];
 // the story always runs on the same assumptions; the sandbox is where they change
 const STORY_STATE = { scen: 'Int', storm: false, protect: false, spec: true };
+// sea level on the map: in the story the water is held at today's high tide until a step about flooding comes on
+// screen, then rises to that year's level; scrolling back above those steps lets it drain away again
+const floodAnim = { t: 1, target: 1, snap: false };
 
 function storyCtx() {
   const canal = ZONES.find(z => z.id === 'canal');
@@ -2045,7 +2054,7 @@ const STEPS = [
     deck: () => `The solid ochre lines are the roughly ${miles(bikeStats.exist)} miles of bikeways San Rafael has today. The magenta ones are another ${miles(bikeStats.plan)} miles in the city’s draft Bicycle & Pedestrian Plan, ${bikeStats.top} of its ${bikeStats.routes} routes marked top priority, plus ${bikeStats.fixes} fixes at crossings that are hard to walk or bike today. The plan sets priorities for the next 5–10 years but gives no build dates.`,
     stats: () => [{ n:miles(bikeStats.exist), suf:' mi', l:'of bikeways today' }, { n:miles(bikeStats.plan), suf:' mi', l:'more in the draft plan' }, { n:bikeStats.fixes, l:'crossing fixes' }] },
 
-  { id:'water', act:4, tag:'Water', key: c => c.canalYear == null ? 2050 : Math.max(2027, c.canalYear),
+  { id:'water', act:4, tag:'Water', flood:true, key: c => c.canalYear == null ? 2050 : Math.max(2027, c.canalYear),
     shot:{ t:[37.9630,-122.4985], d:3600, az:40, el:38, drift:16, dolly:-0.1 },
     focus: () => namesTo(['Casa Canal', '88 Vivian Street', 'Marin Square vision', 'Pickleweed Park upgrades']),
     call: [['zone:canal','Canal District & Pickleweed', c => c.canalYear ? `Tidal flooding from ${c.canalYear}` : 'Dry in this scenario'], ['zone:spinnaker','Spinnaker Point & Baypoint','Flooded'], ['Casa Canal','Casa Canal','41 supportive homes · opened 2025']],
@@ -2055,7 +2064,7 @@ const STEPS = [
       `In California’s likely case the bay is ${slrIn(c.canalYear, 'Int').toFixed(0)} in above its 2000 level by ${c.canalYear}, and the Canal’s ground keeps sinking about 0.4 in a year. That is enough for ordinary high tides to spill into the city’s densest neighborhood, home to 12,000–16,000 people. Bellam Blvd, its main route to 101, goes under at about a foot.`,
     stats: c => [{ t:c.canalYear ? String(c.canalYear) : 'Never', l:'first regular flooding in the Canal' }, { t:'12–16k', l:'people live in the Canal' }, { n:c.wet2058, l:`of ${ZONES.length} low-lying areas flooded by 2058` }] },
 
-  { id:'marsh', act:4, tag:'Marshes', key: () => 2040, fit:true,
+  { id:'marsh', act:4, tag:'Marshes', flood:true, key: () => 2040, fit:true,
     shot:{ t:[37.9935,-122.5010], d:6900, az:104, el:40, drift:4, dolly:0 },
     focus: () => namesTo(MARSHES),
     call: [['Tiscornia Marsh restoration','Tiscornia Marsh','raised levee + wider marsh'], ['McInnis Marsh restoration','McInnis Marsh','22–30 ac · needs construction money']],
@@ -2064,7 +2073,7 @@ const STEPS = [
     deck: () => 'Two projects answer the water with mud and plants instead of concrete. At the mouth of San Rafael Creek, Marin Audubon’s Tiscornia Marsh raises about 2,000 ft of levee behind a gentle slope and widens the marsh in front of the Canal. Up the shore, Marin County Parks would turn dredged creek mud into tidal marsh at McInnis Park, once construction is funded. Marshes calm waves and can build up as the bay rises, but only so far.',
     stats: () => [{ n:2000, suf:' ft', l:'of raised levee at Tiscornia' }, { t:'10–16 ac', l:'of marsh at Tiscornia' }, { t:'22–30 ac', l:'of new tidal marsh at McInnis' }] },
 
-  { id:'gate', act:4, tag:'Floodgate', whatIf:true, set:{ protect:true }, key: () => 2045,
+  { id:'gate', act:4, tag:'Floodgate', flood:true, whatIf:true, set:{ protect:true }, key: () => 2045,
     shot:{ t:[37.9635,-122.4950], d:3200, az:30, el:38, drift:12, dolly:-0.08 },
     focus: () => [],
     call: [['gate','Canal floodgate','Feasibility study, 2025'], ['zone!canal','Canal District','dry behind the levee']],
@@ -2082,7 +2091,7 @@ const STEPS = [
     deck: () => 'No developer has filed anything that would finish after the mid-2030s. These white ghosts fill sites the Housing Element and Downtown Precise Plan already zone for homes, at about the pace General Plan 2040 projects. Read them as capacity, not a forecast.',
     stats: c => [{ n:c.specHomes, l:'illustrative homes' }, { n:c.specSites, l:'sites already zoned for housing' }, { n:0, l:'applications filed for any of them' }] },
 
-  { id:'finale', act:5, tag:'2058', end:true, key: () => 2058,
+  { id:'finale', act:5, tag:'2058', flood:true, end:true, key: () => 2058,
     shot:{ t:[37.9790,-122.5160], d:10200, az:4, el:30, drift:30, dolly:0.04 },
     focus: () => null,
     call: [['Northgate Town Square — Phase 2','Northgate Town Square','1,422 homes'], ['700 Irwin Street tower','Downtown','up to 180 ft'], ['zone:canal','Canal District','tidal flooding']],
@@ -2191,7 +2200,7 @@ function placeCallouts() {
   const items = callouts.map(c => {
     let ok;
     if (c.a.o) { const o = c.a.o; ok = o.prog > 0.3; const tp = o.parts.reduce((m, pt) => Math.max(m, pt.g.position.y + pt.h * pt.g.scale.y), -1e9); tmpV.set(o.p.x, tp + 2, o.p.z); }
-    else if (c.a.zo) { const zo = c.a.zo; ok = c.a.always ? state.protect : zo.cur > 0.4; tmpV.set(zo.z.x, zo.g.position.y, zo.z.z); }
+    else if (c.a.zo) { const zo = c.a.zo; ok = c.a.always ? state.protect : zo.cur > 0.4 && groundU.uRise.value > 0.7; /* wait for the water to arrive */ tmpV.set(zo.z.x, zo.g.position.y, zo.z.z); }
     else { ok = protectGroup.visible; const g = protectGroup.userData.gate; tmpV.set(g[0], yAt(g[0], g[1]) + 18, g[1]); }
     tmpV.project(camera);
     const sx = (tmpV.x + 1) / 2 * w, sy = (1 - tmpV.y) / 2 * h;
@@ -2268,6 +2277,7 @@ function activateStep(i) {
   cine.act = st.act;
   calloutsHost.style.setProperty('--act', `var(--act${st.act})`); sprog.style.setProperty('--act', `var(--act${st.act})`);
   ringColor.copy(tok(`--act${st.act}`));
+  floodAnim.target = st.flood ? 1 : 0; if (floodAnim.snap || reduceMotion()) { floodAnim.t = floodAnim.target; floodAnim.snap = false; }
   const protect = !!(st.set && st.set.protect);
   if (state.protect !== protect) { state.protect = protect; update(); }
   showBikes(!!(st.set && st.set.bikes));
@@ -2302,7 +2312,7 @@ function enterStory() {
   cine.list = STEPS.filter(st => !st.when || st.when(cine.ctx)).map(st => Object.assign({}, st, { key: st.key(cine.ctx) }));
   stepsEl.innerHTML = cine.list.map((st, i, L) => stepHTML(st, i, L)).join('');
   buildActs();
-  cine.active = true; cine.i = -1;
+  cine.active = true; cine.i = -1; floodAnim.snap = true;
   frameForStory(); measureSteps(); fitShots();
   storyEl.scrollTop = cine.lastTop; cine.s = cine.sT = scrollPos();
   cine.from = { t: controls.target.clone(), p: camera.position.clone() }; cine.enter = reduceMotion() ? 1 : 0;
@@ -2312,6 +2322,7 @@ function enterStory() {
 function leaveStory() {
   cine.lastTop = storyEl.scrollTop;
   cine.active = false; cine.focus = null; cine.fadeT = 0; cine.i = -1; cine.act = null;
+  floodAnim.target = floodAnim.t = 1; groundU.uRise.value = 1;
   buildRings([], 0); calloutsHost.innerHTML = ''; callouts = [];
   showBikes(document.getElementById('tBike').checked);
   ringColor.copy(tok('--accent'));
@@ -2412,6 +2423,13 @@ function loop(now) {
   treeMat.color.copy(treeBase).lerp(mutedMat.color, fk * 0.6);
   if (rings.length) showRings();
   if (tickBikeDraw(dt)) moving = true;
+  { // rise over ~3.5 s, drain over ~1.5 s; the year label counts the bay up with it
+    const fd = floodAnim.target - floodAnim.t;
+    if (Math.abs(fd) > 0.0005) { floodAnim.t += Math.sign(fd) * Math.min(Math.abs(fd), dt / (fd > 0 ? 3.5 : 1.5)); moving = true; } else floodAnim.t = floodAnim.target;
+    const r = smooth(floodAnim.t), fk = cine.active && cine.list[cine.i] && cine.list[cine.i].flood ? 1 : 0;
+    if (r !== groundU.uRise.value) { groundU.uRise.value = r; document.getElementById('cYearL').textContent = `${SLR[state.scen].name} · bay +${(slrIn(state.year, state.scen) * r).toFixed(0)}″`; }
+    const dk = fk - groundU.uFloodK.value; if (Math.abs(dk) > 0.002) { groundU.uFloodK.value += dk * kZ; moving = true; } else groundU.uFloodK.value = fk;
+  }
   const az = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z);
   needle.setAttribute('transform', `rotate(${(az * 180 / Math.PI).toFixed(1)} 20 20)`);
   if (bikeGroup && bikeGroup.visible) bikeDash.value = Math.pow(2, Math.round(Math.log2(Math.max(1, camera.position.distanceTo(controls.target) * streetPx.value * 18))));
@@ -2505,7 +2523,7 @@ function boot({ osm, dem, roads, groundImg, labels, bikes }) {
   const ld = document.getElementById('loading'); if (mode === 'sandbox') ld.classList.add('away'); // the intro and the story open on the same title, so only the sandbox fades it
   setTimeout(() => { ld.classList.add('done'); app.classList.remove('booting'); }, 60); // after the first frame of the map is up
   requestRender();
-  window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY, cine, camera, controls, bikeGroup, bikeDash, bikeDraw, setMode, post, requestRender, draw, shotPose };
+  window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY, cine, camera, controls, bikeGroup, bikeDash, bikeDraw, setMode, post, requestRender, draw, shotPose, groundU, floodAnim };
 }
 const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
