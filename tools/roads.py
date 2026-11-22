@@ -3,7 +3,7 @@
 # 101→580 connector project is built along them. Tunnels are dropped.
 # Fetch roads.json from Overpass (overpass.kumi.systems if the main server is busy):
 #   [out:json][timeout:240];way["highway"~"^(trunk|trunk_link|primary|primary_link|secondary|secondary_link|
-#   tertiary|tertiary_link|residential|unclassified|living_street)$"](37.885,-122.665,38.105,-122.355);out tags geom qt;
+#   tertiary|tertiary_link|residential|unclassified|living_street)$"](37.885,-122.665,38.16,-122.355);out tags geom qt;
 # Usage: python3 tools/roads.py raw_roads.json roads.json
 # Each entry is [class, bridge, x0, z0, dx1, dz1, …] in units of q metres;
 # class 1 trunk/primary, 2 secondary, 3 tertiary, 4 residential/minor, 5 ramps/links.

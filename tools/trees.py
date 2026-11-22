@@ -2,6 +2,7 @@
 # metre frame (see XY() in index.html).
 # Input: the canopy-height tile covering the map, a uint8 GeoTIFF in EPSG:3857 (metres of canopy height):
 #   https://dataforgood-fb-data.s3.amazonaws.com/forests/v1/alsgedi_global_v6_float/chm/023010203.tif  (~250 MB)
+# The north strip (38.105–38.16) was baked with ATLAS_BBOX=-122.665,38.105,-122.355,38.16 and appended.
 # Needs rasterio and scipy. Usage: python3 tools/trees.py 023010203.tif buildings.json trees.bin
 #
 # Treetops are local maxima of the lightly smoothed canopy at ~2 m resolution, at least 4 m tall and outside OSM
@@ -10,7 +11,9 @@
 # only the tallest treetop per ~25 m cell is kept to give the slopes texture without millions of trees.
 # Output (little-endian): uint32 n, then int16 x[n], int16 z[n] (metres), uint8 h[n] (quarter metres).
 # Also prints tree cover (share of ground under canopy ≥ 3 m) around each neighbourhood label.
-import sys, math, json, struct
+import sys, os, math, json, struct
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from coast import LONMIN, LONMAX, LATMIN, LATMAX
 import numpy as np, rasterio
 from rasterio.windows import from_bounds
 from scipy.ndimage import maximum_filter, gaussian_filter
@@ -22,7 +25,7 @@ KX = 111320 * math.cos(LAT0 * D2R); KZ = 110950
 R = 6378137.0
 def merc(lon, lat): return (lon * D2R * R, R * math.log(math.tan(math.pi / 4 + lat * D2R / 2)))
 def unmerc(mx, my): return (mx / R / D2R, (2 * math.atan(math.exp(my / R)) - math.pi / 2) / D2R)
-MX0, MY0 = merc(-122.665, 37.885); MX1, MY1 = merc(-122.355, 38.105)
+MX0, MY0 = merc(LONMIN, LATMIN); MX1, MY1 = merc(LONMAX, LATMAX)
 
 with rasterio.open(src) as d:
     w = from_bounds(MX0, MY0, MX1, MY1, d.transform).round_offsets().round_lengths()
@@ -87,6 +90,7 @@ HOODS = [['Downtown', 37.9748, -122.5300], ['Gerstle Park', 37.9665, -122.5370],
 for name, lat, lon in HOODS:
     mx, my = merc(lon, lat); c0, r0 = (mx - left) / res, (top - my) / res
     rad = 450 / math.cos(lat * D2R) / res
+    if not (rad <= r0 < full.shape[0] - rad and rad <= c0 < full.shape[1] - rad): continue  # off this bbox
     rr, cc = np.ogrid[int(r0 - rad):int(r0 + rad), int(c0 - rad):int(c0 + rad)]
     m = (rr - r0) ** 2 + (cc - c0) ** 2 <= rad * rad
     sub = full[int(r0 - rad):int(r0 + rad), int(c0 - rad):int(c0 + rad)]

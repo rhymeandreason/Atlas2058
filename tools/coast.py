@@ -7,7 +7,12 @@ import numpy as np
 from scipy import ndimage
 from scipy.spatial import cKDTree
 
-LONMIN, LONMAX, LATMIN, LATMAX = -122.665, -122.355, 37.885, 38.105
+import os
+# The map bbox. ATLAS_BBOX="lonmin,latmin,lonmax,latmax" overrides it to bake one strip of a grid layer
+# (ground.png, trees.bin) that is then stitched onto the existing file, e.g. when the map is extended.
+LONMIN, LONMAX, LATMIN, LATMAX = -122.665, -122.355, 37.885, 38.16
+if os.environ.get('ATLAS_BBOX'):
+    LONMIN, LATMIN, LONMAX, LATMAX = map(float, os.environ['ATLAS_BBOX'].split(','))
 LAT0 = 37.983
 KX, KZ = 111320 * math.cos(LAT0 * math.pi / 180), 110950
 

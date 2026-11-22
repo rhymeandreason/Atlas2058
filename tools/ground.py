@@ -6,13 +6,15 @@
 #
 # Inputs (fetch once; see each source's note):
 #   nlcd.png    NLCD 2021 land cover, MRLC WMS GetMap layers=NLCD_2021_Land_Cover_L48, srs=EPSG:4326,
-#               bbox=-122.665,37.885,-122.355,38.105, width=2600, height=2300, format=image/png
+#               bbox=-122.665,37.885,-122.355,38.16, width=2600, height=2875, format=image/png
 #   lc*.json    Overpass land-use, leisure, natural, amenity, protected-area and pier features. Use `out geom`
 #               (not `out tags geom`, which drops relation members, i.e. every multipolygon park and preserve)
 #   coast.json  Overpass natural=coastline (as for terrain.py)
 #   tiles/      NOAA SLR Viewer depth tiles, zoom 14, named {level}_{y}_{x}.png, from
 #               https://coast.noaa.gov/arcgis/rest/services/dc_slr/slr_{level}/MapServer/tile/14/{y}/{x}
 #               for level in 0ft, 0_5ft, … 10ft over the low-lying shore
+# The north strip (38.105–38.16, added with Novato) was baked on its own with
+#   ATLAS_BBOX=-122.665,38.105,-122.355,38.16 (nlcd.png then 2600×575) and stacked above the older 2600×2300 image.
 # Usage: python3 tools/ground.py nlcd.png coast.json tiles/ ground.png lc1.json [lc2.json …]
 import sys, os, json, math
 import numpy as np
@@ -20,7 +22,7 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from coast import land_mask, LONMIN, LONMAX, LATMIN, LATMAX
 
-W, H = 2600, 2300
+W = 2600; H = round((LATMAX - LATMIN) / 0.22 * 2300)  # 2875 rows for the full map; same pixel size for a strip
 nlcd_path, coast_path, tile_dir, out_path = sys.argv[1:5]
 lc_paths = sys.argv[5:]
 CLASSES = ['land', 'forest', 'scrub', 'grass', 'sand', 'wetland', 'water', 'park', 'golf', 'sports', 'campus',

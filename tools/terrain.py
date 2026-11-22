@@ -5,18 +5,17 @@
 # Inputs (fetch once):
 #   dem.tif    3DEP exportImage with square pixels (the server reshapes non-square requests):
 #              https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/exportImage
-#              ?bbox=-122.67,37.88,-122.35,38.11&bboxSR=4326&imageSR=4326&size=1600,1150&format=tiff
+#              ?bbox=-122.67,37.88,-122.35,38.165&bboxSR=4326&imageSR=4326&size=1600,1425&format=tiff
 #              &pixelType=F32&interpolation=RSP_BilinearInterpolation&f=image
-#   coast.json Overpass: [out:json];way["natural"="coastline"](37.885,-122.665,38.105,-122.355);out geom;
+#   coast.json Overpass: [out:json];way["natural"="coastline"](37.885,-122.665,38.16,-122.355);out geom;
 # Usage: python3 tools/terrain.py dem.tif coast.json terrain.bin
 import sys, os, math
 import numpy as np
 from PIL import Image
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from coast import land_mask
+from coast import land_mask, LONMIN, LONMAX, LATMIN, LATMAX
 
-NX, NZ = 620, 554
-LONMIN, LONMAX, LATMIN, LATMAX = -122.665, -122.355, 37.885, 38.105
+NX, NZ = 620, 693
 LAT0 = 37.983
 KX, KZ = 111320 * math.cos(LAT0 * math.pi / 180), 110950
 DATUM = 0.9      # NAVD88 → approximate local mean sea level (m)

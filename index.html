@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light"><!-- dark mode off: remove data-theme to follow the OS again -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>San Rafael 2058</title>
@@ -173,6 +173,9 @@ details.about a { word-break: break-word; }
 .facts dt { color: var(--muted); }
 .facts dd { margin: 0; font-variant-numeric: tabular-nums; }
 .card p.note { margin: 0; font-size: 13px; }
+.card .tbd { margin: 0; font-size: 12.5px; padding: 8px 10px; border: 1.5px dashed var(--s-uc); border-radius: 8px; background: color-mix(in srgb, var(--s-uc) 12%, transparent); }
+.tbdtag { color: var(--s-uc); font-weight: 600; }
+.card .tbd b { display: block; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 2px; }
 .card .src { display: grid; gap: 6px; margin-top: 4px; padding-top: 10px; border-top: 1px solid var(--line); }
 .card .srcmain { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-family: var(--body); font-weight: 700; font-size: 14px; color: var(--ink); background: color-mix(in srgb, var(--ink) 5%, transparent); text-decoration: none; border: 1px solid color-mix(in srgb, var(--ink) 35%, transparent); border-radius: 8px; padding: 10px 14px; transition: background .15s, border-color .15s, transform .15s; }
 .card .srcmain:hover { border-color: var(--ink); background: color-mix(in srgb, var(--ink) 10%, transparent); }
@@ -229,7 +232,10 @@ details.about a { word-break: break-word; }
 .bar.top { top: 0; transform-origin: top; transform: scaleY(0); transition: transform .8s cubic-bezier(.6,0,.2,1); }
 /* the timeline bar fades up into the map instead of starting at a hard edge */
 .bar.bot { bottom: 0; z-index: 6; background: none; height: calc(var(--lbh) + var(--bpad)); padding-bottom: var(--bpad); }
-.bar.bot::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: calc(100% + 64px); z-index: -1; pointer-events: none; background: linear-gradient(to top, rgba(8,11,10,.9) 0, rgba(8,11,10,.72) var(--lbh), rgba(8,11,10,.32) calc(var(--lbh) + 26px), rgba(8,11,10,0) 100%); }
+.bar.bot::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: calc(100% + 64px); z-index: -1; pointer-events: none; background: linear-gradient(to top, color-mix(in srgb, var(--bar-shade) 90%, transparent) 0, color-mix(in srgb, var(--bar-shade) 72%, transparent) var(--lbh), color-mix(in srgb, var(--bar-shade) 32%, transparent) calc(var(--lbh) + 26px), transparent 100%); }
+/* while exploring, the timeline bar takes the page theme; the story keeps its dark letterbox */
+.bar.bot { --bar-shade: #080b0a; }
+.app:not(.cinema) .bar.bot { --bar-shade: var(--bg); --cine-bg: var(--panel); --cine-ink: var(--ink); --cine-dim: var(--muted); --cine-accent: var(--accent); }
 .app.cinema .bar.top { transform: none; }
 .bar.top > * { opacity: 0; transition: opacity .3s; }
 .app.cinema .bar.top > * { opacity: 1; transition: opacity .5s .55s; }
@@ -241,7 +247,7 @@ details.about a { word-break: break-word; }
 
 .cine-brand { font-family: var(--body); font-weight: 600; font-size: 12.5px; color: var(--cine-dim); white-space: nowrap; }
 .cine-ch { flex: 1; min-width: 0; font-family: var(--body); font-weight: 600; font-size: 12.5px; color: var(--cine-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-.cbtn { background: transparent; border: 1px solid rgba(255,255,255,.24); color: var(--cine-ink); border-radius: 999px; height: 34px; min-width: 34px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-size: 12.5px; white-space: nowrap; }
+.cbtn { background: transparent; border: 1px solid color-mix(in srgb, var(--cine-ink) 24%, transparent); color: var(--cine-ink); border-radius: 999px; height: 34px; min-width: 34px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-size: 12.5px; white-space: nowrap; }
 .cbtn:hover { border-color: var(--cine-ink); }
 .cbtn svg { width: 12px; height: 12px; fill: currentColor; flex: none; }
 .cbtn.icon { padding: 0; }
@@ -254,13 +260,13 @@ details.about a { word-break: break-word; }
 .segs { flex: 1; display: flex; gap: 5px; min-width: 0; touch-action: pan-y; }
 .app:not(.cinema) .segs { cursor: ew-resize; }
 .sg { flex: 1; min-width: 0; border: 0; background: none; padding: 6px 0; cursor: pointer; color: var(--cine-dim); display: grid; gap: 7px; text-align: left; }
-.sg i { display: block; height: 3px; border-radius: 2px; background: rgba(255,255,255,.2); position: relative; overflow: hidden; }
+.sg i { display: block; height: 3px; border-radius: 2px; background: color-mix(in srgb, var(--cine-ink) 20%, transparent); position: relative; overflow: hidden; }
 .sg i::after { content: ""; position: absolute; inset: 0; background: var(--cine-ink); transform-origin: left; transform: scaleX(var(--p, 0)); }
 .sg span { font-family: var(--body); font-weight: 600; font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sg span b { font-weight: 500; color: var(--cine-ink); opacity: .55; margin-right: 6px; }
 .sg[aria-current="true"] span { color: var(--cine-ink); }
 .app:not(.cinema) .sg[aria-current="true"] i::after { background: var(--cine-accent); }
-.segtip { position: absolute; bottom: calc(100% + 10px); left: 0; transform: translateX(-50%); width: max-content; max-width: min(300px, 80vw); background: var(--cine-bg); color: var(--cine-ink); border: 1px solid rgba(255,255,255,.14); border-radius: 8px; padding: 9px 12px 10px; pointer-events: none; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+.segtip { position: absolute; bottom: calc(100% + 10px); left: 0; transform: translateX(-50%); width: max-content; max-width: min(300px, 80vw); background: var(--cine-bg); color: var(--cine-ink); border: 1px solid color-mix(in srgb, var(--cine-ink) 14%, transparent); border-radius: 8px; padding: 9px 12px 10px; pointer-events: none; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
 .segtip small { display: block; font-family: var(--body); font-weight: 600; font-size: 11.5px; color: var(--cine-accent); margin-bottom: 3px; }
 .segtip b { display: block; font-family: var(--serif); font-weight: 400; font-size: 17px; line-height: 1.15; text-wrap: balance; }
 .sg:hover span { color: var(--cine-ink); }
@@ -301,8 +307,8 @@ details.about a { word-break: break-word; }
   .panel { position: static; order: 1; width: auto; max-height: none; overflow: visible; border: 0; border-radius: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--panel); padding: 20px 16px 28px; }
   h1 { font-size: 46px; }
   .card { top: auto; bottom: 10px; right: 10px; left: 10px; width: auto; max-height: 62%; }
-  .views { top: 10px; right: 10px; }
-  .views button { padding: 5px 8px; font-size: 12px; }
+  .views { top: 10px; right: 10px; gap: 4px; }
+  .views button { padding: 5px 6px; font-size: 12px; }
 }
 @media (max-width: 760px) {
   :root { --lbh: 46px; }
@@ -349,6 +355,7 @@ details.about a { word-break: break-word; }
       <button type="button" data-view="downtown">Downtown</button>
       <button type="button" data-view="northgate">Northgate</button>
       <button type="button" data-view="canal">Canal</button>
+      <button type="button" data-view="novato">Novato</button>
     </div>
     <div class="cyear" aria-hidden="true"><span class="cyear-l" id="cYearL"></span><span id="cYear">2058</span></div>
     <div class="hint">Drag to pan · right-drag or two fingers to rotate · scroll to zoom · click a building or flood zone</div>
@@ -478,7 +485,7 @@ if (!window.THREE) { document.getElementById('loading').classList.add('err'); do
 const D2R = Math.PI / 180, LAT0 = 37.983, LON0 = -122.515;
 const KX = 111320 * Math.cos(LAT0 * D2R), KZ = 110950;
 const EX = 1.6; // vertical exaggeration of terrain
-const LONMIN = -122.665, LONMAX = -122.355, LATMIN = 37.885, LATMAX = 38.105;
+const LONMIN = -122.665, LONMAX = -122.355, LATMIN = 37.885, LATMAX = 38.16;
 const XY = (lat, lon) => [(lon - LON0) * KX, -(lat - LAT0) * KZ];
 
 // Shoreline traced from geocoded points (est.), Corte Madera Creek → San Quentin → Canal → Pt San Pedro → China Camp → McInnis → north
@@ -491,10 +498,12 @@ const LAND = LAND_LL.map(p => XY(p[0], p[1]));
 const TIB = TIB_LL.map(p => XY(p[0], p[1])), RICH = RICH_LL.map(p => XY(p[0], p[1]));
 const LANDS = [LAND, TIB, RICH], SHORES = [SHORE, TIB, RICH];
 
-const HWY101 = [[38.054,-122.5335],[38.035,-122.536],[38.0205,-122.537],[38.0165,-122.5385],[38.010,-122.5395],[38.006,-122.5395],[38.0016,-122.536],[37.9985,-122.5345],[37.992,-122.5315],[37.9863,-122.528],[37.979,-122.5245],[37.9725,-122.5215],[37.970,-122.5213],[37.965,-122.515],[37.9605,-122.5115],[37.9545,-122.5135],[37.948,-122.515],[37.9455,-122.5155],[37.938,-122.5168],[37.921,-122.518]];
+const HWY101 = [[38.1589,-122.5702],[38.157,-122.5689],[38.1511,-122.5667],[38.1483,-122.5658],[38.1445,-122.5646],[38.1396,-122.564],[38.1356,-122.5639],[38.1314,-122.564],[38.128,-122.5649],[38.1239,-122.5658],[38.1213,-122.5657],[38.115,-122.5648],[38.1115,-122.5641],[38.1088,-122.5635],[38.1029,-122.5618],[38.1006,-122.5617],[38.0959,-122.5613],[38.0931,-122.56],[38.0882,-122.5548],[38.0837,-122.5503],[38.0785,-122.5446],[38.0762,-122.5425],[38.0712,-122.5397],[38.0682,-122.5383],[38.0649,-122.5362],[38.0593,-122.5317],[38.0568,-122.5308],[38.054,-122.5335],[38.035,-122.536],[38.0205,-122.537],[38.0165,-122.5385],[38.010,-122.5395],[38.006,-122.5395],[38.0016,-122.536],[37.9985,-122.5345],[37.992,-122.5315],[37.9863,-122.528],[37.979,-122.5245],[37.9725,-122.5215],[37.970,-122.5213],[37.965,-122.515],[37.9605,-122.5115],[37.9545,-122.5135],[37.948,-122.515],[37.9455,-122.5155],[37.938,-122.5168],[37.921,-122.518]];
 const I580 = [[37.9605,-122.5115],[37.959,-122.507],[37.9565,-122.502],[37.954,-122.4975],[37.951,-122.493],[37.9475,-122.4895],[37.945,-122.4855],[37.944,-122.4815],[37.9440,-122.4760],[37.9443,-122.4728]];
+// State Route 37 from US-101 east to where OSM's Sears Point Road (in roads.json) takes over; from OSM motorway centrelines
+const SR37 = [[38.0811,-122.5445],[38.0841,-122.5393],[38.0857,-122.5368],[38.0882,-122.5336],[38.0933,-122.527],[38.0966,-122.5228],[38.098,-122.5209],[38.1028,-122.5148],[38.1056,-122.5115],[38.1113,-122.5082],[38.1175,-122.503],[38.1194,-122.5005],[38.122,-122.4963],[38.1245,-122.4925]];
 const RSR_BRIDGE = [[37.9443,-122.4728,6],[37.9425,-122.466,16],[37.9405,-122.458,26],[37.9385,-122.450,40],[37.937,-122.444,52],[37.9355,-122.438,40],[37.9347,-122.4338,30],[37.9325,-122.426,44],[37.931,-122.418,30]];
-const SMART = [[38.054,-122.5322],[38.035,-122.5348],[38.020,-122.5375],[38.010,-122.5392],[38.0016,-122.5374],[37.996,-122.5355],[37.990,-122.5315],[37.984,-122.527],[37.979,-122.5235],[37.974,-122.5228],[37.97083,-122.5225],[37.9675,-122.5205],[37.964,-122.519],[37.9605,-122.5195],[37.9555,-122.518],[37.951,-122.515],[37.94785,-122.51248],[37.946,-122.5112]];
+const SMART = [[38.1597,-122.5659],[38.1559,-122.5646],[38.1546,-122.5644],[38.1465,-122.5644],[38.1452,-122.5643],[38.1394,-122.5638],[38.1366,-122.5636],[38.1304,-122.5633],[38.1288,-122.5636],[38.1218,-122.5658],[38.1198,-122.5662],[38.1172,-122.5664],[38.1115,-122.5662],[38.107,-122.565],[38.1051,-122.5637],[38.1004,-122.56],[38.0953,-122.5557],[38.093,-122.5538],[38.0852,-122.5473],[38.0837,-122.5461],[38.0803,-122.5441],[38.0774,-122.5425],[38.0699,-122.5385],[38.0675,-122.537],[38.0647,-122.5341],[38.0591,-122.5263],[38.0582,-122.5253],[38.0529,-122.5218],[38.0514,-122.5211],[38.0451,-122.5198],[38.0406,-122.5193],[38.0345,-122.521],[38.0298,-122.5225],[38.0242,-122.5243],[38.0187,-122.526],[38.0147,-122.5278],[38.0085,-122.5307],[38.007,-122.5318],[38.0016,-122.5374],[37.996,-122.5355],[37.990,-122.5315],[37.984,-122.527],[37.979,-122.5235],[37.974,-122.5228],[37.97083,-122.5225],[37.9675,-122.5205],[37.964,-122.519],[37.9605,-122.5195],[37.9555,-122.518],[37.951,-122.515],[37.94785,-122.51248],[37.946,-122.5112]];
 const CREEK = [[37.9712,-122.5235],[37.9695,-122.5215],[37.9690,-122.5195],[37.9695,-122.5170],[37.9685,-122.5110],[37.9675,-122.5090],[37.9672,-122.5030],[37.9670,-122.4985],[37.9670,-122.4930],[37.96722,-122.48639],[37.9675,-122.4825]];
 const FOURTH = [[37.9770,-122.5530],[37.97616,-122.54921],[37.97425,-122.53869],[37.97350,-122.53250],[37.97310,-122.52713],[37.97255,-122.52267],[37.97240,-122.52070],[37.97220,-122.51800]];
 const SANPEDRO = [[37.9695,-122.5125],[37.96843,-122.50599],[37.97367,-122.49832],[37.97436,-122.48448],[37.98222,-122.47306],[37.99015,-122.45773],[37.99609,-122.45652],[38.0005,-122.4620],[38.0065,-122.4750],[38.0085,-122.4890],[38.0030,-122.5050],[37.99674,-122.52833],[37.9975,-122.53028]];
@@ -577,7 +586,7 @@ function elevAdjust(x, z, e) {
 
 /* ---------------- terrain grid ---------------- */
 const [X0, Z1] = XY(LATMIN, LONMIN), [X1, Z0] = XY(LATMAX, LONMAX);
-const NX = 620, NZ = 554; // ~44 m cells; must match tools/terrain.py
+const NX = 620, NZ = 693; // ~44 m cells; must match tools/terrain.py
 const GW = X1 - X0, GH = Z1 - Z0;
 const HGT = new Float32Array((NX + 1) * (NZ + 1));
 function heightAt(x, z) { // true metres, bilinear
@@ -649,7 +658,31 @@ const P = [
   { n:'San Quentin Learning Center', a:'San Quentin Rehabilitation Center', lat:37.9405, lon:-122.4870, st:'built', y:2026, yb:'c', fl:3, u:0, kind:'multi', n2:4, w:110, d:80, sz:'About 80,000 sf in four buildings', note:'Part of converting San Quentin into a rehabilitation center. Opened February 2026 ($239M).', src:['https://www.cdcr.ca.gov/news/2026/02/20/cdcr-announces-the-completion-of-san-quentin-learning-center/'] },
   // Southwest
   { n:'Dominican residential development', a:'Magnolia Ave & Deer Park Ave', lat:37.97900, lon:-122.51150, st:'proposed', y:2031, yb:'a', kind:'houses', fl:2, u:50, w:190, d:140, note:'50 homes plus 14 junior ADUs on Dominican land; an EIR is under way and the project is contested.', src:['https://www.cityofsanrafael.org/dominican-residential-development/'] },
-  { n:'Auburn Grove', a:'Woodland Ave & Auburn St (unincorporated)', lat:37.96342, lon:-122.52109, st:'approved', y:2028, yb:'a', kind:'rows', fl:3, ft:38, u:79, w:150, d:120, note:'79 townhomes in 16 buildings. Approved June 2025; permits under review in 2026.', src:['https://www.marincounty.gov/departments/cda/major-housing-projects/pierce-co-properties-auburn-grove-san-rafael'] }
+  { n:'Auburn Grove', a:'Woodland Ave & Auburn St (unincorporated)', lat:37.96342, lon:-122.52109, st:'approved', y:2028, yb:'a', kind:'rows', fl:3, ft:38, u:79, w:150, d:120, note:'79 townhomes in 16 buildings. Approved June 2025; permits under review in 2026.', src:['https://www.marincounty.gov/departments/cda/major-housing-projects/pierce-co-properties-auburn-grove-san-rafael'] },
+  // Novato (town:'Novato' keeps them out of the headline stats, which follow San Rafael's population projection).
+  // Footprints and placements are approximate unless a note says otherwise.
+  { town:'Novato', n:'Fireman\'s Fund site — apartments', a:'773–777 San Marin Dr, Novato', lat:38.12220, lon:-122.56920, st:'approved', y:2031, yb:'a', start:2028, kind:'multi', n2:6, fl:4, u:725, w:190, d:150, note:'Wolf Properties\' plan for the 44-acre former Fireman\'s Fund headquarters beside the San Marin SMART station. The city council approved it in January 2024 and the office buildings came down from fall 2025. A subdivision map filed in 2026 (P2026-009, under review in March 2026) sets out about 725 apartments on three parcels plus 203 house and townhome lots. Earlier counts were 1,081 homes, with zoning for up to 1,300. Building heights and the split of the site are placeholders.', src:['https://www.novato.gov/government/community-development/planning-division/planning-projects/777-san-marin-drive-vesting-tentative-map/-selectview-0','https://www.northbaybiz.com/2025/09/08/firemans-fund-buildings-face-wrecking-ball/','https://callmarinhome.org/project/firemans-fund/'] },
+  { town:'Novato', n:'Fireman\'s Fund site — houses & townhomes', a:'773–777 San Marin Dr, Novato', lat:38.12320, lon:-122.57360, st:'approved', y:2032, yb:'a', start:2028, kind:'houses', fl:2, u:203, w:200, d:170, note:'The same subdivision map lays out 119 single-family lots and 84 townhome lots on the west side of the former campus. Placement within the site is a placeholder.', src:['https://www.novato.gov/government/community-development/planning-division/planning-projects/777-san-marin-drive-vesting-tentative-map/-selectview-0'] },
+  { town:'Novato', n:'Eames Institute museum', a:'Former Birkenstock campus, Redwood Blvd, Novato', lat:38.13760, lon:-122.56610, st:'proposed', y:2030, yb:'r', start:2028, fl:2, ft:45, u:0, w:120, d:150, sz:'Museum with a 48,000 sf Great Hall, six galleries, library and 275-seat theater; 45,000 sf conference center; 85–88 acres', note:'The Eames Institute of Infinite Curiosity bought the former Birkenstock warehouse and grounds for $36M and filed a master plan with Novato in October 2026. Herzog & de Meuron would convert the 1964 warehouse; Field Operations designs the landscape. The institute aims to start building in 2028 and open in 2030, though no cost or firm schedule has been released. The box follows the existing warehouse; its height is a guess.', src:['https://sfist.com/2026/10/28/new-renderings-revealed-as-eames-institute-moves-forward-at-former-birkenstock-site/','https://www.dezeen.com/2026/10/29/herzog-de-meuron-field-operations-ehdd-eames-institute-infinite-curiosity/','https://www.pressdemocrat.com/2026/10/29/gebbia-novato-design-museum/'] },
+  { town:'Novato', n:'Habitat for Humanity Redwood Blvd homes', a:'8161 Redwood Blvd, Novato', lat:38.13480, lon:-122.56700, st:'approved', y:2030, yb:'a', start:2028, kind:'houses', fl:2, u:50, w:90, d:70, note:'Affordable homes for sale on land donated by PG&E, cut from 80 to 50 homes in revised plans. Novato\'s Planning Commission extended the subdivision map by a year in April 2026, and Habitat targets a 2028 groundbreaking. The site is next to the Birkenstock campus; its exact outline here is a placeholder.', src:['https://news.theregistrysf.com/habitat-for-humanity-advances-marin-countys-largest-affordable-homeownership-community-on-pge-donated-novato-site/','https://habitatgsf.org/redwood-boulevard/','https://www.novato.gov/government/community-development/planning-division/planning-projects/habitat-redwood-blvd'] },
+  { town:'Novato', n:'Valley Oaks', a:'Redwood Blvd at Pinkston Rd, Novato', lat:38.13050, lon:-122.56900, st:'approved', y:2030, yb:'a', kind:'houses', fl:2, u:130, w:200, d:150, note:'61 duets and detached houses, 49 junior ADUs and 20 townhomes on 38 acres, about 20 of them kept as open space. Listed as approved by Call Marin Home in February 2026. Placement is approximate.', src:['https://ceqanet.lci.ca.gov/2023080717/2','https://callmarinhome.org/projects/'] },
+  { town:'Novato', n:'Wood Hollow Residences', a:'100 Wood Hollow Dr, Novato', lat:38.12620, lon:-122.56900, st:'approved', y:2030, yb:'a', kind:'houses', fl:2, u:66, w:120, d:100, note:'66 houses, 9 of them affordable to low-income households, replacing an office park. The city council approved it in May 2025; a time extension went to the Planning Commission in July 2026. Placement is approximate.', src:['https://www.novato.gov/government/community-development/planning-division/planning-projects/wood-hollow-residences'] },
+  { town:'Novato', n:'Village at Novato', a:'Redwood Blvd at Olive Ave, Novato', lat:38.11180, lon:-122.56750, st:'approved', y:2032, yb:'a', kind:'multi', n2:3, fl:4, u:178, w:150, d:110, sz:'178 homes (25 below market rate) + 14,000 sf of shops', note:'Three buildings on 5.85 acres around a central green, with shops along Redwood Blvd. The city council approved it in January 2024, but it stalled after Blackstone bought the developer. Story count estimated.', src:['https://www.novato.gov/government/community-development/planning-division/planning-projects/village-at-novato','https://ceqanet.lci.ca.gov/2023110281'] },
+  { town:'Novato', n:'4th St & Grant Ave', a:'1316–1320 Grant Ave & 1020 4th St, Novato', lat:38.10840, lon:-122.57410, st:'approved', y:2030, yb:'a', fl:6, ft:78, u:209, w:56, d:46, sz:'209 studios and one-bedrooms over 5,335 sf of shops', note:'Affordable homes (90% low income, 10% very low income) filed by the developer group behind four downtown Novato projects. Conditionally approved by the city council in August 2024.', src:['https://www.novato.gov/government/community-development/planning-division/planning-projects/4th-st-and-grant-ave-mixed-use-project','https://calhdf.org/calhdf-submits-applications-for-novato-affordable-housing-developments/'] },
+  { town:'Novato', n:'3rd St & Grant Ave', a:'1212–1214 Grant Ave, Novato', lat:38.10810, lon:-122.57290, st:'approved', y:2029, yb:'a', fl:5, u:56, w:30, d:28, sz:'56 apartments over 1,735 sf of shops, no on-site parking', note:'Conditionally approved by the city council in June 2024. CalHDF lists 60 units for the same site.', src:['https://www.novato.gov/government/community-development/planning-division/planning-projects/3rd-st-and-grant-ave-mixed-use-project'] },
+  { town:'Novato', n:'1st St & Grant Ave', a:'Grant Ave at 1st St, Novato', lat:38.10790, lon:-122.57060, st:'proposed', y:2031, yb:'a', fl:6, u:170, w:52, d:42, sz:'170 studios and one-bedrooms over 6,794 sf of shops', note:'Mostly low-income homes. On hold while the developer shows the site is fit for housing, given possible past hazardous-materials use. Footprint and placement are placeholders.', src:['https://www.novato.gov/government/community-development/planning-division/planning-projects/1st-st-and-grant-ave-mixed-use-project'] },
+  { town:'Novato', n:'Lodge on Novato Creek', a:'1787 Grant Ave, Novato', lat:38.10860, lon:-122.58300, st:'approved', y:2029, yb:'a', fl:3, u:0, w:60, d:44, sz:'55 assisted-living units + 31 memory-care beds, about 73,000 sf', note:'Senior care home approved by the Planning Commission in November 2024. Story count estimated.', src:['https://www.novato.gov/government/community-development/planning-division/planning-projects/the-lodge-on-novato-creek-1787-grant-avenue'] },
+  { town:'Novato', n:'Landing Court Apartments', a:'Landing Ct, Novato', lat:38.09830, lon:-122.56520, st:'approved', y:2031, yb:'a', fl:5, u:301, w:80, d:56, note:'301 affordable homes with no on-site parking. Conditionally approved by the city council in October 2024. Height, footprint and exact site are placeholders.', src:['https://callmarinhome.org/projects/','https://calhdf.org/calhdf-submits-applications-for-novato-affordable-housing-developments/'] },
+  { town:'Novato', n:'The Pavilions Eco Village', a:'200 Landing Ct, Novato', lat:38.09680, lon:-122.56380, st:'proposed', y:2032, yb:'a', kind:'houses', fl:2, u:28, w:110, d:80, note:'28 live/work units on 3.4 acres. As of February 2026 the city was waiting on the applicant\'s revisions.', src:['https://www.novato.gov/government/community-development/planning-division/planning-projects/the-pavilions-eco-village'] },
+  { town:'Novato', n:'200 San Marin Drive', a:'200 San Marin Dr, Novato', lat:38.12200, lon:-122.60130, st:'proposed', y:2029, yb:'a', kind:'houses', fl:2, u:8, w:60, d:40, note:'Eight townhomes, one affordable. The city found the application incomplete in January 2026.', src:['https://www.pressdemocrat.com/2026/01/25/novato-housing-proposal-sent-back-for-more-work/'] },
+  // FOLLOW-UP placeholders: listed by Novato or Call Marin Home, but no size published yet. Each carries tbd:'what to find'
+  // and shows a "Needs follow-up" box on its card. Search for "tbd:" to find them all.
+  { town:'Novato', tbd:'Unit count, height and footprint', n:'924 Grant Avenue Mixed-Use', a:'924 Grant Ave, Novato', lat:38.10748, lon:-122.56930, st:'approved', y:2030, yb:'a', fl:3, u:0, w:30, d:26, sz:'Homes over shops; size not found', note:'Listed as approved on Novato\'s planning projects page. Its size isn\'t published, so the 3-story box is a placeholder.', src:['https://www.novato.gov/government/community-development/planning-division/planning-projects/924-grant-avenue-mixed-use','https://callmarinhome.org/jurisdiction/novato/'] },
+  { town:'Novato', tbd:'Unit count, height and footprint', n:'7299 Redwood Blvd Apartments', a:'7299 Redwood Blvd, Novato', lat:38.10645, lon:-122.57068, st:'proposed', y:2031, yb:'a', fl:4, u:0, w:40, d:30, sz:'Apartments; size not found', note:'Listed as proposed by Call Marin Home (last updated May 2025). Its size isn\'t published, so the 4-story box is a placeholder.', src:['https://callmarinhome.org/jurisdiction/novato/'] },
+  { town:'Novato', tbd:'Number of lots, house type and site outline', n:'761 Sun Lane subdivision', a:'761 Sun Ln, Novato', lat:38.10855, lon:-122.60218, st:'proposed', y:2030, yb:'a', kind:'houses', fl:2, u:0, w:60, d:45, sz:'Tentative subdivision map; lot count not found', note:'A tentative map on Novato\'s list of active planning projects. The number of homes isn\'t published, so the footprint is a placeholder.', src:['https://www.novato.gov/government/community-development/planning-division/planning-projects'] },
+  { town:'Novato', tbd:'Unit count, height, footprint and exact site', n:'NUSD educator housing (San Andreas site)', a:'San Andreas Dr, San Marin, Novato', lat:38.12350, lon:-122.60130, st:'concept', y:2033, yb:'a', kind:'houses', fl:2, u:0, w:120, d:100, sz:'Staff housing on about 21 acres of school district land; size not set', note:'Novato Unified is looking at its San Andreas site in San Marin for teacher and staff housing, still in pre-development as of April 2026. No plan has been released, so the size, site and the 2033 date are placeholders.', src:['https://callmarinhome.org/jurisdiction/novato/'] },
+  { town:'Novato', tbd:'Address, unit count, height and footprint', n:'Broadstone Marin', a:'Address not found, Novato', lat:38.11000, lon:-122.57900, st:'proposed', y:2031, yb:'a', fl:4, u:0, w:40, d:30, sz:'Apartments; size not found', note:'Listed as an active proposed project by Novato and Call Marin Home (updated May 2026), but neither gives an address. The pin is a stand-in west of downtown, not the real site.', src:['https://www.novato.gov/government/community-development/planning-division/planning-projects','https://callmarinhome.org/jurisdiction/novato/'] },
+  { town:'Novato', n:'Highway 37 Novato Creek Bridge', a:'SR-37 at Novato Creek, Novato', lat:38.08740, lon:-122.53450, st:'infra', y:2030, yb:'r', start:2027, kind:'bridge', ends:[[38.0858,-122.5366],[38.0890,-122.5324]], bw:26, dh:8, u:0, sz:'About $220M; a higher span built for sea-level rise through 2130', note:'The first piece of raising Highway 37 between US-101 and Atherton Ave, one of the most flood-prone stretches of the road. Caltrans expects to start building in early 2027 and finish around 2030. The span length shown is an estimate.', src:['https://dot.ca.gov/caltrans-near-me/district-4/d4-projects/d4-37-corridor-projects/37-projects/sr37-flood-reduction-phase-1','https://www.californiaconstructionnews.com/2026/08/24/california-approves-more-than-300-million-for-highway-37-upgrades/'] }
 ];
 
 // Illustrative growth: real housing sites with no project yet, placed at GP2040 pace. Clearly not proposals.
@@ -1360,11 +1393,12 @@ function buildProjects() {
       exclude.push({ x:cx, z:cz, r:75 });
     }
     else if (kind === 'bridge') {
-      const a = XY(37.96735, -122.51195), b = XY(37.96935, -122.51120);
+      // p.ends: [[lat, lon], [lat, lon]] deck ends, p.bw deck width and p.dh deck height (m); default is the Canal crossing + its park
+      const e = p.ends || [[37.96735, -122.51195], [37.96935, -122.51120]], a = XY(...e[0]), b = XY(...e[1]);
       const len = Math.hypot(b[0] - a[0], b[1] - a[1]), ang = Math.atan2(b[0] - a[0], b[1] - a[1]);
       const mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2;
-      const g = addPart(obj, mx, mz, 6, len, 1.2, ang); g.position.y = 6;
-      addPart(obj, a[0] + 10, a[1] - 40, 70, 50, 0.6, 0, null);
+      const g = addPart(obj, mx, mz, p.bw || 6, len, 1.2, ang); g.position.y = p.dh || 6;
+      if (!p.ends) addPart(obj, a[0] + 10, a[1] - 40, 70, 50, 0.6, 0, null);
       exclude.push({ x:mx, z:mz, r:60 });
     }
     else if (kind === 'xing') {
@@ -1413,7 +1447,7 @@ function buildLandmarks() {
   // Bettini Transit Center canopies (until the new center opens)
   [-14, 14].forEach(o => lm(...offsetLL(37.97083, -122.52250, 0, o), 110, 10, 6, -9, 2029));
   // SMART stations
-  [[37.97210,-122.52270],[38.00160,-122.53740],[37.94785,-122.51248]].forEach(s => lm(s[0], s[1], 8, 90, 4, -12, 9999, railStationMat));
+  [[37.97210,-122.52270,-12],[38.00160,-122.53740,-12],[37.94785,-122.51248,-12],[38.0565,-122.5240,-28],[38.1060,-122.5645,-31],[38.1207,-122.5662,4]].forEach(s => lm(s[0], s[1], 8, 90, 4, s[2], 9999, railStationMat));
   // Richmond–San Rafael Bridge piers
   sampleLine(RSR_BRIDGE, 260).forEach(s => { if (s.x > XY(37.944, -122.471)[0]) { const m = new THREE.Mesh(boxGeo, lmMat); m.scale.set(5, s.alt + 6, 5); m.position.set(s.x, -6, s.z); scene.add(m); } });
 }
@@ -1460,7 +1494,10 @@ const LABELS = [
   ['Lucas Valley',38.0290,-122.5620],['Marinwood',38.0400,-122.5400],['Santa Venetia',38.0020,-122.5150],['Peacock Gap',37.9930,-122.4700],['Glenwood',37.9850,-122.4790],
   ['Loch Lomond',37.9715,-122.4850],['Canal',37.9630,-122.5000],['Bret Harte',37.9555,-122.5215],['Northgate',38.0060,-122.5420],['Civic Center',37.9965,-122.5285],
   ['San Quentin',37.9375,-122.4880],['Larkspur Landing',37.9485,-122.5085],['China Camp',38.0035,-122.4820],['San Pedro Ridge',37.9925,-122.4930],['San Rafael Hill',37.9858,-122.5340],
-  ['Smith Ranch',38.0180,-122.5260]
+  ['Smith Ranch',38.0180,-122.5260],
+  // Novato
+  ['Downtown Novato',38.1075,-122.5700],['San Marin',38.1240,-122.5960],['Hamilton',38.0600,-122.5200],['Ignacio',38.0705,-122.5400],
+  ['Bel Marin Keys',38.0800,-122.5000],['Pacheco Valle',38.0780,-122.5620]
 ];
 const WLABELS = [['San Rafael Bay',37.9620,-122.4700],['San Pablo Bay',38.0300,-122.4800],['Richmond–San Rafael Bridge',37.9370,-122.4480]];
 const labelEls = [];
@@ -1547,7 +1584,7 @@ function update() {
   document.getElementById('h1year').textContent = Y;
   let homes = 0;
   let specHomes = 0;
-  projObjs.forEach(o => { o.target = progressFor(o.p, Y); if (o.target >= 1 && o.p.u) { if (o.p.st === 'spec') specHomes += o.p.u; else homes += o.p.u; } });
+  projObjs.forEach(o => { o.target = progressFor(o.p, Y); if (o.target >= 1 && o.p.u && !o.p.town) { if (o.p.st === 'spec') specHomes += o.p.u; else homes += o.p.u; } });
   document.getElementById('stHomes').textContent = homes.toLocaleString('en-US');
   document.getElementById('stSpec').textContent = specHomes ? ` +${specHomes.toLocaleString('en-US')} illustrative` : '';
   document.getElementById('stPop').textContent = (Math.round(popAt(Y) / 100) * 100).toLocaleString('en-US');
@@ -1581,7 +1618,7 @@ function buildChips() {
 function renderList() {
   chipsEl.querySelectorAll('button[data-f]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.f === filter)));
   const rows = P.filter(p => filter === 'all' || p.st === filter).filter(p => state.spec || p.st !== 'spec').slice().sort((a, b) => a.y - b.y || a.n.localeCompare(b.n));
-  listEl.innerHTML = rows.map(p => `<li class="${p.y > state.year ? 'future' : ''}"><button type="button" data-id="${p.id}" ${selected && selected.p.id === p.id ? 'aria-current="true"' : ''}><i class="dot" data-tok="${STATUS[p.st].tok}" style="background:var(${STATUS[p.st].tok})"></i><span class="nm">${esc(p.n)}<small>${p.u ? p.u.toLocaleString('en-US') + ' homes · ' : ''}${esc(STATUS[p.st].label)}</small></span><span class="yr">${p.y}</span></button></li>`).join('');
+  listEl.innerHTML = rows.map(p => `<li class="${p.y > state.year ? 'future' : ''}"><button type="button" data-id="${p.id}" ${selected && selected.p.id === p.id ? 'aria-current="true"' : ''}><i class="dot" data-tok="${STATUS[p.st].tok}" style="background:var(${STATUS[p.st].tok})"></i><span class="nm">${esc(p.n)}<small>${p.u ? p.u.toLocaleString('en-US') + ' homes · ' : ''}${esc(STATUS[p.st].label)}${p.tbd ? ' · <b class="tbdtag">Needs follow-up</b>' : ''}</small></span><span class="yr">${p.y}</span></button></li>`).join('');
 }
 listEl.addEventListener('click', e => { const b = e.target.closest('button[data-id]'); if (!b) return; const id = +b.dataset.id; select(projObjs[id]); flyTo(P[id].x, P[id].z, P[id].kind === 'ng1' || P[id].kind === 'ng2' ? 1500 : 900); });
 /* card sources: the first link is the primary one (usually the city's project page); the rest are listed small beneath it */
@@ -1612,6 +1649,7 @@ function showCard(id, scroll) {
     <h3>${esc(p.n)}</h3>
     <p class="addr">${esc(p.a)}</p>
     <dl class="facts">${facts.map(f => `<dt>${f[0]}</dt><dd>${f[1]}</dd>`).join('')}</dl>
+    ${p.tbd ? `<p class="tbd"><b>Needs follow-up</b>Placeholder. Still to find: ${esc(p.tbd)}.</p>` : ''}
     <p class="note">${esc(p.note)} ${yearState ? `<em>${yearState}</em>` : ''}</p>
     ${srcLinks(p.src)}`;
   card.hidden = false;
@@ -1686,7 +1724,8 @@ const VIEWS = {
   overview: { t:[37.9790,-122.5160], off:[4300, 4900, 6600] },
   downtown: { t:[37.9725,-122.5265], off:[900, 650, 1150] },
   northgate: { t:[38.0030,-122.5460], off:[1000, 850, 1250] },
-  canal: { t:[37.9635,-122.4985], off:[1700, 1150, 950] }
+  canal: { t:[37.9635,-122.4985], off:[1700, 1150, 950] },
+  novato: { t:[38.1150,-122.5680], off:[1800, 2300, 3000] }
 };
 let fly = null;
 function viewK() { return camera.aspect < 1 ? 1.45 : 1; }
@@ -2175,6 +2214,7 @@ function boot({ osm, dem, roads, groundImg, labels, bikes }) {
   terrain = new THREE.Mesh(tGeo, terrainMat); scene.add(terrain); scene.add(water);
   scene.add(ribbon(HWY101, 32, roadMat, 2.2, s => { const lat = LAT0 - s.z / KZ; return yAt(s.x, s.z) + 2.2 + ((lat > 37.9685 && lat < 37.979) ? 7 : 0); }));
   scene.add(ribbon(I580, 28, roadMat, 2.2));
+  scene.add(ribbon(SR37, 24, roadMat, 2.2));
   scene.add(ribbon(RSR_BRIDGE, 18, roadMat, 0));
   scene.add(ribbon(SMART, 7, railMat, 2.6));
   if (roads) scene.add(buildStreets(roads));

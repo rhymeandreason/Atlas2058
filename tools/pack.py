@@ -1,11 +1,13 @@
 # Pack OSM building footprints into the map's local metre frame (see XY() in index.html).
 # Fetch raw.json from Overpass (overpass.kumi.systems if the main server is busy):
-#   [out:json][timeout:240];way["building"](37.885,-122.665,38.105,-122.355);out tags geom qt;
-#   [out:json][timeout:240];rel["building"](37.885,-122.665,38.105,-122.355);out geom;   (members need full `out geom`)
+#   [out:json][timeout:240];way["building"](37.885,-122.665,38.16,-122.355);out tags geom qt;
+#   [out:json][timeout:240];rel["building"](37.885,-122.665,38.16,-122.355);out geom;   (members need full `out geom`)
 # Optional heights.csv (t,osm_id,h): Overture Maps building heights for OSM footprints, mostly Microsoft ML
 # estimates from imagery (ODbL). Used when OSM has no height or levels tag. Export with DuckDB from
 #   s3://overturemaps-us-west-2/release/<release>/theme=buildings/type=building/*  (sources[1].record_id = w123@1)
 # then: python3 tools/pack.py ways.json rels.json [heights.csv] buildings.json
+# The north strip (38.105–38.16, added with Novato) was fetched on its own, keeping only buildings lying wholly north of
+# 38.105 (the rest were already in the older file), packed the same way and appended to buildings.json's "b" list.
 import json, sys, math, re
 srcs, out = [a for a in sys.argv[1:-1] if not a.endswith('.csv')], sys.argv[-1]
 ML = {}

@@ -1,14 +1,18 @@
 # Bake labels.json: landmark, open-space and road labels from OpenStreetMap.
 # Inputs: the Overpass files used for roads.py / ground.py, plus named.json:
 #   [out:json];(nwr["name"~"Civic Center|Mission San Rafael|Dominican University|Marin Country Mart|
-#   Corte Madera Town Center|Village at Corte Madera|Northgate|San Quentin"](37.885,-122.665,38.105,-122.355););out tags center qt;
+#   Corte Madera Town Center|Village at Corte Madera|Northgate|San Quentin"](37.885,-122.665,38.16,-122.355););out tags center qt;
 # Usage: python3 tools/labels.py roads_raw.json named.json labels.json lc1.json [lc2.json …]
+# The north strip (38.105–38.16) was run on its own with ATLAS_BBOX and its labels appended, skipping names already
+# placed within 3 km.
 # Output: { l: [[kind, name, lat, lon], …] } with kind p (landmark), o (open space), r (road)
 import sys, json, math
 
 roads_path, named_path, out_path = sys.argv[1:4]
 lc_paths = sys.argv[4:]
-LONMIN, LONMAX, LATMIN, LATMAX = -122.665, -122.355, 37.885, 38.105
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from coast import LONMIN, LONMAX, LATMIN, LATMAX
 KX, KZ = 111320 * math.cos(37.983 * math.pi / 180), 110950
 inside = lambda la, lo: LATMIN + 0.004 < la < LATMAX - 0.004 and LONMIN + 0.004 < lo < LONMAX - 0.004
 out, seen = [], set()
