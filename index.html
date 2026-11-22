@@ -113,11 +113,13 @@ a { color: inherit; }
   background: radial-gradient(ellipse 58% 60% at 50% 48%, color-mix(in srgb, var(--paper) 94%, transparent) 0%, color-mix(in srgb, var(--paper) 78%, transparent) 48%, color-mix(in srgb, var(--paper) 18%, transparent) 100%);
   transition: opacity .9s, visibility 0s .9s; }
 .app:not([data-mode="intro"]) .intro { opacity: 0; visibility: hidden; pointer-events: none; }
-.intro-in { max-width: 640px; text-align: center; display: grid; gap: 18px; justify-items: center; }
+.intro-in { width: min(640px, 100%); text-align: center; display: grid; gap: 18px; justify-items: center; }
 .eyebrow { font-weight: 600; font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .intro h1 { font-family: var(--display); font-weight: 700; font-size: clamp(50px, 8vw, 104px); line-height: .9; letter-spacing: -.05em; margin: 0; text-wrap: balance; }
 .intro h1 em { display: block; font-style: normal; font-weight: 300; color: var(--muted); letter-spacing: -.04em; }
 .intro p { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.5; max-width: 42ch; text-wrap: balance; }
+.app.booting .intro-cta, .app.booting .key { opacity: 0; transform: translateY(10px); }
+.intro-cta, .key { transition: opacity 1s 1.6s, transform 1.2s 1.6s cubic-bezier(.2,.7,.2,1); }
 .intro-cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
 .btn { display: grid; gap: 2px; text-align: left; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 16px; padding: 14px 20px 13px; min-width: 236px; cursor: pointer; font-weight: 650; font-size: 16px; line-height: 1.25; box-shadow: 0 6px 22px rgba(34, 44, 38, .08); transition: transform .2s, box-shadow .2s, border-color .2s; }
 .btn small { font-weight: 450; font-size: 12.5px; color: var(--muted); }
@@ -151,13 +153,11 @@ a { color: inherit; }
 .slegend li { display: inline-flex; align-items: center; gap: 6px; }
 .whatif { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--act); border: 1px dashed currentColor; border-radius: 999px; padding: 1px 8px; margin-left: 6px; vertical-align: 2px; }
 /* opening and closing */
-.step.title { justify-content: center; padding-left: 20px; padding-right: 20px; }
-.step.title .scard { border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; text-align: center; width: min(760px, 100%); padding: 70px 60px;
+/* the opening title shares the loader's exact layout (.tblock), so arriving at #story the title never moves */
+.step.title { justify-content: center; align-items: center; padding: 72px 20px 40px; }
+.step.title .scard { position: relative; isolation: isolate; width: 100%; display: grid; place-items: center; padding: 0; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; background: none; opacity: 1; transform: none; }
+.step.title .scard::before { content: ""; position: absolute; left: 50%; top: 50%; z-index: -1; width: min(860px, 120vw); height: 640px; transform: translate(-50%, -50%); pointer-events: none;
   background: radial-gradient(closest-side, color-mix(in srgb, var(--paper) 94%, transparent) 0%, color-mix(in srgb, var(--paper) 82%, transparent) 62%, color-mix(in srgb, var(--paper) 0%, transparent) 100%); }
-.acts button[data-act="0"] { display: none; }
-.step.title h2 { font-size: clamp(46px, 7vw, 92px); line-height: .92; letter-spacing: -.05em; margin-bottom: 16px; text-shadow: 0 0 30px var(--paper), 0 0 12px var(--paper); }
-.step.title h2 em { display: block; font-style: normal; font-weight: 300; color: var(--muted); }
-.step.title p { max-width: 44ch; margin: 0 auto 26px; font-size: 16.5px; color: var(--muted); text-shadow: 0 0 14px var(--paper), 0 0 4px var(--paper); }
 .scrollcue { display: inline-flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
 .scrollcue svg { width: 16px; height: 16px; animation: cue 2.4s ease-in-out infinite; }
 @keyframes cue { 0%, 100% { transform: translateY(0); opacity: .5; } 50% { transform: translateY(5px); opacity: 1; } }
@@ -319,25 +319,26 @@ details.about a { word-break: break-word; }
 .basis { font-weight: 600; font-size: 12px; color: var(--muted); margin-left: 4px; }
 
 /* loading */
-#loading { position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-weight: 600; font-size: 13.5px; color: var(--muted); background: var(--paper); transition: opacity .9s ease, visibility 0s .9s; }
-#loading.done { opacity: 0; visibility: hidden; }
-#loadMsg { font-style: italic; font-weight: 500; font-size: 18px; letter-spacing: -.01em; color: var(--ink); opacity: .75; }
-#loading.done .vista { transform: scale(1.06); }
-#loading .vista { width: min(340px, 78vw); height: auto; overflow: hidden; transition: transform .7s ease; }
-#loading .hills { fill: color-mix(in srgb, var(--land-high) 55%, transparent); }
-#loading .hills.near { fill: color-mix(in srgb, var(--nature) 45%, transparent); }
-#loading .b { fill: var(--bldg); stroke: color-mix(in srgb, var(--ink) 30%, transparent); stroke-width: .8; transform-box: fill-box; transform-origin: bottom; transform: scaleY(0); animation: build 2s cubic-bezier(.3,.7,.2,1) infinite; }
-#loading .b.new { fill: var(--s-approved); stroke: none; }
-#loading .sun { fill: #e8b960; opacity: .85; animation: sun 2s ease-in-out infinite; }
-#loading .wave { fill: color-mix(in srgb, var(--water) 75%, transparent); animation: swell 2s ease-in-out infinite; }
-#loading .wave path { animation: drift 1.2s linear infinite; }
-#loading .wave.back { fill: color-mix(in srgb, var(--water) 50%, transparent); }
-#loading .wave.back path { animation-duration: 3.6s; animation-direction: reverse; }
-#loading.err .vista { display: none; }
-@keyframes build { 0% { transform: scaleY(0); } 55%, 92% { transform: scaleY(1); } 100% { transform: scaleY(0); } }
-@keyframes sun { 0% { transform: translateY(14px); opacity: 0; } 20%, 85% { opacity: .9; } 70% { transform: translateY(-6px); } 100% { transform: translateY(-6px); opacity: 0; } }
-@keyframes swell { 0%, 8% { transform: translateY(6px); } 70%, 92% { transform: translateY(-5px); } 100% { transform: translateY(6px); } }
-@keyframes drift { from { transform: translateX(0); } to { transform: translateX(-40px); } }
+/* loading: the same title as the intro and the story, so the page opens on type and the map paints in behind it */
+#loading { position: absolute; inset: 0; z-index: 30; display: grid; place-items: center; padding: 72px 20px 40px; background-color: var(--paper); transition: background-color 2.4s cubic-bezier(.4,0,.2,1), opacity 1s ease, visibility 0s 2.5s; }
+/* when the map is ready only the paper dissolves: the title holds still while the map fades in behind it, then hands
+   over to the identical title in the intro underneath */
+#loading.done { background-color: color-mix(in srgb, var(--paper) 0%, transparent); visibility: hidden; pointer-events: none; }
+#loading.done .tb-slot { opacity: 0; transition: opacity .6s; }
+#loading.done.away { opacity: 0; } /* arriving straight into the story or sandbox, the title fades too */
+.tblock { width: min(640px, 100%); text-align: center; display: grid; gap: 18px; justify-items: center; }
+.tblock .tb-h { font-family: var(--display); font-weight: 700; font-size: clamp(50px, 8vw, 104px); line-height: .9; letter-spacing: -.05em; margin: 0; text-wrap: balance; }
+.tblock .tb-h em { display: block; font-style: normal; font-weight: 300; color: var(--muted); letter-spacing: -.04em; }
+.tblock p { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.5; max-width: 42ch; text-wrap: balance; }
+.tb-slot { margin-top: 10px; height: 66px; display: grid; place-content: center; justify-items: center; gap: 10px; } /* stands where the intro's buttons will be */
+.tb-key { height: 20px; margin-top: 18px; }
+.load-bar { width: 120px; height: 2px; border-radius: 2px; background: var(--line); overflow: hidden; position: relative; }
+.load-bar::after { content: ""; position: absolute; inset: 0; width: 40%; border-radius: 2px; background: var(--muted); animation: loadslide 1.6s ease-in-out infinite; }
+@keyframes loadslide { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+#loadMsg { font-size: 12.5px; font-weight: 600; color: var(--faint); letter-spacing: .02em; }
+#loading.err .load-bar { display: none; }
+#loading.err #loadMsg { color: var(--ink); font-size: 14px; }
+@media (max-width: 760px) { .tblock .tb-h { font-size: 52px; } .tblock p { font-size: 15.5px; } }
 
 /* ---------- phones ---------- */
 @media (max-width: 760px) {
@@ -357,8 +358,8 @@ details.about a { word-break: break-word; }
   .scard h2 { font-size: 23px; }
   .scard p { font-size: 14px; margin-bottom: 12px; }
   .sstats b { font-size: 19px; }
-  .step.title { align-items: center; }
-  .step.title h2 { font-size: 50px; }
+  .step.title { align-items: center; padding: 72px 20px 40px; }
+  .step.title .tblock p { font-size: 15.5px; margin: 0; } /* beat the story card's phone paragraph size so it matches the loader */
   .acts { display: none; }
   .sprog { display: block; }
   .cyear { top: calc(var(--top) + 6px); bottom: auto; right: 14px; }
@@ -388,7 +389,7 @@ details.about a { word-break: break-word; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 
-<div class="app" data-mode="intro">
+<div class="app booting" data-mode="intro">
   <section class="stage" id="stage" aria-label="3D model of San Rafael">
     <canvas id="scene"></canvas>
     <div id="labels" aria-hidden="true"></div>
@@ -411,7 +412,13 @@ details.about a { word-break: break-word; }
       </div>
     </div>
     <article id="card" class="card" hidden aria-live="polite"></article>
-    <div id="loading" role="status"><svg class="vista" viewBox="0 0 300 140" aria-hidden="true"><defs><linearGradient id="ldFade"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".18" stop-color="#fff"/><stop offset=".82" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><linearGradient id="ldFadeV" x2="0" y2="1"><stop offset=".7" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><mask id="ldMask"><rect width="300" height="140" fill="url(#ldFade)"/></mask><mask id="ldMaskV"><rect width="300" height="140" fill="url(#ldFadeV)"/></mask></defs><g mask="url(#ldMask)"><g mask="url(#ldMaskV)"><circle class="sun" cx="236" cy="22" r="12"/><path class="hills" d="M0 92 C40 60 70 58 110 76 S180 50 220 66 S280 70 300 80 V120 H0 Z"/><path class="hills near" d="M0 104 C30 92 60 96 90 102 S200 90 240 98 S290 104 300 102 V120 H0 Z"/><rect class="b" x="30" y="84" width="14" height="26" style="animation-delay:0.02s"/><rect class="b new" x="46" y="70" width="10" height="40" style="animation-delay:0.07s"/><rect class="b" x="58" y="80" width="16" height="30" style="animation-delay:0.03s"/><rect class="b new" x="78" y="56" width="12" height="54" style="animation-delay:0.14s"/><rect class="b" x="92" y="74" width="14" height="36" style="animation-delay:0.05s"/><rect class="b new" x="110" y="40" width="18" height="70" style="animation-delay:0.22s"/><rect class="b" x="130" y="66" width="10" height="44" style="animation-delay:0.07s"/><rect class="b new" x="142" y="52" width="14" height="58" style="animation-delay:0.29s"/><rect class="b" x="160" y="78" width="16" height="32" style="animation-delay:0.08s"/><rect class="b new" x="178" y="62" width="12" height="48" style="animation-delay:0.36s"/><rect class="b" x="192" y="72" width="20" height="38" style="animation-delay:0.10s"/><rect class="b new" x="214" y="48" width="10" height="62" style="animation-delay:0.43s"/><rect class="b" x="226" y="82" width="14" height="28" style="animation-delay:0.12s"/><rect class="b" x="244" y="68" width="12" height="42" style="animation-delay:0.13s"/><g transform="translate(0 104)"><g class="wave back"><path d="M0 6 Q10 0 20 6 T40 6 T60 6 T80 6 T100 6 T120 6 T140 6 T160 6 T180 6 T200 6 T220 6 T240 6 T260 6 T280 6 T300 6 T320 6 T340 6 V22 H0 Z"/></g></g><g transform="translate(0 108)"><g class="wave"><path d="M0 6 Q10 0 20 6 T40 6 T60 6 T80 6 T100 6 T120 6 T140 6 T160 6 T180 6 T200 6 T220 6 T240 6 T260 6 T280 6 T300 6 T320 6 T340 6 V22 H0 Z"/></g></g></g></g></svg><span id="loadMsg">Raising the hills…</span></div>
+    <div id="loading" role="status"><div class="tblock">
+      <div class="eyebrow">Marin County, California</div>
+      <h1 class="tb-h">San Rafael <em>2026 → 2058</em></h1>
+      <p>What is actually being built, what has only been proposed, and what the bay may do in the meantime.</p>
+      <div class="tb-slot"><div class="load-bar" aria-hidden="true"></div><span id="loadMsg">Painting the map</span></div>
+      <div class="tb-key" aria-hidden="true"></div>
+    </div></div>
   </section>
 
   <header class="topbar">
@@ -546,6 +553,7 @@ details.about a { word-break: break-word; }
 <script>
 (function () {
 "use strict";
+if (location.hash === '#story') document.querySelector('#loading .eyebrow').textContent = 'A story in five parts'; // match the story's opening title
 if (!window.THREE) { document.getElementById('loading').classList.add('err'); document.getElementById('loadMsg').textContent = 'The 3D library did not load. Check your connection and reload.'; return; }
 
 /* ---------------- geography ---------------- */
@@ -2175,9 +2183,12 @@ function legendHTML(keys) {
 }
 function stepHTML(st, i, L) {
   const c = cine.ctx;
-  if (st.title) return `<section class="step title" data-i="${i}"><div class="scard"><div class="eyebrow">A story in five parts</div>
-    <h2>San Rafael <em>2026 → 2058</em></h2><p>What is actually being built, what has only been proposed, and what the bay may do in the meantime.</p>
-    <div class="scrollcue">Scroll to begin<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6 L8 11 L13 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></section>`;
+  if (st.title) return `<section class="step title" data-i="${i}"><div class="scard"><div class="tblock">
+    <div class="eyebrow">A story in five parts</div>
+    <h2 class="tb-h">San Rafael <em>2026 → 2058</em></h2>
+    <p>What is actually being built, what has only been proposed, and what the bay may do in the meantime.</p>
+    <div class="tb-slot"><div class="scrollcue">Scroll to begin<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6 L8 11 L13 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    <div class="tb-key" aria-hidden="true"></div></div></div></section>`;
   const prev = L[i - 1], A = ACTS[st.act], newAct = !prev || prev.act !== st.act;
   const stats = st.stats(c).map(s => `<div><b>${s.n != null ? fmtStat(s.n, s.dec, s.suf) : esc(s.t)}</b><span>${esc(s.l)}</span></div>`).join('');
   return `<section class="step" data-i="${i}"><article class="scard" style="--act:var(--act${st.act})">
@@ -2445,8 +2456,9 @@ function boot({ osm, dem, roads, groundImg, labels, bikes }) {
   controls.target.set(tx, 0, tz); camera.position.set(tx + v.off[0], v.off[1], tz + v.off[2]);
   resize(); if (camera.aspect < 1) camera.position.set(tx + v.off[0] * 1.45, v.off[1] * 1.45, tz + v.off[2] * 1.45); update();
   controls.enabled = false; controls.autoRotate = true; controls.autoRotateSpeed = 0.35; // the intro turns the model slowly
-  document.getElementById('loading').classList.add('done');
   setMode(location.hash.slice(1) || 'intro');
+  const ld = document.getElementById('loading'); if (mode === 'sandbox') ld.classList.add('away'); // the intro and the story open on the same title, so only the sandbox fades it
+  setTimeout(() => { ld.classList.add('done'); app.classList.remove('booting'); }, 60); // after the first frame of the map is up
   requestRender();
   window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY, cine, camera, controls, bikeGroup, bikeDash, bikeDraw, setMode, post, requestRender, draw };
 }
