@@ -39,7 +39,8 @@
   --bldg: #fbfaf5; --road: #f8f6ef; --street: #f3f2eb; --street-main: #fbfaf6;
 
   /* getting around: ochre */
-  --move: #c47a1f; --move-2: #ec6f12; /* planned bike routes: a vivid orange so thin dashes survive the paint pass */
+  --move: #c47a1f;
+  --bike-new: #e8358c; /* planned bike routes: a vivid magenta, the one loud colour on the map, so new reads at a glance */
   --rail: #dcb27a; /* the SMART line, a lighter ochre so it does not shout up close */
 
   /* new homes: a rose ramp from certain to speculative */
@@ -49,7 +50,7 @@
   --s-proposed: #e7b1a3;
   --s-concept: #efcdc4;
   --s-spec: #f7f4ef;
-  --s-infra: var(--move);
+  --s-infra: var(--bike-new); /* new transit, roads and bike routes share the one bright 'new' colour */
 
   /* civic buildings and workplaces (library, hospital, hotels, labs): a violet ramp, same light-to-deep rule */
   --c-built: #6d588c;
@@ -60,7 +61,7 @@
   --civic: var(--c-approved);
 
   /* one colour per part of the story */
-  --act0: #3d4a44; --act1: #5f7458; --act2: #c56b57; --act3: #c47a1f; --act4: #2b6e7c; --act5: #3d4a44;
+  --act0: #3d4a44; --act1: #5f7458; --act2: #c56b57; --act3: #e8358c; --act4: #2b6e7c; --act5: #3d4a44;
 
   --display: "Hanken Grotesk", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
   --body: var(--display);
@@ -433,7 +434,7 @@ details.about a { word-break: break-word; }
       <ul class="key" aria-label="Colour key">
         <li><i class="sw ramp"></i>New homes</li>
         <li><i class="sw" style="--c:var(--civic)"></i>Civic &amp; work</li>
-        <li><i class="sw" style="--c:var(--move)"></i>Getting around</li>
+        <li><i class="sw" style="--c:var(--bike-new)"></i>New ways to get around</li>
         <li><i class="sw" style="--c:var(--flood)"></i>Water</li>
         <li><i class="sw" style="--c:var(--nature)"></i>Nature</li>
       </ul>
@@ -483,7 +484,7 @@ details.about a { word-break: break-word; }
         <li><i class="sw" style="--c:var(--s-concept)"></i>Concept only</li>
         <li><i class="sw ghost"></i>Sketch, no proposal</li>
         <li><i class="sw ramp civic"></i>Civic &amp; workplaces</li>
-        <li><i class="sw" style="--c:var(--move)"></i>Transit &amp; roads</li>
+        <li><i class="sw" style="--c:var(--bike-new)"></i>New transit &amp; roads</li>
         <li><i class="sw" style="--c:var(--nature)"></i>Marsh &amp; parks</li>
       </ul>
       <p class="ramp-note">The deeper the color, the surer the building: rose for homes, violet for libraries, hospitals, hotels and workplaces. White blocks are the city as it stands.</p>
@@ -494,9 +495,9 @@ details.about a { word-break: break-word; }
       <label class="tog"><input type="checkbox" id="tBike"><span>Bike routes<small>Today’s bikeways and the city’s draft plan.</small></span></label>
       <ul class="legkey bikekey" aria-label="Bike route key">
         <li><i class="sw line" style="--c:var(--move)"></i>Today</li>
-        <li><i class="sw dash" style="--c:var(--move-2)"></i>Planned</li>
-        <li><i class="sw dash" style="--c:var(--move-2);height:5px"></i>Top priority</li>
-        <li><i class="sw dot" style="--c:var(--move-2)"></i>Crossing fix</li>
+        <li><i class="sw line" style="--c:var(--bike-new)"></i>Planned</li>
+        <li><i class="sw line" style="--c:var(--bike-new);height:5px"></i>Top priority</li>
+        <li><i class="sw dot" style="--c:var(--bike-new)"></i>Crossing fix</li>
       </ul>
       <div class="toggles minor">
         <label class="tog"><input type="checkbox" id="tSpec" checked><span>Growth after 2034<small>White ghosts where housing is allowed but nobody has proposed it yet.</small></span></label>
@@ -1074,29 +1075,34 @@ function buildStreets(data) {
   return g;
 }
 /* bikeways (bikes.json, packed by tools/bikes.py from the city's draft Bicycle & Pedestrian Plan map), drawn like the
-   streets but just above them. Proposed routes are dashed, with the dash length snapped to the zoom so dashes stay a
-   steady size on screen. Each vertex carries NOAA's flood threshold, so a route goes under the flood colour when the
+   streets but just above them. Proposed routes are solid magenta and draw themselves in along their length when the
+   layer appears. Each vertex carries NOAA's flood threshold, so a route goes under the flood colour when the
    ground beneath it does, using the same zone timing as the terrain shader. */
 const BIKE_CLS = ['', 'Off-street path for biking and walking', 'Painted bike lanes', 'Shared street marked for bikes', 'Bike lanes separated from traffic', 'Bike boulevard: a calm side street that favors bikes', 'Bike improvement, type still to be decided'];
 const BIKE_SHORT = ['', 'Path', 'Bike lanes', 'Bike route', 'Protected bike lanes', 'Bike boulevard', 'Type to be decided'];
 // the plan's stock descriptions, which the Type line already says in plain words
 const BIKE_STOCK = ['Class I Multi-Use Path', 'Class II Bike Lane', 'Class III Bike Route', 'Class III+ Bike Boulevard', 'Class IV Separated Bikeway', 'Bicycle Facility Improvement - TBD', 'Pedestrian Intersection Improvements', 'Bicycle Intersection Improvement'];
 const bikeDash = { value: 24 }, bikeHi = { value: -1 };
+// planned routes draw themselves in whenever the bike layer appears: uDraw runs 0 → 1 along every route at once
+const bikeDraw = { value: 1, t: 1 };
 const bikeExistMat = bikeMaterial(1.6, -2, false), bikePlanMat = bikeMaterial(3.2, -2.5, true), bikeTopMat = bikeMaterial(5.2, -3, true);
 const bikeDotMat = new THREE.PointsMaterial({ size: 8, sizeAttenuation: false, alphaTest: 0.5, transparent: false });
 const bikeDotTopMat = new THREE.PointsMaterial({ size: 12, sizeAttenuation: false, alphaTest: 0.5, transparent: false });
 (() => { const c = document.createElement('canvas'); c.width = c.height = 32; const x = c.getContext('2d'); x.fillStyle = '#fff'; x.beginPath(); x.arc(16, 16, 15, 0, Math.PI * 2); x.fill(); const t = new THREE.CanvasTexture(c); bikeDotMat.map = bikeDotTopMat.map = t; })();
 let bikeGroup = null, bikeData = null, bikeStats = null;
 const bikeLines = [], bikeDots = [];
-function bikeMaterial(minPx, offset, dashed) {
+function bikeMaterial(minPx, offset, planned) {
   const m = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: offset, polygonOffsetUnits: offset });
+  // three.js caches programs by onBeforeCompile's source, which is the same for every bike material: key the planned
+  // variant separately or all three end up sharing whichever shader compiled first
+  m.customProgramCacheKey = () => planned ? 'bike-planned' : 'bike-today';
   m.onBeforeCompile = sh => {
-    Object.assign(sh.uniforms, { uPxK: streetPx, uMinPx: { value: minPx }, uDash: bikeDash, uHi: bikeHi, uLevel: groundU.uLevel, uOn: groundU.uOn, uZa: groundU.uZa, uZb: groundU.uZb, uFlood: groundU.uFlood });
-    sh.vertexShader = `attribute vec3 aSide; attribute float aDist, aThr, aId; uniform float uPxK, uMinPx, uHi, uLevel, uOn;
+    Object.assign(sh.uniforms, { uPxK: streetPx, uMinPx: { value: minPx }, uDash: bikeDash, uDraw: bikeDraw, uHi: bikeHi, uLevel: groundU.uLevel, uOn: groundU.uOn, uZa: groundU.uZa, uZb: groundU.uZb, uFlood: groundU.uFlood });
+    sh.vertexShader = `attribute vec3 aSide; attribute float aDist, aThr, aId, aT; varying float vT; uniform float uPxK, uMinPx, uHi, uLevel, uOn;
 uniform vec4 uZa[${ZONES.length}], uZb[${ZONES.length}]; varying float vDist, vWet;\n` + sh.vertexShader.replace('#include <begin_vertex>', `vec3 transformed = vec3(position);
 float mpp = -(modelViewMatrix * vec4(position, 1.0)).z * uPxK, hi = abs(aId - uHi) < 0.5 ? 1.0 : 0.0;
 transformed += vec3(aSide.x, 0.0, aSide.y) * max(aSide.z, uMinPx * (1.0 + hi) * mpp * 0.5);
-vDist = aDist; vWet = 0.0;
+vDist = aDist; vT = aT; vWet = 0.0;
 if (uOn > 0.5 && aThr >= 1.5 && aThr < 200.0) {
   float lvl = uLevel, fade = 1.0, best = 1.0;
   for (int i = 0; i < ${ZONES.length}; i++) {
@@ -1106,8 +1112,9 @@ if (uOn > 0.5 && aThr >= 1.5 && aThr < 200.0) {
   }
   if (lvl >= (aThr - 1.0) * 0.5) vWet = fade;
 }`);
-    sh.fragmentShader = 'uniform float uDash; uniform vec3 uFlood; varying float vDist, vWet;\n' + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
-${dashed ? 'if (fract(vDist / uDash) > 0.6) discard;' : ''}
+    sh.fragmentShader = 'uniform float uDash, uDraw; uniform vec3 uFlood; varying float vDist, vWet, vT;\n' + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+${planned ? `if (vT > uDraw) discard;
+diffuseColor.rgb = mix(diffuseColor.rgb, vec3(1.0, 0.82, 0.92), smoothstep(uDraw - 0.05, uDraw, vT) * step(uDraw, 0.999) * 0.7); // glowing pen tip` : ''}
 diffuseColor.rgb = mix(diffuseColor.rgb, uFlood, vWet * 0.65);`);
   };
   return m;
@@ -1122,18 +1129,33 @@ function sampleXZ(pts, step) {
   for (let i = 0; i < pts.length - 1; i++) { const [ax, az] = pts[i], [bx, bz] = pts[i + 1], n = Math.max(1, Math.ceil(Math.hypot(bx - ax, bz - az) / step)); for (let s = 0; s < n; s++) out.push([ax + (bx - ax) * s / n, az + (bz - az) * s / n]); }
   out.push(pts[pts.length - 1]); return out;
 }
+function showBikes(on) {
+  if (!bikeGroup) return;
+  if (on && !bikeGroup.visible) { bikeDraw.t = reduceMotion() ? 1 : 0; bikeDraw.value = bikeDraw.t; }
+  bikeGroup.visible = on; requestRender();
+}
+// called every frame: ease the draw-in forward, then pop the crossing-fix dots in once the lines are mostly down
+function tickBikeDraw(dt) {
+  if (bikeDraw.t >= 1 || !bikeGroup || !bikeGroup.visible) return false;
+  bikeDraw.t = Math.min(1, bikeDraw.t + dt / 2.8);
+  const t = bikeDraw.t; bikeDraw.value = 1 - Math.pow(1 - t, 2.2);
+  const k = Math.max(0, Math.min(1, (t - 0.65) / 0.35)), pop = k === 0 ? 0 : 1 + 2.70158 * Math.pow(k - 1, 3) + 1.70158 * Math.pow(k - 1, 2); // ease-out-back
+  bikeDotMat.size = 8 * pop; bikeDotTopMat.size = 12 * pop;
+  return true;
+}
 function buildBikes(data) {
-  const q = data.q, g = new THREE.Group(), bufs = [0, 1, 2].map(() => ({ pos: [], side: [], dist: [], thr: [], id: [], idx: [] }));
+  const q = data.q, g = new THREE.Group(), bufs = [0, 1, 2].map(() => ({ pos: [], side: [], dist: [], tt: [], thr: [], id: [], idx: [] }));
   const decode = (r, k0) => { const pts = []; let x = 0, z = 0; for (let k = k0; k < r.length; k += 2) { x += r[k] * q; z += r[k + 1] * q; pts.push([x, z]); } return pts; };
   const add = (o, pts, hw, id) => {
     const s = sampleXZ(pts, 10), v0 = o.pos.length / 3; let acc = 0;
+    let total = 0; for (let i = 1; i < s.length; i++) total += Math.hypot(s[i][0] - s[i - 1][0], s[i][1] - s[i - 1][1]);
     for (let i = 0; i < s.length; i++) {
       const a = s[Math.max(0, i - 1)], b = s[Math.min(s.length - 1, i + 1)];
       let dx = b[0] - a[0], dz = b[1] - a[1]; const l = Math.hypot(dx, dz) || 1; dx /= l; dz /= l;
       if (i) acc += Math.hypot(s[i][0] - s[i - 1][0], s[i][1] - s[i - 1][1]);
       const y = yAt(s[i][0], s[i][1]) + 1.9, t = groundThr(s[i][0], s[i][1]);
       o.pos.push(s[i][0], y, s[i][1], s[i][0], y, s[i][1]); o.side.push(-dz, dx, hw, dz, -dx, hw);
-      o.dist.push(acc, acc); o.thr.push(t, t); o.id.push(id, id);
+      o.dist.push(acc, acc); o.tt.push(acc / (total || 1), acc / (total || 1)); o.thr.push(t, t); o.id.push(id, id);
       if (i < s.length - 1) { const k = v0 + i * 2; o.idx.push(k, k + 2, k + 1, k + 1, k + 2, k + 3); }
     }
     return s;
@@ -1146,7 +1168,7 @@ function buildBikes(data) {
   bufs.forEach((o, n) => {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(o.pos, 3)); geo.setAttribute('aSide', new THREE.Float32BufferAttribute(o.side, 3));
-    geo.setAttribute('aDist', new THREE.Float32BufferAttribute(o.dist, 1)); geo.setAttribute('aThr', new THREE.Float32BufferAttribute(o.thr, 1)); geo.setAttribute('aId', new THREE.Float32BufferAttribute(o.id, 1));
+    geo.setAttribute('aDist', new THREE.Float32BufferAttribute(o.dist, 1)); geo.setAttribute('aT', new THREE.Float32BufferAttribute(o.tt, 1)); geo.setAttribute('aThr', new THREE.Float32BufferAttribute(o.thr, 1)); geo.setAttribute('aId', new THREE.Float32BufferAttribute(o.id, 1));
     geo.setIndex(new THREE.BufferAttribute(new Uint32Array(o.idx), 1)); geo.computeBoundingSphere();
     const m = new THREE.Mesh(geo, [bikeExistMat, bikePlanMat, bikeTopMat][n]); m.frustumCulled = false; m.renderOrder = 2; g.add(m);
   });
@@ -1198,7 +1220,7 @@ function showBike(b) {
     facts.push([`Water in ${Y}`, f.wet > 5 ? `About ${mi(f.wet)} of this ${mi(f.len)} route is flooded ${state.storm ? 'in the storm' : 'at high tide'}` : `Dry along its ${mi(f.len)} in this scenario`]);
   }
   card.innerHTML = `<button class="x" type="button" aria-label="Close">×</button>
-    <span class="pill" style="--c:var(--move)">Draft bike &amp; walking plan</span>
+    <span class="pill" style="--c:var(--bike-new)">Draft bike &amp; walking plan</span>
     <h3>${esc(n)}</h3>
     <dl class="facts">${facts.map(f => `<dt>${f[0]}</dt><dd>${f[1]}</dd>`).join('')}</dl>
     <p class="note">From the city’s draft Citywide Bicycle &amp; Pedestrian Plan, which the City Council is scheduled to consider adopting on October 19, 2026. The plan sets priorities for the next 5–10 years; it gives no build dates or funding for individual projects, so this route has no year on the timeline.</p>
@@ -1432,9 +1454,9 @@ const CIVIC = new Set(['AC Hotel by Marriott', 'Public Safety Center', 'BioMarin
   'San Rafael Inn', 'Terra Linda Park & Community Center plan', 'Kaiser San Rafael hospital replacement', 'Hampton Inn / Home2 Suites', 'San Quentin Learning Center', 'Eames Institute museum']);
 const CIVIC_ST = ['built', 'uc', 'approved', 'proposed', 'concept'];
 const isCivic = p => CIVIC.has(p.n) && CIVIC_ST.includes(p.st);
-const tokFor = p => p.kind === 'park' ? '--nature' : isCivic(p) ? `--c-${p.st}` : STATUS[p.st].tok;
+const tokFor = p => p.kind === 'park' ? '--nature' : p.kind === 'bridge' ? '--s-infra' : isCivic(p) ? `--c-${p.st}` : STATUS[p.st].tok;
 const labelFor = p => isCivic(p) ? `${STATUS[p.st].label} · civic & workplaces` : STATUS[p.st].label;
-function matFor(p) { return p.kind === 'park' ? marshMat : projMat(isCivic(p) ? 'c-' + p.st : p.st); }
+function matFor(p) { return p.kind === 'park' ? marshMat : p.kind === 'bridge' ? projMat('infra') : projMat(isCivic(p) ? 'c-' + p.st : p.st); }
 function addPart(obj, x, z, w, d, h, rot, mat) {
   const m = new THREE.Mesh(boxGeo, mat || matFor(obj.p));
   m.scale.set(w, h, d); m.rotation.y = rot || 0;
@@ -1456,9 +1478,13 @@ function polyLen(xy, upto) { let L = 0; for (let i = 0; i < upto; i++) L += Math
 function regMesh(obj, m) { m.userData.obj = obj; m.userData.base = m.material; pickables.push(m); obj.meshes.push(m); }
 function buildConnector(obj, exclude) {
   const W = 10, T = 1.6, PEAK = 14, ROAD = 2.2;
-  // 101 is listed north→south; the 580 junction is vertex 14. Diverge ~800 m south of it (below Bellam), merge ~650 m east along 580.
-  const j101 = polyLen(HWY_XY, 14);
-  const a = polyPoint(HWY_XY, j101 + 800), b = polyPoint(I580_XY, 650);
+  // 101 is listed north→south. Find the 580 junction as the 101 vertex nearest where 580 begins (a fixed index broke when
+  // the 101 line was extended north to Novato). Diverge ~250 m south of it, at Bellam Blvd (further south the line climbs
+  // Cal Park Hill), and merge ~650 m east along 580.
+  let jk = 0, jd = Infinity;
+  HWY_XY.forEach((p, i) => { const d = Math.hypot(p[0] - I580_XY[0][0], p[1] - I580_XY[0][1]); if (d < jd) { jd = d; jk = i; } });
+  const j101 = polyLen(HWY_XY, jk);
+  const a = polyPoint(HWY_XY, j101 + 250), b = polyPoint(I580_XY, 650);
   const ta = [-a.dx, -a.dz], tb = [b.dx, b.dz];                 // northbound heading; eastbound heading
   const right = (dx, dz) => [-dz, dx];                           // x = east, z = south
   const ra = right(...ta), rb = right(...tb);
@@ -1711,7 +1737,7 @@ function applyTheme() {
   waterMat.color = wat;
   roadMat.color = T('--road'); streetMat.color = T('--street'); streetMinorMat.color = T('--street'); streetMainMat.color = T('--street-main'); railMat.color = T('--rail'); creekMat.color = wat.clone().lerp(T('--water-ink'), 0.2);
   railStationMat.color = T('--rail'); infraMat.color = T('--s-infra');
-  bikeExistMat.color = T('--move'); bikePlanMat.color = bikeTopMat.color = bikeDotMat.color = bikeDotTopMat.color = T('--move-2');
+  bikeExistMat.color = T('--move'); bikePlanMat.color = bikeTopMat.color = bikeDotMat.color = bikeDotTopMat.color = T('--bike-new');
   treeBase.copy(T('--tree')); treeMat.color.copy(treeBase);
   const b = T('--bldg'); fabricBase.copy(b); fabricMat.color.copy(b); lmMat.color = b.clone().multiplyScalar(0.96);
   Object.keys(STATUS).forEach(s => { projMat(s).color = T(STATUS[s].tok); });
@@ -1720,7 +1746,7 @@ function applyTheme() {
   cine.fadeColor.setRGB(Math.min(1.3, sbg.r / Math.max(0.02, b.r)), Math.min(1.3, sbg.g / Math.max(0.02, b.g)), Math.min(1.3, sbg.b / Math.max(0.02, b.b)));
   ringColor.copy(T(cine.active && cine.act != null ? `--act${cine.act}` : '--accent')); rings.forEach(r => r.m.material.color.copy(ringColor));
   edgeMat.color = T('--ink'); marshMat.color = T('--nature').lerp(T('--marsh'), 0.25); selMat.color = T('--ink');
-  if (protectGroup) protectGroup.userData.mat.color = T('--s-infra');
+  if (protectGroup) protectGroup.userData.mat.color = T('--water-ink');
   zoneObjs.forEach(z => z.mat.uniforms.uColor.value = T('--flood'));
   groundU.uFlood.value.copy(T('--flood')); paintGround(T);
   document.querySelectorAll('[data-tok]').forEach(el => el.style.background = `var(${el.dataset.tok})`);
@@ -1946,9 +1972,9 @@ const ACTS = [
 const KEY = {
   built: ['', '--s-built', 'Built since 2020'], uc: ['', '--s-uc', 'Under construction'], approved: ['', '--s-approved', 'Approved'],
   proposed: ['', '--s-proposed', 'Proposed'], concept: ['', '--s-concept', 'Concept only'], spec: ['ghost', '', 'Sketch, no proposal'],
-  move: ['', '--move', 'Transit & roads'], bikeNow: ['line', '--move', 'Bikeways today'], bikePlan: ['dash', '--move-2', 'In the draft plan'],
-  fix: ['dot', '--move-2', 'Crossing fixes'], flood: ['', '--flood', 'Flooded at high tide'], marsh: ['', '--nature', 'Marsh restoration'],
-  gate: ['', '--move', 'Floodgate & levees'], civic: ['', '--civic', 'Civic & workplaces']
+  move: ['', '--bike-new', 'New transit & roads'], bikeNow: ['line', '--move', 'Bikeways today'], bikePlan: ['line', '--bike-new', 'In the draft plan'],
+  fix: ['dot', '--bike-new', 'Crossing fixes'], flood: ['', '--flood', 'Flooded at high tide'], marsh: ['', '--nature', 'Marsh restoration'],
+  gate: ['', '--water-ink', 'Floodgate & levees'], civic: ['', '--civic', 'Civic & workplaces']
 };
 
 // shot: target [lat, lon], distance m, azimuth (0 = camera due south, + toward east), elevation deg,
@@ -1998,7 +2024,7 @@ const STEPS = [
     shot:{ t:[37.9655,-122.5135], d:3300, az:156, el:38, drift:10, dolly:-0.08 },
     focus: () => namesTo(CROSSINGS),
     call: [['US-101 / I-580 direct connector','101 → 580 flyover','$192–241M · not fully funded'], ['San Rafael Canal Crossing & 620 Canal St park','Canal Crossing','bike & walk drawbridge'], ['San Rafael Transit Center (relocated)','New transit center','by the SMART station']],
-    legend: ['move', 'proposed'],
+    legend: ['move'],
     head: () => 'New ways across the freeway and the creek',
     deck: () => 'If its construction money comes through, a flyover finally links northbound 101 to eastbound 580, ending the detour through local streets. Downtown’s buses move a block north to a new transit center by the SMART station, and a bike-and-walk drawbridge over San Rafael Creek ties the Canal to downtown.',
     stats: () => [{ t:'$192–241M', l:'connector estimate, not fully funded' }, { n:17, l:'bus bays at the new transit center' }, { n:1.65, dec:2, suf:' ac', l:'new waterfront park on the Canal' }] },
@@ -2008,7 +2034,7 @@ const STEPS = [
     focus: () => [],
     legend: ['bikeNow', 'bikePlan', 'fix'],
     head: () => 'A bike network, mostly still on paper',
-    deck: () => `The solid ochre lines are the roughly ${miles(bikeStats.exist)} miles of bikeways San Rafael has today. The dashed ones are another ${miles(bikeStats.plan)} miles in the city’s draft Bicycle & Pedestrian Plan, ${bikeStats.top} of its ${bikeStats.routes} routes marked top priority, plus ${bikeStats.fixes} fixes at crossings that are hard to walk or bike today. The plan sets priorities for the next 5–10 years but gives no build dates.`,
+    deck: () => `The solid ochre lines are the roughly ${miles(bikeStats.exist)} miles of bikeways San Rafael has today. The magenta ones are another ${miles(bikeStats.plan)} miles in the city’s draft Bicycle & Pedestrian Plan, ${bikeStats.top} of its ${bikeStats.routes} routes marked top priority, plus ${bikeStats.fixes} fixes at crossings that are hard to walk or bike today. The plan sets priorities for the next 5–10 years but gives no build dates.`,
     stats: () => [{ n:miles(bikeStats.exist), suf:' mi', l:'of bikeways today' }, { n:miles(bikeStats.plan), suf:' mi', l:'more in the draft plan' }, { n:bikeStats.fixes, l:'crossing fixes' }] },
 
   { id:'water', act:4, tag:'Water', key: c => c.canalYear == null ? 2050 : Math.max(2027, c.canalYear),
@@ -2188,7 +2214,7 @@ function activateStep(i) {
   ringColor.copy(tok(`--act${st.act}`));
   const protect = !!(st.set && st.set.protect);
   if (state.protect !== protect) { state.protect = protect; update(); }
-  if (bikeGroup) bikeGroup.visible = !!(st.set && st.set.bikes);
+  showBikes(!!(st.set && st.set.bikes));
   const fps = st.focus ? st.focus(cine.ctx) : null;
   cine.focus = fps ? new Set(fps.map(p => p.id)) : null; cine.fadeT = fps ? 1 : 0;
   buildRings(fps || [], st.shot.d * 0.011);
@@ -2231,7 +2257,7 @@ function leaveStory() {
   cine.lastTop = storyEl.scrollTop;
   cine.active = false; cine.focus = null; cine.fadeT = 0; cine.i = -1; cine.act = null;
   buildRings([], 0); calloutsHost.innerHTML = ''; callouts = [];
-  if (bikeGroup) bikeGroup.visible = document.getElementById('tBike').checked;
+  showBikes(document.getElementById('tBike').checked);
   ringColor.copy(tok('--accent'));
 }
 storyEl.addEventListener('scroll', () => { cine.sT = scrollPos(); requestRender(); }, { passive: true });
@@ -2329,6 +2355,7 @@ function loop(now) {
   fabricMat.color.setRGB(fabricBase.r * (1 + (fc.r - 1) * fk), fabricBase.g * (1 + (fc.g - 1) * fk), fabricBase.b * (1 + (fc.b - 1) * fk));
   treeMat.color.copy(treeBase).lerp(mutedMat.color, fk * 0.6);
   if (rings.length) showRings();
+  if (tickBikeDraw(dt)) moving = true;
   const az = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z);
   needle.setAttribute('transform', `rotate(${(az * 180 / Math.PI).toFixed(1)} 20 20)`);
   if (bikeGroup && bikeGroup.visible) bikeDash.value = Math.pow(2, Math.round(Math.log2(Math.max(1, camera.position.distanceTo(controls.target) * streetPx.value * 18))));
@@ -2381,7 +2408,7 @@ document.getElementById('tSpec').addEventListener('change', e => { state.spec = 
 document.getElementById('tLabels').addEventListener('change', requestRender);
 document.getElementById('tTrees').addEventListener('change', e => { if (treeMesh) treeMesh.visible = e.target.checked; else if (e.target.checked && treeExclude) loadTrees(); requestRender(); });
 document.getElementById('tPaint').addEventListener('change', e => { post.on = e.target.checked; requestRender(); });
-document.getElementById('tBike').addEventListener('change', e => { if (bikeGroup) bikeGroup.visible = e.target.checked; if (!e.target.checked && selBike) { selBike = null; bikeHi.value = -1; card.hidden = true; } requestRender(); });
+document.getElementById('tBike').addEventListener('change', e => { showBikes(e.target.checked); if (!e.target.checked && selBike) { selBike = null; bikeHi.value = -1; card.hidden = true; } requestRender(); });
 
 /* ---------------- boot ---------------- */
 function boot({ osm, dem, roads, groundImg, labels, bikes }) {
@@ -2421,7 +2448,7 @@ function boot({ osm, dem, roads, groundImg, labels, bikes }) {
   document.getElementById('loading').classList.add('done');
   setMode(location.hash.slice(1) || 'intro');
   requestRender();
-  window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY, cine, camera, controls, bikeGroup, bikeDash, setMode, post };
+  window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY, cine, camera, controls, bikeGroup, bikeDash, bikeDraw, setMode, post, requestRender, draw };
 }
 const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
