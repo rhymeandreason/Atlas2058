@@ -2028,8 +2028,8 @@ const STEPS = [
     deck: () => { const ps = namesTo(SKYLINE), a = ps.filter(p => p.st === 'approved').length; return `State density-bonus law lets 700 Irwin rise to about 180 ft where the zone tops out at 70. Around it, developers have filed for mid-rises on the Safeway, United Markets and Market Hall blocks. ${cap1(NUMW[a])} of these ${NUMW[ps.length]} buildings are approved; the paler ones are proposals that could still shrink, stall or disappear.`; },
     stats: () => [{ n:180, suf:' ft', l:'700 Irwin, the tallest building in town' }, { n:homesOf(SKYLINE), l:'homes on eight downtown blocks' }, { n:namesTo(SKYLINE).filter(p => p.st === 'proposed').length, l:'still only proposals' }] },
 
-  { id:'crossings', act:3, tag:'Crossings', key: () => 2034,
-    shot:{ t:[37.9655,-122.5135], d:3300, az:156, el:38, drift:10, dolly:-0.08 },
+  { id:'crossings', act:3, tag:'Crossings', key: () => 2034, fit:true,
+    shot:{ t:[37.9655,-122.5135], d:3300, az:156, el:38, drift:4, dolly:0 },
     focus: () => namesTo(CROSSINGS),
     call: [['US-101 / I-580 direct connector','101 → 580 flyover','$192–241M · not fully funded'], ['San Rafael Canal Crossing & 620 Canal St park','Canal Crossing','bike & walk drawbridge'], ['San Rafael Transit Center (relocated)','New transit center','by the SMART station']],
     legend: ['move'],
@@ -2055,8 +2055,8 @@ const STEPS = [
       `In California’s likely case the bay is ${slrIn(c.canalYear, 'Int').toFixed(0)} in above its 2000 level by ${c.canalYear}, and the Canal’s ground keeps sinking about 0.4 in a year. That is enough for ordinary high tides to spill into the city’s densest neighborhood, home to 12,000–16,000 people. Bellam Blvd, its main route to 101, goes under at about a foot.`,
     stats: c => [{ t:c.canalYear ? String(c.canalYear) : 'Never', l:'first regular flooding in the Canal' }, { t:'12–16k', l:'people live in the Canal' }, { n:c.wet2058, l:`of ${ZONES.length} low-lying areas flooded by 2058` }] },
 
-  { id:'marsh', act:4, tag:'Marshes', key: () => 2040,
-    shot:{ t:[37.9935,-122.5010], d:6900, az:104, el:40, drift:12, dolly:-0.06 },
+  { id:'marsh', act:4, tag:'Marshes', key: () => 2040, fit:true,
+    shot:{ t:[37.9935,-122.5010], d:6900, az:104, el:40, drift:4, dolly:0 },
     focus: () => namesTo(MARSHES),
     call: [['Tiscornia Marsh restoration','Tiscornia Marsh','raised levee + wider marsh'], ['McInnis Marsh restoration','McInnis Marsh','22–30 ac · needs construction money']],
     legend: ['marsh', 'flood'],
@@ -2094,10 +2094,55 @@ const STEPS = [
 
 const easeIO = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 function shotPose(s, u) {
-  const [x, z] = XY(s.t[0], s.t[1]), t = new THREE.Vector3(x, yAt(x, z) + (s.dy || 0), z);
-  const az = (s.az + (s.drift || 0) * (u - 0.5)) * D2R, el = s.el * D2R, d = s.d * (camera.aspect < 1 ? 1.8 : 1) * (1 + (s.dolly || 0) * (u - 0.5));
-  return { t, p: new THREE.Vector3(x + Math.sin(az) * Math.cos(el) * d, t.y + Math.sin(el) * d, z + Math.cos(az) * Math.cos(el) * d) };
+  // a fitted shot (see fitShot) carries its own world target and distance for the current screen
+  const t = s.tw ? s.tw.clone() : (() => { const [x, z] = XY(s.t[0], s.t[1]); return new THREE.Vector3(x, yAt(x, z) + (s.dy || 0), z); })();
+  const az = (s.az + (s.drift || 0) * (u - 0.5)) * D2R, el = s.el * D2R;
+  const d = (s.dw != null ? s.dw : s.d * (camera.aspect < 1 ? 1.8 : 1)) * (1 + (s.dolly || 0) * (u - 0.5));
+  return { t, p: new THREE.Vector3(t.x + Math.sin(az) * Math.cos(el) * d, t.y + Math.sin(el) * d, t.z + Math.cos(az) * Math.cos(el) * d) };
 }
+/* Fitted shots: keep the step's viewing angle, but choose the target and distance so every focus project (its whole
+   footprint, plus headroom for its callout) lands in the part of the map the card leaves open, right of the card on
+   wide screens and above it on phones. Recomputed whenever the story is entered or the window resizes. */
+function fitShot(st, i) {
+  const ps = (st.focus && st.focus(cine.ctx)) || [], el = stepsEl.children[i], card = el && el.querySelector('.scard');
+  if (!ps.length || !card) return;
+  const w = stage.clientWidth, h = stage.clientHeight, top = document.querySelector('.topbar').offsetHeight;
+  projGroup.updateMatrixWorld(true);
+  const pts = [], b = new THREE.Box3();
+  ps.forEach(p => {
+    b.makeEmpty(); projObjs[p.id].parts.forEach(pt => b.expandByObject(pt.g));
+    if (b.isEmpty()) b.set(new THREE.Vector3(p.x - 40, 0, p.z - 40), new THREE.Vector3(p.x + 40, 0, p.z + 40));
+    const pad = 25, ht = Math.max(12, p.kind === 'marsh' ? 4 : heightM(p));
+    [[b.min.x - pad, b.min.z - pad], [b.max.x + pad, b.min.z - pad], [b.min.x - pad, b.max.z + pad], [b.max.x + pad, b.max.z + pad]]
+      .forEach(([x, z]) => { const g = yAt(x, z); pts.push(new THREE.Vector3(x, g, z), new THREE.Vector3(x, g + ht, z)); });
+  });
+  // the open area, in stage pixels: clear of the card, the top bar plus callout headroom, the parts rail and the year
+  const safe = w > 760 ? [card.offsetLeft + card.offsetWidth + 56, top + 120, w - 120, h - 120]
+                       : [28, top + 110, w - 28, h - card.offsetHeight - 14 - 36];
+  const sw = safe[2] - safe[0], sh = safe[3] - safe[1]; if (sw < 80 || sh < 80) return;
+  const cam = camera.clone(); cam.updateProjectionMatrix();
+  let az = 0; const elv = st.shot.el * D2R, v = new THREE.Vector3();
+  const place = (t, d) => { cam.position.set(t.x + Math.sin(az) * Math.cos(elv) * d, t.y + Math.sin(elv) * d, t.z + Math.cos(az) * Math.cos(elv) * d); cam.lookAt(t); cam.updateMatrixWorld(); };
+  const bbox = () => { let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, ok = true; pts.forEach(q => { v.copy(q).project(cam); if (v.z > 1) ok = false; const sx = (v.x + 1) / 2 * w, sy = (1 - v.y) / 2 * h; x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy); }); return { x0, y0, x1, y1, ok }; };
+  const onGround = (px, py, y) => { const o = cam.position, dir = new THREE.Vector3(px / w * 2 - 1, 1 - py / h * 2, 0.5).unproject(cam).sub(o).normalize(); return o.clone().add(dir.multiplyScalar((y - o.y) / dir.y)); };
+  const c0 = new THREE.Vector3(); pts.forEach(q => c0.add(q)); c0.divideScalar(pts.length);
+  // try the step's own heading and a few turns either side of it; keep whichever frames the projects closest
+  let best = null; const az0 = st.shot.az0 != null ? st.shot.az0 : st.shot.az; // the authored heading, even after earlier fits
+  for (const turn of [0, -30, 30, -60, 60]) {
+  az = (az0 + turn) * D2R;
+  const t = c0.clone(); let d = 3000;
+  for (let pass = 0; pass < 4; pass++) {
+    let lo = 150, hi = 40000; // smallest distance at which the projected footprint fits the open area
+    for (let k = 0; k < 28; k++) { const m = Math.sqrt(lo * hi); place(t, m); const bb = bbox(); if (bb.ok && bb.x1 - bb.x0 <= sw && bb.y1 - bb.y0 <= sh) hi = m; else lo = m; }
+    d = hi * 1.06; place(t, d);
+    const bb = bbox(), a = onGround((bb.x0 + bb.x1) / 2, (bb.y0 + bb.y1) / 2, t.y), c = onGround((safe[0] + safe[2]) / 2, (safe[1] + safe[3]) / 2, t.y);
+    t.add(a.sub(c)); // slide the camera so the footprint's centre sits at the open area's centre
+  }
+  if (!best || d < best.d * 0.85) best = { t, d, az: az0 + turn }; // only leave the authored heading for a clearly closer frame
+  }
+  st.shot = Object.assign({}, st.shot, { tw: best.t.clone(), dw: best.d, az: best.az, az0 });
+}
+function fitShots() { cine.list.forEach((st, i) => { if (st.fit) fitShot(st, i); }); }
 // Blend two poses: target slides, view direction turns, distance moves in log space, and long moves lift into an arc.
 function blendPose(a, b, k) {
   const t = a.t.clone().lerp(b.t, k);
@@ -2258,7 +2303,7 @@ function enterStory() {
   stepsEl.innerHTML = cine.list.map((st, i, L) => stepHTML(st, i, L)).join('');
   buildActs();
   cine.active = true; cine.i = -1;
-  frameForStory(); measureSteps();
+  frameForStory(); measureSteps(); fitShots();
   storyEl.scrollTop = cine.lastTop; cine.s = cine.sT = scrollPos();
   cine.from = { t: controls.target.clone(), p: camera.position.clone() }; cine.enter = reduceMotion() ? 1 : 0;
   update();
@@ -2400,7 +2445,7 @@ canvas.addEventListener('wheel', e => {
 function resize() {
   const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return;
   renderer.setSize(w, h, false); postSize(w, h); camera.aspect = w / h; streetPx.value = 2 * Math.tan(camera.fov * Math.PI / 360) / h;
-  frameForStory(); if (cine.active) { measureSteps(); cine.sT = scrollPos(); } requestRender();
+  frameForStory(); if (cine.active) { measureSteps(); fitShots(); cine.sT = scrollPos(); } requestRender();
 }
 // In the story the subject sits beside the cards: right of them on wide screens, above them on phones.
 function frameForStory() {
@@ -2460,7 +2505,7 @@ function boot({ osm, dem, roads, groundImg, labels, bikes }) {
   const ld = document.getElementById('loading'); if (mode === 'sandbox') ld.classList.add('away'); // the intro and the story open on the same title, so only the sandbox fades it
   setTimeout(() => { ld.classList.add('done'); app.classList.remove('booting'); }, 60); // after the first frame of the map is up
   requestRender();
-  window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY, cine, camera, controls, bikeGroup, bikeDash, bikeDraw, setMode, post, requestRender, draw };
+  window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY, cine, camera, controls, bikeGroup, bikeDash, bikeDraw, setMode, post, requestRender, draw, shotPose };
 }
 const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
