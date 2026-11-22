@@ -539,6 +539,10 @@ details.about a { word-break: break-word; }
         <li><a href="https://www.cityofsanrafael.org/housing-element-certified-by-state" target="_blank" rel="noopener">Housing Element 2023–2031</a></li>
         <li><a href="https://www.cityofsanrafael.org/northgatetownsquaredev/" target="_blank" rel="noopener">Northgate Town Square</a></li>
         <li><a href="https://goldengate.org/assets/1/6/srtc_fact_sheet_20241.pdf" target="_blank" rel="noopener">San Rafael Transit Center replacement (GGBHTD)</a></li>
+        <li><a href="https://mtc.ca.gov/news/marin-sonoma-coordinated-transit-service-mascots-plan-launches-april-12-2026" target="_blank" rel="noopener">MASCOTS service changes, April 2026 (MTC)</a></li>
+        <li><a href="https://patch.com/california/petaluma/smart-awards-190-5m-contract-healdsburg-rail-extension" target="_blank" rel="noopener">SMART Healdsburg contract and ridership (Patch, Nov 2026)</a></li>
+        <li><a href="https://www.goldengate.org/assets/1/6/0_exec_sum_10.12.pdf" target="_blank" rel="noopener">Larkspur Ferry Service &amp; Parking Expansion draft EIR summary (GGBHTD)</a></li>
+        <li><a href="https://www.pressdemocrat.com/north-bay-business-journal/article/article/options-to-extend-sonoma-marin-commuter-trains-to-solano-could-cost-as-much/" target="_blank" rel="noopener">SMART Novato–Suisun City feasibility study (North Bay Business Journal, 2019)</a></li>
         <li><a href="https://www.cityofsanrafael.org/cbpp" target="_blank" rel="noopener">Citywide Bicycle &amp; Pedestrian Plan update</a></li>
         <li><a href="https://sustainability.atmeta.com/blog/2024/04/22/using-artificial-intelligence-to-map-the-earths-forests/" target="_blank" rel="noopener">Meta &amp; WRI global canopy height map</a></li>
         <li><a href="https://www.cityofsanrafael.org/measure-p-albert-park-library-community-center/" target="_blank" rel="noopener">Measure P library &amp; community center</a></li>
@@ -582,6 +586,14 @@ const I580 = [[37.9605,-122.5115],[37.959,-122.507],[37.9565,-122.502],[37.954,-
 const SR37 = [[38.0811,-122.5445],[38.0841,-122.5393],[38.0857,-122.5368],[38.0882,-122.5336],[38.0933,-122.527],[38.0966,-122.5228],[38.098,-122.5209],[38.1028,-122.5148],[38.1056,-122.5115],[38.1113,-122.5082],[38.1175,-122.503],[38.1194,-122.5005],[38.122,-122.4963],[38.1245,-122.4925]];
 const RSR_BRIDGE = [[37.9443,-122.4728,6],[37.9425,-122.466,16],[37.9405,-122.458,26],[37.9385,-122.450,40],[37.937,-122.444,52],[37.9355,-122.438,40],[37.9347,-122.4338,30],[37.9325,-122.426,44],[37.931,-122.418,30]];
 const SMART = [[38.1597,-122.5659],[38.1559,-122.5646],[38.1546,-122.5644],[38.1465,-122.5644],[38.1452,-122.5643],[38.1394,-122.5638],[38.1366,-122.5636],[38.1304,-122.5633],[38.1288,-122.5636],[38.1218,-122.5658],[38.1198,-122.5662],[38.1172,-122.5664],[38.1115,-122.5662],[38.107,-122.565],[38.1051,-122.5637],[38.1004,-122.56],[38.0953,-122.5557],[38.093,-122.5538],[38.0852,-122.5473],[38.0837,-122.5461],[38.0803,-122.5441],[38.0774,-122.5425],[38.0699,-122.5385],[38.0675,-122.537],[38.0647,-122.5341],[38.0591,-122.5263],[38.0582,-122.5253],[38.0529,-122.5218],[38.0514,-122.5211],[38.0451,-122.5198],[38.0406,-122.5193],[38.0345,-122.521],[38.0298,-122.5225],[38.0242,-122.5243],[38.0187,-122.526],[38.0147,-122.5278],[38.0085,-122.5307],[38.007,-122.5318],[38.0016,-122.5374],[37.996,-122.5355],[37.990,-122.5315],[37.984,-122.527],[37.979,-122.5235],[37.974,-122.5228],[37.97083,-122.5225],[37.9675,-122.5205],[37.964,-122.519],[37.9605,-122.5195],[37.9555,-122.518],[37.951,-122.515],[37.94785,-122.51248],[37.946,-122.5112]];
+// SMART's Brazos branch: freight track SMART owns, leaving the main line at Ignacio and running east beside Highway 37
+// (OpenStreetMap, simplified to 6 m; it leaves the frame near Sears Point)
+const SMART_EAST = [[38.0821,-122.5450],[38.0814,-122.5445],[38.0812,-122.5441],[38.0810,-122.5435],[38.0810,-122.5426],[38.0814,-122.5416],[38.1193,-122.4927],[38.1209,-122.4902],[38.1218,-122.4886],[38.1223,-122.4874],[38.1381,-122.4471],[38.1385,-122.4462],[38.1389,-122.4456],[38.1396,-122.4450],[38.1405,-122.4447],[38.1471,-122.4439],[38.1478,-122.4439],[38.1483,-122.4441],[38.1489,-122.4446],[38.1510,-122.4471],[38.1518,-122.4478],[38.1615,-122.4503]];
+// the passenger service a 2019 study proposed: north on the main line from Hamilton station to Ignacio, then east along the branch
+const SMART_HAMILTON = [[38.0565,-122.5240],[38.0601,-122.5275],[38.0643,-122.5337],[38.0687,-122.5378],[38.0779,-122.5427],[38.0821,-122.5450]];
+// Golden Gate Ferry, Larkspur → San Francisco, down the Corte Madera Creek channel (OpenStreetMap, simplified to 8 m)
+const FERRY = [[37.9447,-122.5084],[37.9448,-122.5080],[37.9440,-122.5073],[37.9435,-122.5066],[37.9427,-122.5041],[37.9421,-122.5018],[37.9408,-122.4990],[37.9390,-122.4971],[37.9387,-122.4966],[37.9379,-122.4933],[37.9365,-122.4906],[37.9362,-122.4893],[37.9367,-122.4864],[37.9365,-122.4833],[37.9361,-122.4808],[37.9355,-122.4781],[37.9339,-122.4734],[37.9311,-122.4677],[37.9260,-122.4614],[37.8828,-122.4181],[37.8814,-122.4168],[37.8805,-122.4164]];
+const LARKSPUR_STN = [37.94785, -122.51248], SR_STN = [37.97210, -122.52270], HAMILTON_STN = [38.0565, -122.5240];
 const CREEK = [[37.9712,-122.5235],[37.9695,-122.5215],[37.9690,-122.5195],[37.9695,-122.5170],[37.9685,-122.5110],[37.9675,-122.5090],[37.9672,-122.5030],[37.9670,-122.4985],[37.9670,-122.4930],[37.96722,-122.48639],[37.9675,-122.4825]];
 const FOURTH = [[37.9770,-122.5530],[37.97616,-122.54921],[37.97425,-122.53869],[37.97350,-122.53250],[37.97310,-122.52713],[37.97255,-122.52267],[37.97240,-122.52070],[37.97220,-122.51800]];
 const SANPEDRO = [[37.9695,-122.5125],[37.96843,-122.50599],[37.97367,-122.49832],[37.97436,-122.48448],[37.98222,-122.47306],[37.99015,-122.45773],[37.99609,-122.45652],[38.0005,-122.4620],[38.0065,-122.4750],[38.0085,-122.4890],[38.0030,-122.5050],[37.99674,-122.52833],[37.9975,-122.53028]];
@@ -760,7 +772,10 @@ const P = [
   { town:'Novato', tbd:'Number of lots, house type and site outline', n:'761 Sun Lane subdivision', a:'761 Sun Ln, Novato', lat:38.10855, lon:-122.60218, st:'proposed', y:2030, yb:'a', kind:'houses', fl:2, u:0, w:60, d:45, sz:'Tentative subdivision map; lot count not found', note:'A tentative map on Novato\'s list of active planning projects. The number of homes isn\'t published, so the footprint is a placeholder.', src:['https://www.novato.gov/government/community-development/planning-division/planning-projects'] },
   { town:'Novato', tbd:'Unit count, height, footprint and exact site', n:'NUSD educator housing (San Andreas site)', a:'San Andreas Dr, San Marin, Novato', lat:38.12350, lon:-122.60130, st:'concept', y:2033, yb:'a', kind:'houses', fl:2, u:0, w:120, d:100, sz:'Staff housing on about 21 acres of school district land; size not set', note:'Novato Unified is looking at its San Andreas site in San Marin for teacher and staff housing, still in pre-development as of April 2026. No plan has been released, so the size, site and the 2033 date are placeholders.', src:['https://callmarinhome.org/jurisdiction/novato/'] },
   { town:'Novato', tbd:'Address, unit count, height and footprint', n:'Broadstone Marin', a:'Address not found, Novato', lat:38.11000, lon:-122.57900, st:'proposed', y:2031, yb:'a', fl:4, u:0, w:40, d:30, sz:'Apartments; size not found', note:'Listed as an active proposed project by Novato and Call Marin Home (updated May 2026), but neither gives an address. The pin is a stand-in west of downtown, not the real site.', src:['https://www.novato.gov/government/community-development/planning-division/planning-projects','https://callmarinhome.org/jurisdiction/novato/'] },
-  { town:'Novato', n:'Highway 37 Novato Creek Bridge', a:'SR-37 at Novato Creek, Novato', lat:38.08740, lon:-122.53450, st:'infra', y:2030, yb:'r', start:2027, kind:'bridge', ends:[[38.0858,-122.5366],[38.0890,-122.5324]], bw:26, dh:8, u:0, sz:'About $220M; a higher span built for sea-level rise through 2130', note:'The first piece of raising Highway 37 between US-101 and Atherton Ave, one of the most flood-prone stretches of the road. Caltrans expects to start building in early 2027 and finish around 2030. The span length shown is an estimate.', src:['https://dot.ca.gov/caltrans-near-me/district-4/d4-projects/d4-37-corridor-projects/37-projects/sr37-flood-reduction-phase-1','https://www.californiaconstructionnews.com/2026/08/24/california-approves-more-than-300-million-for-highway-37-upgrades/'] }
+  { town:'Novato', n:'Highway 37 Novato Creek Bridge', a:'SR-37 at Novato Creek, Novato', lat:38.08740, lon:-122.53450, st:'infra', y:2030, yb:'r', start:2027, kind:'bridge', ends:[[38.0858,-122.5366],[38.0890,-122.5324]], bw:26, dh:8, u:0, sz:'About $220M; a higher span built for sea-level rise through 2130', note:'The first piece of raising Highway 37 between US-101 and Atherton Ave, one of the most flood-prone stretches of the road. Caltrans expects to start building in early 2027 and finish around 2030. The span length shown is an estimate.', src:['https://dot.ca.gov/caltrans-near-me/district-4/d4-projects/d4-37-corridor-projects/37-projects/sr37-flood-reduction-phase-1','https://www.californiaconstructionnews.com/2026/08/24/california-approves-more-than-300-million-for-highway-37-upgrades/'] },
+  { town:'Larkspur', n:'Larkspur ferry garages (draft plan)', a:'Larkspur Ferry Terminal, Larkspur', lat:37.94560, lon:-122.51150, st:'infra', y:2036, yb:'a', start:2032, kind:'parts', u:0,
+    parts:[[37.94666,-122.51263,76,54,6,61],[37.94462,-122.51053,190,118,5,42]],
+    sz:'Up to 76 daily ferry trips by 2050; garages with about 4,850 parking spaces, up from about 2,000', note:'Golden Gate Bridge District\'s draft environmental report (October 2026) would lift the cap of 42 daily Larkspur ferry trips to as many as 76 by 2050, as ridership is forecast to recover to 8,000 a day by about 2035 and reach 17,600 daily rides by 2050. Both build alternatives add a six-level, 850-space garage on the North Lot beside the SMART station and a garage on the Main Lot: five levels and 3,998 spaces in Alternative 1, four levels and 3,258 in Alternative 2. No alternative has been picked, and the garages still need a funding plan; the district would build them as demand and money allow, so the dates and the Alternative 1 massing shown are model assumptions. Today 73% of ferry riders drive to the terminal and 8% arrive by SMART.', src:['https://www.goldengate.org/assets/1/6/0_exec_sum_10.12.pdf','https://goldengate.org/district/district-projects/larkspur-ferry-service-parking-expansion-study','https://ceqanet.lci.ca.gov/Project/2024091190'] }
 ];
 
 // Illustrative growth: real housing sites with no project yet, placed at GP2040 pace. Clearly not proposals.
@@ -1596,7 +1611,18 @@ function buildProjects() {
       exclude.push({ x:cx, z:cz, r:260 });
     }
     else if (kind === 'canopy') {
-      [-22, 0, 22].forEach(o => addPart(obj, cx, cz + o, p.w, 12, 7, rot));
+      // bus canopies stop short of the SMART tracks that run through the block, leaving a 16 m gap for the trains
+      const ux = Math.cos(rot), uz = -Math.sin(rot); // the canopy's long axis
+      [-22, 0, 22].forEach(o => {
+        const bx = cx - uz * o, bz = cz + ux * o; let best = null;
+        for (let i = 0; i < SMART_XY.length - 1; i++) { // where the track crosses this canopy's centreline, as an offset along it
+          const a = SMART_XY[i], b = SMART_XY[i + 1], ex = b[0] - a[0], ez = b[1] - a[1], den = ux * ez - uz * ex; if (Math.abs(den) < 1e-6) continue;
+          const t = ((a[0] - bx) * ez - (a[1] - bz) * ex) / den, k = ((a[0] - bx) * uz - (a[1] - bz) * ux) / den;
+          if (k >= 0 && k <= 1 && Math.abs(t) < p.w / 2) best = t;
+        }
+        if (best == null) { addPart(obj, bx, bz, p.w, 12, 7, rot); return; }
+        [[-p.w / 2, best - 8], [best + 8, p.w / 2]].forEach(([s0, s1]) => { if (s1 - s0 > 6) { const m = (s0 + s1) / 2; addPart(obj, bx + ux * m, bz + uz * m, s1 - s0, 12, 7, rot); } });
+      });
       exclude.push({ x:cx, z:cz, r:75 });
     }
     else if (kind === 'bridge') {
@@ -1616,6 +1642,9 @@ function buildProjects() {
     else if (kind === 'park') {
       addPart(obj, cx, cz, p.w, p.d, 2.2, rot); // parts sit 1.2 m into the ground, so the field shows 1 m proud
       addPart(obj, cx - p.w / 2 - 14, cz - p.d / 2 + 8, 12, 8, 5, rot); addPart(obj, cx + p.w / 2 + 10, cz - p.d / 2 + 6, 8, 8, 4.5, rot);
+    }
+    else if (kind === 'parts') { // separate buildings on one project: p.parts = [[lat, lon, w, d, levels, rot°], …] (parking levels ~3.1 m)
+      p.parts.forEach(([la, lo, w, d, lv, r]) => { const [x, z] = XY(la, lo); addPart(obj, x, z, w, d, lv * 3.1, r * D2R); exclude.push({ x, z, r:Math.max(w, d) * 0.6 + 10 }); });
     }
     else if (kind === 'marsh') addMarsh(obj, cx, cz, p.w, p.d, (p.rot || 0) * D2R);
     else if (kind === 'ramp') buildConnector(obj, exclude);
@@ -1654,11 +1683,164 @@ function buildLandmarks() {
   // Bettini Transit Center canopies (until the new center opens)
   [-14, 14].forEach(o => lm(...offsetLL(37.97083, -122.52250, 0, o), 110, 10, 6, -9, 2029));
   // SMART stations
-  [[37.97210,-122.52270,-12],[38.00160,-122.53740,-12],[37.94785,-122.51248,-12],[38.0565,-122.5240,-28],[38.1060,-122.5645,-31],[38.1207,-122.5662,4]].forEach(s => lm(s[0], s[1], 8, 90, 4, s[2], 9999, railStationMat));
+  // platforms sit beside the traced line, turned to follow it, so a train can pull in alongside
+  [SR_STN, [38.00160,-122.53740], LARKSPUR_STN, HAMILTON_STN, [38.1060,-122.5645], [38.1207,-122.5662]].forEach(([la, lo]) => {
+    const [x, z] = XY(la, lo); let bi = 0, bd = 1e12;
+    for (let i = 0; i < SMART_XY.length - 1; i++) { const d = segDist(x, z, SMART_XY[i], SMART_XY[i + 1]); if (d < bd) { bd = d; bi = i; } }
+    const a = SMART_XY[bi], b = SMART_XY[bi + 1], l = Math.hypot(b[0] - a[0], b[1] - a[1]), tx = (b[0] - a[0]) / l, tz = (b[1] - a[1]) / l;
+    const t = Math.max(0, Math.min(l, (x - a[0]) * tx + (z - a[1]) * tz)), px = a[0] + tx * t + tz * 6.5, pz = a[1] + tz * t - tx * 6.5;
+    const m = lm(LAT0 - pz / KZ, LON0 + px / KX, 6, 90, 4, 0, 9999, railStationMat); m.rotation.y = Math.atan2(tx, tz);
+  });
   // Richmond–San Rafael Bridge piers
   sampleLine(RSR_BRIDGE, 260).forEach(s => { if (s.x > XY(37.944, -122.471)[0]) { const m = new THREE.Mesh(boxGeo, lmMat); m.scale.set(5, s.alt + 6, 5); m.position.set(s.x, -6, s.z); scene.add(m); } });
 }
 const railStationMat = new THREE.MeshLambertMaterial();
+
+/* ---------------- vehicles ----------------
+   A two-car SMART train and a Golden Gate ferry, to scale (a SMART car is about 26 m, the ferry about 42 m), for the story's
+   close-ups. Each runs a loop through one stop: it brakes in, waits, pulls away and fades out down the line, and the next
+   run comes back from the far end (the train from the other direction; the ferry turns at the dock). A run animates only
+   while its story step is on screen. Otherwise it finishes its loop and rests at its stop, so the map can stop drawing. */
+const RUNS = [], VEH = {};
+const vehGeoBox = (g, mat, w, h, d, x, y, z) => { const m = new THREE.Mesh(boxGeo, mat); m.scale.set(w, h, d); m.position.set(x, y, z); g.add(m); return m; };
+function vehMats() { return { body: new THREE.MeshLambertMaterial(), trim: new THREE.MeshLambertMaterial(), glass: new THREE.MeshLambertMaterial(), dark: new THREE.MeshLambertMaterial() }; }
+// local frame for every vehicle: +z is the front, y = 0 the rail head or the waterline
+function trainCar(M, len) {
+  const g = new THREE.Group(), h = len / 2;
+  vehGeoBox(g, M.dark, 2.5, 1.0, len - 4, 0, 0, 0);            // trucks and underframe
+  vehGeoBox(g, M.body, 3.0, 3.25, len - 0.6, 0, 1.0, 0);       // body
+  vehGeoBox(g, M.trim, 3.08, 0.4, len - 0.9, 0, 1.55, 0);      // livery stripe
+  vehGeoBox(g, M.glass, 3.08, 1.0, len - 6, 0, 2.55, 0);       // side windows
+  vehGeoBox(g, M.body, 2.3, 0.45, len - 5, 0, 4.25, 0);        // roof equipment
+  [-1, 1].forEach(e => { vehGeoBox(g, M.glass, 2.3, 1.0, 0.2, 0, 2.6, e * (h - 0.25)); vehGeoBox(g, M.trim, 3.08, 0.9, 0.5, 0, 1.0, e * (h - 0.5)); }); // cab windscreens, bumpers
+  return g;
+}
+function hullShape(pts) { const s = new THREE.Shape(); pts.forEach(([x, y], i) => i ? s.lineTo(x, y) : s.moveTo(x, y)); s.closePath(); return s; }
+// a plan outline (x across, y toward the bow) extruded upward from y0 to y0 + h
+function slab(g, shape, h, y0, mat, sc) {
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: h, bevelEnabled: false, curveSegments: 4 });
+  geo.rotateX(Math.PI / 2); geo.translate(0, y0 + h, 0); if (sc) geo.scale(sc, 1, sc + (sc - 1) * 0.2);
+  const m = new THREE.Mesh(geo, mat); g.add(m); return m;
+}
+function makeFerry(M) {
+  const g = new THREE.Group();
+  const hull = hullShape([[-1.3, -21], [1.3, -21], [1.4, 12], [0, 21], [-1.4, 12]]);
+  [-4, 4].forEach(x => { const a = slab(g, hull, 2.4, -1.0, M.body); a.position.x = x; const b = slab(g, hull, 0.35, 0.95, M.trim, 1.03); b.position.x = x; });
+  slab(g, hullShape([[-5.3, -20.5], [5.3, -20.5], [5.3, 9], [3.2, 17.5], [-3.2, 17.5], [-5.3, 9]]), 0.5, 1.4, M.body);
+  const cab = hullShape([[-4.8, -17], [4.8, -17], [4.8, 7], [2.8, 13.5], [-2.8, 13.5], [-4.8, 7]]);
+  slab(g, cab, 2.6, 1.9, M.body); slab(g, cab, 1.0, 2.85, M.glass, 1.012);
+  const up = hullShape([[-4.2, -12], [4.2, -12], [4.2, 5], [2.4, 10], [-2.4, 10], [-4.2, 5]]);
+  slab(g, up, 2.4, 4.5, M.body); slab(g, up, 0.9, 5.35, M.glass, 1.014);
+  vehGeoBox(g, M.body, 4.4, 2.0, 4.2, 0, 6.9, 5.2); vehGeoBox(g, M.glass, 4.5, 0.9, 4.3, 0, 7.75, 5.2); // wheelhouse
+  vehGeoBox(g, M.trim, 0.5, 2.2, 0.5, 0, 6.9, -9);                                                      // mast
+  return g;
+}
+// the wake: two arms spreading from the stern and a churned trail between them, fading with distance and speed
+const wakeMat = new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false,
+  uniforms: { uK: { value: 0 }, uOp: { value: 1 }, uCol: { value: new THREE.Color(0xffffff) } },
+  vertexShader: '#include <common>\n#include <logdepthbuf_pars_vertex>\nvarying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);\n#include <logdepthbuf_vertex>\n}',
+  fragmentShader: `#include <logdepthbuf_pars_fragment>
+uniform float uK, uOp; uniform vec3 uCol; varying vec2 vUv; void main(){
+#include <logdepthbuf_fragment>
+float v = vUv.y, u = abs(vUv.x - 0.5) * 2.0;
+float arm = smoothstep(0.1 + 0.06 * v, 0.0, abs(u - (0.16 + 0.84 * v)));
+float trail = smoothstep(0.22 + 0.25 * v, 0.0, u) * (0.75 - 0.35 * v);
+float a = min(1.0, max(arm, trail) * pow(1.0 - v, 1.4) * uK * 1.8) * uOp;
+if (a < 0.01) discard; gl_FragColor = vec4(uCol, a); }`
+});
+function makeRun(o) {
+  // runs follow the same straight segments as the drawn line, so a train stays on its ribbon
+  const xy = o.ll.map(p => XY(p[0], p[1])), L = polyLen(xy, xy.length - 1);
+  let stop = o.s0 || 0;
+  if (o.stopAt) { const [x, z] = XY(o.stopAt[0], o.stopAt[1]); let bd = 1e12; for (let s = 0; s <= L; s += 1) { const p = polyPoint(xy, s); const d = Math.hypot(p.x - x, p.z - z); if (d < bd) { bd = d; stop = s; } } }
+  const r = Object.assign({ xy, L, stop, t: 0, active: false, mats: [], op: 1 }, o);
+  const tb = r.v / r.a, db = r.v * r.v / (2 * r.a), TA = Math.max(0, (r.span - db) / r.v) + tb;
+  r.tm = { tb, db, TA, T: 2 * TA + r.dwell };
+  r.t = r.tm.TA + r.park * r.dwell; // start out resting at the stop
+  const sp = polyPoint(xy, stop); r.stopXZ = new THREE.Vector3(sp.x, 0, sp.z);
+  r.g = new THREE.Group(); r.follow = r.stopXZ.clone();
+  RUNS.push(r); VEH[r.name] = r; scene.add(r.g);
+  return r;
+}
+// where a run is at time t: off = signed distance from the stop (negative while arriving), sp = speed, ph 0 arrive / 1 wait / 2 leave
+function runState(r, t) {
+  const { tb, db, TA, T } = r.tm, cyc = Math.floor(t / T), tt = t - cyc * T;
+  if (tt < TA) { const u = TA - tt; return { cyc, ph: 0, k: 0, off: -(u < tb ? 0.5 * r.a * u * u : db + (u - tb) * r.v), sp: u < tb ? r.a * u : r.v }; }
+  if (tt < TA + r.dwell) return { cyc, ph: 1, k: (tt - TA) / r.dwell, off: 0, sp: 0 };
+  const u = tt - TA - r.dwell; return { cyc, ph: 2, k: 1, off: u < tb ? 0.5 * r.a * u * u : db + (u - tb) * r.v, sp: u < tb ? r.a * u : r.v };
+}
+const vP = new THREE.Vector3();
+function runPoint(r, s) { const p = polyPoint(r.xy, Math.max(0, Math.min(r.L, s))); return vP.set(p.x, 0, p.z); }
+// heading along the line at s, from a chord either side so it turns smoothly through the corners
+function runHeading(r, s, half) { const a = polyPoint(r.xy, Math.max(0, Math.min(r.L, s - half))), b = polyPoint(r.xy, Math.max(0, Math.min(r.L, s + half))); return Math.atan2(b.x - a.x, b.z - a.z); }
+function poseRun(r) {
+  const st = runState(r, r.t), fade = Math.max(0, Math.min(1, (r.span - Math.abs(st.off)) / (r.span * 0.22)));
+  if (r.kind === 'train') {
+    const dir = st.cyc % 2 ? -1 : 1, s = r.stop + dir * st.off;
+    r.cars.forEach((car, i) => {
+      const c = s + (i - (r.cars.length - 1) / 2) * 27;
+      const f = runPoint(r, c + 12).clone(), fy = yAt(f.x, f.z), b = runPoint(r, c - 12), by = yAt(b.x, b.z);
+      car.position.set((f.x + b.x) / 2, (fy + by) / 2 + 2.6, (f.z + b.z) / 2);
+      car.rotation.set(-Math.atan2(fy - by, Math.hypot(f.x - b.x, f.z - b.z)), Math.atan2(f.x - b.x, f.z - b.z), 0, 'YXZ');
+    });
+    const p = runPoint(r, s); r.pos = vP.set(p.x, yAt(p.x, p.z) + 2.6, p.z).clone();
+  } else {
+    const sNow = r.stop + Math.abs(st.off), p = runPoint(r, sNow), out = runHeading(r, sNow, 30);
+    r.g.position.set(p.x, water.position.y + 0.05, p.z);
+    r.g.rotation.y = st.ph === 0 ? out + Math.PI : st.ph === 1 ? out + Math.PI * (1 - smooth(st.k)) : out;
+    r.wake.material.uniforms.uK.value = Math.min(1, st.sp / r.v); r.wake.material.uniforms.uOp.value = fade;
+    r.pos = r.g.position.clone();
+  }
+  if (fade !== r.op) { r.op = fade; r.mats.forEach(m => { m.opacity = fade; m.transparent = fade < 0.999; }); r.g.visible = fade > 0.01; }
+  // the camera follows the run only as far as it is visible, so it drifts back to the stop as the run fades out
+  r.follow.set(r.stopXZ.x + (r.pos.x - r.stopXZ.x) * fade, 0, r.stopXZ.z + (r.pos.z - r.stopXZ.z) * fade);
+}
+function buildVehicles() {
+  const tm = vehMats(), t = makeRun({ name: 'train', kind: 'train', ll: SMART.filter(p => p[0] > 37.957 && p[0] < 37.992), stopAt: SR_STN, span: 420, v: 17, a: 1.0, dwell: 6, park: 0.5, ts: 1.4 });
+  t.cars = [trainCar(tm, 26), trainCar(tm, 26)]; t.cars.forEach(c => t.g.add(c)); t.mats = Object.values(tm); t.matSet = tm;
+  const fm = vehMats(), f = makeRun({ name: 'ferry', kind: 'ferry', ll: FERRY.slice(0, 15), s0: 28, span: 1500, v: 11, a: 0.45, dwell: 14, park: 0.98, ts: 2.0 });
+  f.g.add(makeFerry(fm)); f.mats = Object.values(fm); f.matSet = fm;
+  const wg = new THREE.PlaneGeometry(34, 230); wg.rotateX(-Math.PI / 2); wg.translate(0, 0.7, -115 - 18);
+  f.wake = new THREE.Mesh(wg, wakeMat); f.wake.renderOrder = 2; f.g.add(f.wake);
+  RUNS.forEach(poseRun);
+}
+function themeVehicles(T) {
+  const body = T('--bldg'), ink = T('--ink');
+  RUNS.forEach(r => { const M = r.matSet; M.body.color.copy(body); M.glass.color.copy(ink).lerp(body, 0.28); M.dark.color.copy(ink).lerp(body, 0.45); M.trim.color.copy(r.kind === 'train' ? T('--move') : T('--water-ink')); });
+  wakeMat.uniforms.uCol.value.copy(body).lerp(new THREE.Color(1, 1, 1), 0.6);
+}
+function tickVehicles(dt) {
+  let moving = false;
+  RUNS.forEach(r => {
+    let nt = r.t;
+    if (r.active) nt = r.t + dt * r.ts;
+    else { // finish the loop at speed and come to rest at the stop; outside the story or far from the camera, just be there
+      const T = r.tm.T; let tp = Math.floor(r.t / T) * T + r.tm.TA + r.park * r.dwell; if (r.t > tp + 1e-3) tp += T;
+      if (tp > r.t) nt = !cine.active || (r.pos && r.pos.distanceTo(camera.position) > 4000) ? tp : Math.min(tp, r.t + dt * r.ts * 3);
+    }
+    if (nt !== r.t) { r.t = nt; poseRun(r); moving = true; }
+    else if (r.kind === 'ferry' && Math.abs(r.g.position.y - water.position.y - 0.05) > 0.01) poseRun(r); // the bay rose under it
+  });
+  if (ferryRoute) ferryRoute.position.y = water.position.y + 0.2;
+  return moving;
+}
+// the ferry route, and the passenger line a 2019 study sketched east along Highway 37 (drawn in when its step comes up)
+let ferryRoute = null, eastRail = null;
+const ferryRouteMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.3, depthWrite: false, side: THREE.DoubleSide });
+const eastRailMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.95, depthWrite: false, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });
+const eastDraw = { t: 1, on: false };
+function showEastRail(on) {
+  if (!eastRail || on === eastDraw.on) return;
+  eastDraw.on = on; eastDraw.t = on && !reduceMotion() ? 0 : 1; eastRail.visible = on; tickEastRail(0); requestRender();
+}
+function tickEastRail(dt) {
+  if (!eastRail || !eastRail.visible) return false;
+  const n = eastRail.geometry.index.count;
+  if (eastDraw.t < 1) eastDraw.t = Math.min(1, eastDraw.t + dt / 2.4);
+  eastRail.geometry.setDrawRange(0, Math.round((1 - Math.pow(1 - eastDraw.t, 2.2)) * n / 6) * 6);
+  return eastDraw.t < 1;
+}
 
 /* flood zones */
 const floodMat = new THREE.ShaderMaterial({
@@ -1754,6 +1936,7 @@ function applyTheme() {
   waterMat.color = wat;
   roadMat.color = T('--road'); streetMat.color = T('--street'); streetMinorMat.color = T('--street'); streetMainMat.color = T('--street-main'); railMat.color = T('--rail'); creekMat.color = wat.clone().lerp(T('--water-ink'), 0.2);
   railStationMat.color = T('--rail'); infraMat.color = T('--s-infra');
+  ferryRouteMat.color = T('--water-ink'); eastRailMat.color = T('--bike-new'); themeVehicles(T);
   bikeExistMat.color = T('--move'); bikePlanMat.color = bikeTopMat.color = bikeDotMat.color = bikeDotTopMat.color = T('--bike-new');
   treeBase.copy(T('--tree')); treeMat.color.copy(treeBase);
   const b = T('--bldg'); fabricBase.copy(b); fabricMat.color.copy(b); lmMat.color = b.clone().multiplyScalar(0.96);
@@ -1994,7 +2177,8 @@ const KEY = {
   proposed: ['', '--s-proposed', 'Proposed'], concept: ['', '--s-concept', 'Concept only'], spec: ['ghost', '', 'Sketch, no proposal'],
   move: ['', '--bike-new', 'New transit & roads'], bikeNow: ['line', '--move', 'Bikeways today'], bikePlan: ['line', '--bike-new', 'In the draft plan'],
   fix: ['dot', '--bike-new', 'Crossing fixes'], flood: ['', '--flood', 'Flooded at high tide'], marsh: ['', '--nature', 'Marsh restoration'],
-  gate: ['', '--water-ink', 'Floodgate & levees'], civic: ['', '--civic', 'Civic & workplaces']
+  gate: ['', '--water-ink', 'Floodgate & levees'], civic: ['', '--civic', 'Civic & workplaces'],
+  rail: ['line', '--rail', 'SMART today'], railNew: ['line', '--bike-new', 'Passenger trains, if funded'], ferry: ['line', '--water-ink', 'Ferry to San Francisco']
 };
 
 // shot: target [lat, lon], distance m, azimuth (0 = camera due south, + toward east), elevation deg,
@@ -2019,8 +2203,8 @@ const STEPS = [
     call: [['Modera San Rafael','Modera, 930 Irwin St','210 homes · 8 stories'], ['San Rafael Transit Center (relocated)','New transit center','17 bus bays'], ['703 Third Street','703 Third St','120 homes'], ['Belmont senior living','1515 Fourth St','183 senior units']],
     legend: ['uc', 'approved', 'civic', 'move'],
     head: () => 'Downtown starts building up, around a new transit hub',
-    deck: () => 'Mill Creek’s 210-home Modera on Irwin Street is already out of the ground, and demolition has cleared 703 Third. The bus transit center moves a block north, freeing today’s Bettini block for housing. Senior housing on Fourth Street and a new WildCare animal hospital follow.',
-    stats: () => [{ n:homesOf(DOWNTOWN), l:'homes rising downtown' }, { t:'$25.6M', l:'federal grant for the transit center' }, { n:17, l:'bus bays, one block north' }] },
+    deck: () => 'Mill Creek’s 210-home Modera on Irwin Street is already out of the ground, and demolition has cleared 703 Third. The bus transit center moves a block north, freeing today’s Bettini block for housing, and its buses are already busier: since April 2026, Golden Gate’s Route 101 leaves for San Francisco every 15 minutes at rush hour, about twice as often as before. Senior housing on Fourth Street and a new WildCare animal hospital follow.',
+    stats: () => [{ n:homesOf(DOWNTOWN), l:'homes rising downtown' }, { t:'$25.6M', l:'federal grant for the transit center' }, { n:15, suf:' min', l:'between rush-hour buses to SF' }] },
 
   { id:'northgate', act:2, tag:'Northgate', key: () => 2031,
     shot:{ t:[38.0050,-122.5440], d:2350, az:40, el:31, drift:20, dolly:-0.08 },
@@ -2049,6 +2233,24 @@ const STEPS = [
     deck: () => 'If its construction money comes through, a flyover finally links northbound 101 to eastbound 580, ending the detour through local streets. Downtown’s buses move a block north to a new transit center by the SMART station, and a bike-and-walk drawbridge over San Rafael Creek ties the Canal to downtown.',
     stats: () => [{ t:'$192–241M', l:'connector estimate, not fully funded' }, { n:17, l:'bus bays at the new transit center' }, { n:1.65, dec:2, suf:' ac', l:'new waterfront park on the Canal' }] },
 
+  { id:'smart', act:3, tag:'SMART', key: () => 2034, veh:['train'],
+    shot:{ t:SR_STN, dy:3, d:190, az:58, el:16, drift:14, dolly:-0.06, follow:'train', fw:0.6 },
+    focus: () => namesTo(['San Rafael Transit Center (relocated)']),
+    call: [['veh:train','SMART train','two cars · about 170 ft'], [`at:${SR_STN}`,'Downtown San Rafael station','48 trains a weekday'], ['San Rafael Transit Center (relocated)','New transit center','buses meet the train']],
+    legend: ['rail', 'move'],
+    head: () => 'A busier train, with track heading north',
+    deck: () => 'SMART’s two-car trains stop downtown, a block from the new bus center, and again at the Civic Center. Riders keep coming: 5,754 on an average weekday in September 2026, up 23% in a year, after April’s regional service shake-up gave SMART 19% more trains. North of Windsor, a $190.5M contract is laying 4.75 more miles of track, and trains are due in Healdsburg by late 2028.',
+    stats: () => [{ n:5754, l:'riders on an average weekday, Sept 2026' }, { t:'+23%', l:'from a year earlier' }, { t:'Late 2028', l:'trains reach Healdsburg' }] },
+
+  { id:'ferry', act:3, tag:'Larkspur', key: () => 2034, veh:['ferry'],
+    shot:{ t:[37.9446,-122.5075], d:300, az:38, el:19, drift:14, dolly:-0.05, follow:'ferry', fw:0.6 },
+    focus: () => namesTo(['Larkspur ferry garages (draft plan)']),
+    call: [['veh:ferry','Golden Gate ferry','to the SF Ferry Building'], ['Larkspur ferry garages (draft plan)','Proposed garages','about 4,850 spaces · unfunded'], [`at:${LARKSPUR_STN}`,'Larkspur SMART station','end of the line since 2019']],
+    legend: ['ferry', 'rail', 'move'],
+    head: () => 'Where the train meets the ferry',
+    deck: () => 'Two miles south of downtown, SMART ends across the street from the Larkspur ferry terminal. Few riders use that link yet: 73% of ferry riders drive to the terminal, and 8% come by train. A draft plan released in October 2026 would raise the cap of 42 daily trips to San Francisco to as many as 76 by 2050, and add garages for about 4,850 cars, up from about 2,000. The garages have no funding plan yet.',
+    stats: () => [{ t:'42 → 76', l:'daily ferry trips allowed by 2050' }, { n:73, suf:'%', l:'of ferry riders drive there' }, { n:17600, l:'daily rides forecast for 2050' }] },
+
   { id:'bikes', act:3, tag:'Bikes', when: () => !!bikeStats, set:{ bikes:true }, key: () => 2034,
     shot:{ t:[37.9730,-122.5200], d:6400, az:18, el:54, drift:8, dolly:-0.06 },
     focus: () => [],
@@ -2056,6 +2258,16 @@ const STEPS = [
     head: () => 'A bike network, mostly still on paper',
     deck: () => `The solid ochre lines are the roughly ${miles(bikeStats.exist)} miles of bikeways San Rafael has today. The magenta ones are another ${miles(bikeStats.plan)} miles in the city’s draft Bicycle & Pedestrian Plan, ${bikeStats.top} of its ${bikeStats.routes} routes marked top priority, plus ${bikeStats.fixes} fixes at crossings that are hard to walk or bike today. The plan sets priorities for the next 5–10 years but gives no build dates.`,
     stats: () => [{ n:miles(bikeStats.exist), suf:' mi', l:'of bikeways today' }, { n:miles(bikeStats.plan), suf:' mi', l:'more in the draft plan' }, { n:bikeStats.fixes, l:'crossing fixes' }] },
+
+  { id:'east', act:3, tag:'Highway 37', whatIf:true, set:{ eastRail:true }, key: () => 2034, fit:true,
+    fitLL: [HAMILTON_STN, [38.0821,-122.5450], [38.1223,-122.4874], [38.1400,-122.4447]],
+    shot:{ t:[38.1000,-122.5000], d:8200, az:-20, el:40, drift:4, dolly:0 },
+    focus: () => namesTo(['Highway 37 Novato Creek Bridge']),
+    call: [[`at:${HAMILTON_STN}`,'Novato Hamilton station','where trains would start'], ['at:38.0821,-122.5450','Ignacio','freight track turns east'], ['Highway 37 Novato Creek Bridge','Highway 37','being raised above the bay'], ['at:38.1381,-122.4471','Toward Suisun City','Amtrak’s Capitol Corridor']],
+    legend: ['rail', 'railNew'],
+    head: () => 'What if SMART turned east?',
+    deck: () => 'SMART already owns 25 miles of freight track that leaves its main line at Ignacio and follows Highway 37 east to the Napa River. A 2019 study found that passenger trains could run from Novato’s Hamilton station to Suisun City, where they would meet Amtrak’s Capitol Corridor, for roughly $0.8–1.3 billion. No one has funded it, while Caltrans works on raising the flood-prone highway beside it.',
+    stats: () => [{ n:25, suf:' mi', l:'of track SMART owns along Highway 37' }, { t:'$0.8–1.3B', l:'2019 cost estimate' }, { t:'Unfunded', l:'as of 2026' }] },
 
   { id:'water', act:4, tag:'Water', flood:true, key: c => c.canalYear == null ? 2050 : Math.max(2027, c.canalYear),
     shot:{ t:[37.9630,-122.4985], d:3600, az:40, el:38, drift:16, dolly:-0.1 },
@@ -2098,6 +2310,8 @@ const easeIO = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 function shotPose(s, u) {
   // a fitted shot (see fitShot) carries its own world target and distance for the current screen
   const t = s.tw ? s.tw.clone() : (() => { const [x, z] = XY(s.t[0], s.t[1]); return new THREE.Vector3(x, yAt(x, z) + (s.dy || 0), z); })();
+  // follow: lean the target toward a moving vehicle (fw of the way), so a close-up keeps the train or ferry in frame
+  if (s.follow && VEH[s.follow]) { const f = VEH[s.follow].follow, k = s.fw || 0.4, sx = VEH[s.follow].stopXZ; t.x += (f.x - sx.x) * k; t.z += (f.z - sx.z) * k; }
   const az = (s.az + (s.drift || 0) * (u - 0.5)) * D2R, el = s.el * D2R;
   const d = (s.dw != null ? s.dw : s.d * (camera.aspect < 1 ? 1.8 : 1)) * (1 + (s.dolly || 0) * (u - 0.5));
   return { t, p: new THREE.Vector3(t.x + Math.sin(az) * Math.cos(el) * d, t.y + Math.sin(el) * d, t.z + Math.cos(az) * Math.cos(el) * d) };
@@ -2107,7 +2321,7 @@ function shotPose(s, u) {
    wide screens and above it on phones. Recomputed whenever the story is entered or the window resizes. */
 function fitShot(st, i) {
   const ps = (st.focus && st.focus(cine.ctx)) || [], el = stepsEl.children[i], card = el && el.querySelector('.scard');
-  if (!ps.length || !card) return;
+  if ((!ps.length && !st.fitLL) || !card) return;
   const w = stage.clientWidth, h = stage.clientHeight, top = document.querySelector('.topbar').offsetHeight;
   projGroup.updateMatrixWorld(true);
   const pts = [], b = new THREE.Box3();
@@ -2118,6 +2332,7 @@ function fitShot(st, i) {
     [[b.min.x - pad, b.min.z - pad], [b.max.x + pad, b.min.z - pad], [b.min.x - pad, b.max.z + pad], [b.max.x + pad, b.max.z + pad]]
       .forEach(([x, z]) => { const g = yAt(x, z); pts.push(new THREE.Vector3(x, g, z), new THREE.Vector3(x, g + ht, z)); });
   });
+  (st.fitLL || []).forEach(([la, lo]) => { const [x, z] = XY(la, lo), g = yAt(x, z); pts.push(new THREE.Vector3(x, g, z), new THREE.Vector3(x, g + 40, z)); }); // extra points to frame, e.g. a line's ends
   // the open area, in stage pixels: clear of the card, the top bar plus callout headroom, the parts rail and the year
   const safe = w > 760 ? [card.offsetLeft + card.offsetWidth + 56, top + 120, w - 120, h - 120]
                        : [28, top + 110, w - 28, h - card.offsetHeight - 14 - 36];
@@ -2158,7 +2373,7 @@ function blendPose(a, b, k) {
 const ringGeo = new THREE.RingGeometry(0.9, 1, 72); ringGeo.rotateX(-Math.PI / 2);
 const ringColor = new THREE.Color(0x2f5d50);
 let rings = [];
-function ringR(p) { const k = p.kind; if (k === 'ng1' || k === 'ng2') return 270; if (k === 'ramp') return 170; if (k === 'bridge') return 80; if (k === 'marsh') return Math.max(p.w, p.d) * 0.62; return Math.max(p.w || 40, p.d || 40) * 0.72 + 14; }
+function ringR(p) { const k = p.kind; if (k === 'ng1' || k === 'ng2') return 270; if (k === 'ramp') return 170; if (k === 'bridge') return 80; if (k === 'parts') return 175; if (k === 'marsh') return Math.max(p.w, p.d) * 0.62; return Math.max(p.w || 40, p.d || 40) * 0.72 + 14; }
 function buildRings(ps, minR) {
   rings.forEach(r => { scene.remove(r.m); r.m.material.dispose(); }); rings = [];
   ps.forEach(p => {
@@ -2181,6 +2396,8 @@ function buildCallouts(st) {
     let a;
     if (name.startsWith('zone')) { const zo = zoneObjs.find(o => o.z.id === name.slice(5)); if (!zo) return; a = { zo, always: name[4] === '!' }; }  // zone! = label it even when dry
     else if (name === 'gate') a = { gate: true };
+    else if (name.startsWith('veh:')) { const r = VEH[name.slice(4)]; if (!r) return; a = { veh: r }; }   // veh:train, veh:ferry
+    else if (name.startsWith('at:')) { const [la, lo] = name.slice(3).split(',').map(Number), [x, z] = XY(la, lo); a = { at: [x, z] }; } // at:lat,lon
     else { const p = byName(name); if (!p) return; a = { o: projObjs[p.id] }; }
     const el = document.createElement('div'); el.className = 'co';
     el.innerHTML = `<div class="co-tag"><small>${esc(typeof fact === 'function' ? fact(cine.ctx) : fact)}</small><b>${esc(label)}</b></div>`;
@@ -2193,6 +2410,8 @@ function placeCallouts() {
   const items = callouts.map(c => {
     let ok;
     if (c.a.o) { const o = c.a.o; ok = o.prog > 0.3; const tp = o.parts.reduce((m, pt) => Math.max(m, pt.g.position.y + pt.h * pt.g.scale.y), -1e9); tmpV.set(o.p.x, tp + 2, o.p.z); }
+    else if (c.a.veh) { const r = c.a.veh; ok = r.g.visible && r.op > 0.6; tmpV.set(r.pos.x, r.pos.y + (r.kind === 'train' ? 6 : 10), r.pos.z); }
+    else if (c.a.at) { ok = true; tmpV.set(c.a.at[0], yAt(c.a.at[0], c.a.at[1]) + 8, c.a.at[1]); }
     else if (c.a.zo) { const zo = c.a.zo; ok = c.a.always ? state.protect : zo.cur > 0.4 && groundU.uRise.value > 0.7; /* wait for the water to arrive */ tmpV.set(zo.z.x, zo.g.position.y, zo.z.z); }
     else { ok = protectGroup.visible; const g = protectGroup.userData.gate; tmpV.set(g[0], yAt(g[0], g[1]) + 18, g[1]); }
     tmpV.project(camera);
@@ -2274,6 +2493,8 @@ function activateStep(i) {
   const protect = !!(st.set && st.set.protect);
   if (state.protect !== protect) { state.protect = protect; update(); }
   showBikes(!!(st.set && st.set.bikes));
+  showEastRail(!!(st.set && st.set.eastRail));
+  RUNS.forEach(r => { r.active = !!(st.veh && st.veh.includes(r.name)); });
   const fps = st.focus ? st.focus(cine.ctx) : null;
   cine.focus = fps ? new Set(fps.map(p => p.id)) : null; cine.fadeT = fps ? 1 : 0;
   buildRings(fps || [], st.shot.d * 0.011);
@@ -2318,6 +2539,7 @@ function leaveStory() {
   floodAnim.target = floodAnim.t = 1; groundU.uRise.value = 1;
   buildRings([], 0); calloutsHost.innerHTML = ''; callouts = [];
   showBikes(document.getElementById('tBike').checked);
+  showEastRail(false); RUNS.forEach(r => { r.active = false; });
   ringColor.copy(tok('--accent'));
 }
 storyEl.addEventListener('scroll', () => { cine.sT = scrollPos(); requestRender(); }, { passive: true });
@@ -2416,6 +2638,8 @@ function loop(now) {
   treeMat.color.copy(treeBase).lerp(mutedMat.color, fk * 0.6);
   if (rings.length) showRings();
   if (tickBikeDraw(dt)) moving = true;
+  if (tickEastRail(dt)) moving = true;
+  if (tickVehicles(dt)) moving = true;
   { // rise over ~3.5 s, drain over ~1.5 s; the year label counts the bay up with it
     const fd = floodAnim.target - floodAnim.t;
     if (Math.abs(fd) > 0.0005) { floodAnim.t += Math.sign(fd) * Math.min(Math.abs(fd), dt / (fd > 0 ? 3.5 : 1.5)); moving = true; } else floodAnim.t = floodAnim.target;
@@ -2487,6 +2711,9 @@ function boot({ osm, dem, roads, groundImg, labels, bikes }) {
   scene.add(ribbon(SR37, 24, roadMat, 2.2));
   scene.add(ribbon(RSR_BRIDGE, 18, roadMat, 0));
   scene.add(ribbon(SMART, 7, railMat, 2.6));
+  scene.add(ribbon(SMART_EAST, 4.5, railMat, 2.4)); // freight-only today
+  eastRail = ribbon(SMART_HAMILTON.concat(SMART_EAST.slice(1)), 34, eastRailMat, 3.4); eastRail.renderOrder = 3; eastRail.visible = false; scene.add(eastRail);
+  ferryRoute = ribbon(FERRY, 5, ferryRouteMat, 0, () => 0); ferryRoute.renderOrder = 2; scene.add(ferryRoute);
   if (roads) scene.add(buildStreets(roads));
   else { scene.add(ribbon(FOURTH, 13, streetMat, 1.6)); scene.add(ribbon(SANPEDRO, 10, streetMat, 1.6)); scene.add(ribbon(LUCAS, 10, streetMat, 1.6)); }
   if (bikes) { bikeGroup = buildBikes(bikes); bikeGroup.visible = document.getElementById('tBike').checked; scene.add(bikeGroup); }
@@ -2506,7 +2733,7 @@ function boot({ osm, dem, roads, groundImg, labels, bikes }) {
       q.setFromAxisAngle(yAx, f.rot); sc.set(f.w, f.h + hi - lo, f.d); ps.set(f.x, lo - 1, f.z); m4.compose(ps, q, sc); fabricMesh.setMatrixAt(i, m4); fabricMesh.setColorAt(i, new THREE.Color(f.shade, f.shade, f.shade)); });
   }
   scene.add(fabricMesh);
-  buildLandmarks(); buildZones(); buildProtection(); makeLabels(labels); buildChips();
+  buildLandmarks(); buildVehicles(); buildZones(); buildProtection(); makeLabels(labels); buildChips();
   applyTheme();
   const v = VIEWS.overview, [tx, tz] = XY(v.t[0], v.t[1]);
   controls.target.set(tx, 0, tz); camera.position.set(tx + v.off[0], v.off[1], tz + v.off[2]);
@@ -2516,7 +2743,7 @@ function boot({ osm, dem, roads, groundImg, labels, bikes }) {
   const ld = document.getElementById('loading'); if (mode === 'sandbox') ld.classList.add('away'); // the intro and the story open on the same title, so only the sandbox fades it
   setTimeout(() => { ld.classList.add('done'); app.classList.remove('booting'); }, 60); // after the first frame of the map is up
   requestRender();
-  window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY, cine, camera, controls, bikeGroup, bikeDash, bikeDraw, setMode, post, requestRender, draw, shotPose, groundU, floodAnim };
+  window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY, cine, camera, controls, bikeGroup, bikeDash, bikeDraw, setMode, post, requestRender, draw, shotPose, groundU, floodAnim, VEH, SMART_XY, scene };
 }
 const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
