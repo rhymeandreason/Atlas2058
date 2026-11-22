@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="light"><!-- dark mode off: remove data-theme to follow the OS again -->
+<html lang="en" data-theme="light">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>San Rafael 2058</title>
@@ -7,142 +7,244 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&display=swap">
 <style>
-/* Layout: one-screen app — a planning-commission massing model on the right, a control sheet on the left (stacks under the model on phones). */
+/* Layout: a full-bleed watercolor model with three modes on top of it.
+   intro   — a title card over the slowly turning map, with the two ways in
+   story   — a scroll-driven story in five parts; the map follows the reader
+   sandbox — every control: year, bay, layers, projects */
 :root {
-  --bg: #e7eae3;
-  --panel: #f4f6f1;
-  --ink: #17211e;
-  --muted: #5a6762;
-  --line: #cdd4cb;
-  --accent: #17a34a;
+  /* paper and ink */
+  --paper: #f3f2ec;
+  --bg: var(--paper);
+  --panel: #fbfaf6;
+  --ink: #1f2723;
+  --muted: #68716b;
+  --faint: #a2a9a2;
+  --line: #e0e2d9;
+  --accent: #2f5d50;
   --accent-ink: #ffffff;
-  --scene-bg: #dde3dc;
-  --land-low: #e2e5d4;
-  --land-high: #b9b07a;
-  --marsh: #a9bb93;
-  --water: #8eaebd;
-  --bldg: #f7f6f1;
-  --road: #6f7672;
-  --street: #a3a99f;
-  --street-main: #858c83;
-  --lc-forest: #9db78a; --lc-scrub: #c4c393; --lc-grass: #dde2bd; --lc-sand: #eedcae; --lc-wetland: #a9c9b6;
-  --lc-golf: #aed08e; --lc-sports: #b8d79a; --lc-campus: #e2d9bf; --lc-retail: #ecccbe; --lc-industrial: #d2cdd8;
-  --lc-parking: #b9bbb4; --lc-pier: #9a9282; --lc-cemetery: #c6d2ae; --lc-park: #8fc77a; --os-ink: #3f6e3a;
-  --rail: #2c7d8e;
-  --flood: #2a78c4;
-  --s-built: #5f7d4c;
-  --s-uc: #d4951a;
-  --s-approved: #17a34a;
-  --s-proposed: #7a55b5;
-  --s-concept: #a47ccf;
-  --s-spec: #9fb1c2;
-  --s-infra: #1f7a8c;
-  --tree: #7fa566;
+  --scene-bg: #eff0e9;
+
+  /* nature: sage washes */
+  --land-low: #d3d9c9; --land-high: #a7b29b;
+  --marsh: #a1b79f; --nature: #5f7d55; --tree: #7a976a;
+  --lc-forest: #95a989; --lc-scrub: #b6bea1; --lc-grass: #c8d0b6; --lc-sand: #e4dcc4; --lc-wetland: #a6bdaa;
+  --lc-golf: #a8bc94; --lc-sports: #b3c39e; --lc-campus: #d8d8c9; --lc-retail: #dcd8ce; --lc-industrial: #d4d4cd;
+  --lc-parking: #dadad3; --lc-pier: #bcb4a5; --lc-cemetery: #b8c3a7; --lc-park: #8fab80; --os-ink: #46663f;
+
+  /* water: teal pigment */
+  --water: #8db0ad; --water-ink: #2e6470;
+  --flood: #2b6e7c;
+
+  /* the existing city: white paper massing and white streets */
+  --bldg: #fbfaf5; --road: #f8f6ef; --street: #f3f2eb; --street-main: #fbfaf6;
+
+  /* getting around: ochre */
+  --move: #c47a1f; --move-2: #ec6f12; /* planned bike routes: a vivid orange so thin dashes survive the paint pass */
+  --rail: #dcb27a; /* the SMART line, a lighter ochre so it does not shout up close */
+
+  /* new homes: a rose ramp from certain to speculative */
+  --s-built: #a5584a;
+  --s-uc: #c56b57;
+  --s-approved: #d98d7a;
+  --s-proposed: #e7b1a3;
+  --s-concept: #efcdc4;
+  --s-spec: #f7f4ef;
+  --s-infra: var(--move);
+
+  /* civic buildings and workplaces (library, hospital, hotels, labs): a violet ramp, same light-to-deep rule */
+  --c-built: #6d588c;
+  --c-uc: #8270a2;
+  --c-approved: #9b8bbb;
+  --c-proposed: #bbaed4;
+  --c-concept: #d6cde6;
+  --civic: var(--c-approved);
+
+  /* one colour per part of the story */
+  --act0: #3d4a44; --act1: #5f7458; --act2: #c56b57; --act3: #c47a1f; --act4: #2b6e7c; --act5: #3d4a44;
+
   --display: "Hanken Grotesk", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-  --body: "Hanken Grotesk", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-  --mono: var(--body);
-  --serif: "Hanken Grotesk", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-  /* story mode and the timeline bar follow the page theme (the old always-dark letterbox was #0b0e0d / #f3f0e7 / #b3bab5 / #4ee08f) */
-  --cine-bg: var(--panel); --cine-ink: var(--ink); --cine-dim: var(--muted); --cine-accent: var(--accent); --cine-shade: var(--bg);
-  --lbh: clamp(44px, 7.5vh, 76px);
-  --bpad: 14px; /* extra room under the timeline controls */
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0e1413; --panel: #141c1a; --ink: #e4ebe6; --muted: #91a099; --line: #2a3632;
-    --accent: #3ddc84; --accent-ink: #04180c;
-    --scene-bg: #0c1312; --land-low: #1d2623; --land-high: #3b3a2a; --marsh: #22312a; --water: #132430;
-    --bldg: #6c7672; --road: #7c8580; --street: #4b5450; --street-main: #66706b; --rail: #3fa8ba; --flood: #3c92e6;
-    --lc-forest: #20362a; --lc-scrub: #2f3a2a; --lc-grass: #2a3428; --lc-sand: #3d3a2e; --lc-wetland: #1f3933; --lc-golf: #284330; --lc-sports: #2b4230; --lc-campus: #2a302b; --lc-retail: #3a3030; --lc-industrial: #302f36; --lc-parking: #343a37; --lc-pier: #5c564c; --lc-cemetery: #2b3a2d; --lc-park: #2e6b3d; --os-ink: #8cc79a;
-    --s-built: #8fb378; --s-uc: #f0b23a; --s-approved: #3ddc84; --s-proposed: #a985e3; --s-concept: #c3a3ea; --s-spec: #7f97ad; --s-infra: #3cb3c7;
-    --tree: #4f8556;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0e1413; --panel: #141c1a; --ink: #e4ebe6; --muted: #91a099; --line: #2a3632;
-  --accent: #3ddc84; --accent-ink: #04180c;
-  --scene-bg: #0c1312; --land-low: #1d2623; --land-high: #3b3a2a; --marsh: #22312a; --water: #132430;
-  --bldg: #6c7672; --road: #7c8580; --street: #4b5450; --street-main: #66706b; --rail: #3fa8ba; --flood: #3c92e6;
-    --lc-forest: #20362a; --lc-scrub: #2f3a2a; --lc-grass: #2a3428; --lc-sand: #3d3a2e; --lc-wetland: #1f3933; --lc-golf: #284330; --lc-sports: #2b4230; --lc-campus: #2a302b; --lc-retail: #3a3030; --lc-industrial: #302f36; --lc-parking: #343a37; --lc-pier: #5c564c; --lc-cemetery: #2b3a2d; --lc-park: #2e6b3d; --os-ink: #8cc79a;
-  --s-built: #8fb378; --s-uc: #f0b23a; --s-approved: #3ddc84; --s-proposed: #a985e3; --s-concept: #c3a3ea; --s-spec: #7f97ad; --s-infra: #3cb3c7;
-  --tree: #4f8556;
-  color-scheme: dark;
+  --body: var(--display);
+  --top: 60px;
+  --shadow: 0 18px 50px rgba(34, 44, 38, .12), 0 2px 6px rgba(34, 44, 38, .05);
+  --blot: 46% 54% 52% 48% / 58% 44% 56% 42%; /* hand-painted swatch shape */
 }
 html, body { height: 100%; }
-body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14.5px; line-height: 1.5; overflow: hidden; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; font-kerning: normal; }
-/* Hanken Grotesk throughout. Scale: 11 / 12 / 13 / 14.5 body / 16 / 22 / 26 / display. Small labels get a touch of tracking, big type is tightened. */
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 14.5px; line-height: 1.5; overflow: hidden; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; font-kerning: normal; }
 * { box-sizing: border-box; }
 button, input, select { font: inherit; color: inherit; }
 a { color: inherit; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+[hidden] { display: none !important; }
 
 .app { height: 100%; position: relative; }
-.panel { position: absolute; top: 16px; left: 16px; z-index: 7; width: min(372px, calc(100% - 32px)); max-height: calc(100% - var(--lbh) - var(--bpad) - 32px); overflow-y: auto; background: color-mix(in srgb, var(--panel) 94%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 14px 40px rgba(0,0,0,.18); padding: 24px 26px 22px; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .stage { position: absolute; inset: 0; min-width: 0; min-height: 0; overflow: hidden; background: var(--scene-bg); }
 #scene { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
 #scene:active { cursor: grabbing; }
 #scene.hot { cursor: pointer; }
-.hovtip { position: absolute; left: 0; top: 0; z-index: 6; pointer-events: none; max-width: min(280px, calc(100% - 16px)); font-size: 13px; font-weight: 600; line-height: 1.35; background: var(--ink); color: var(--panel); padding: 3px 8px; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,.2); opacity: 0; transition: opacity .12s; }
-.hovtip.on { opacity: 1; }
-.hovtip .tipd { display: block; font-weight: 400; font-size: 12px; opacity: .75; margin-top: 2px; line-height: 1.35; }
-.hovtip small { font-weight: 400; opacity: .7; margin-left: 6px; }
+.app:not([data-mode="sandbox"]) #scene { cursor: default; touch-action: pan-y; }
 
-/* Masthead */
-.eyebrow { font-family: var(--body); font-weight: 600; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-h1 { font-family: var(--display); font-weight: 700; font-size: 52px; line-height: .9; letter-spacing: -.04em; margin: 8px 0 12px; text-wrap: balance; }
-h1 span { color: var(--accent); }
-.lede { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.5; max-width: 62ch; text-wrap: pretty; }
-h2 { font-family: var(--display); font-weight: 700; font-size: 16px; line-height: 1.25; letter-spacing: -.012em; color: var(--ink); margin: 0 0 10px; }
+/* swatches: little painted blots used in every legend */
+.sw { display: inline-block; flex: none; width: 16px; height: 11px; border-radius: var(--blot); background: var(--c, var(--ink)); }
+.sw.ghost { background: var(--s-spec); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 28%, transparent); }
+.sw.ramp { width: 34px; border-radius: 6px 9px 7px 10px / 9px 6px 10px 7px; background: linear-gradient(90deg, var(--s-built), var(--s-uc) 33%, var(--s-approved) 66%, var(--s-proposed)); }
+.sw.ramp.civic { width: 16px; border-radius: var(--blot); background: linear-gradient(90deg, var(--c-built), var(--c-approved) 50%, var(--c-proposed)); }
+.sw.line { height: 3px; width: 22px; border-radius: 2px; }
+.sw.dash { height: 3px; width: 22px; border-radius: 0; background: repeating-linear-gradient(90deg, var(--c) 0 5px, transparent 5px 8px); }
+.sw.dot { width: 8px; height: 8px; border-radius: 50%; }
 
-/* Stats */
-.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-block: 1px solid var(--line); }
+/* ---------- top bar ---------- */
+.topbar { position: absolute; top: 0; left: 0; right: 0; z-index: 20; height: var(--top); display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 18px 0 22px; pointer-events: none; }
+.topbar > * { pointer-events: auto; }
+.topbar::before { content: ""; position: absolute; inset: 0 0 -30px; z-index: -1; pointer-events: none; background: linear-gradient(to bottom, color-mix(in srgb, var(--paper) 88%, transparent), color-mix(in srgb, var(--paper) 0%, transparent)); opacity: 0; transition: opacity .5s; }
+.app:not([data-mode="intro"]) .topbar::before { opacity: 1; }
+.brand { border: 0; background: none; padding: 0; cursor: pointer; font-weight: 700; font-size: 16px; letter-spacing: -.015em; color: var(--ink); white-space: nowrap; opacity: 0; transition: opacity .5s; }
+.brand span { font-weight: 400; color: var(--muted); }
+.app:not([data-mode="intro"]) .brand { opacity: 1; }
+.modes { display: flex; padding: 3px; border-radius: 999px; background: color-mix(in srgb, var(--panel) 90%, transparent); border: 1px solid var(--line); box-shadow: 0 4px 18px rgba(34, 44, 38, .08); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); opacity: 0; transition: opacity .5s; }
+.app:not([data-mode="intro"]) .modes { opacity: 1; }
+.modes button { border: 0; background: transparent; border-radius: 999px; padding: 7px 15px; font-size: 13.5px; font-weight: 600; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; transition: background .2s, color .2s; }
+.modes button:hover { color: var(--ink); }
+.modes button[aria-selected="true"] { background: var(--ink); color: var(--panel); }
+.modes svg { width: 10px; height: 10px; fill: currentColor; flex: none; }
+
+/* ---------- intro ---------- */
+.intro { position: absolute; inset: 0; z-index: 15; display: grid; place-items: center; padding: 72px 20px 40px; overflow-y: auto;
+  background: radial-gradient(ellipse 58% 60% at 50% 48%, color-mix(in srgb, var(--paper) 94%, transparent) 0%, color-mix(in srgb, var(--paper) 78%, transparent) 48%, color-mix(in srgb, var(--paper) 18%, transparent) 100%);
+  transition: opacity .9s, visibility 0s .9s; }
+.app:not([data-mode="intro"]) .intro { opacity: 0; visibility: hidden; pointer-events: none; }
+.intro-in { max-width: 640px; text-align: center; display: grid; gap: 18px; justify-items: center; }
+.eyebrow { font-weight: 600; font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.intro h1 { font-family: var(--display); font-weight: 700; font-size: clamp(50px, 8vw, 104px); line-height: .9; letter-spacing: -.05em; margin: 0; text-wrap: balance; }
+.intro h1 em { display: block; font-style: normal; font-weight: 300; color: var(--muted); letter-spacing: -.04em; }
+.intro p { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.5; max-width: 42ch; text-wrap: balance; }
+.intro-cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+.btn { display: grid; gap: 2px; text-align: left; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 16px; padding: 14px 20px 13px; min-width: 236px; cursor: pointer; font-weight: 650; font-size: 16px; line-height: 1.25; box-shadow: 0 6px 22px rgba(34, 44, 38, .08); transition: transform .2s, box-shadow .2s, border-color .2s; }
+.btn small { font-weight: 450; font-size: 12.5px; color: var(--muted); }
+.btn.primary { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.btn.primary small { color: color-mix(in srgb, var(--panel) 68%, transparent); }
+.btn:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(34, 44, 38, .14); }
+.btn.sm { min-width: 0; padding: 10px 16px; font-size: 14px; border-radius: 12px; }
+.key { list-style: none; padding: 0; margin: 18px 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 20px; font-size: 13px; color: var(--muted); }
+.key li { display: inline-flex; align-items: center; gap: 8px; }
+
+/* ---------- story ---------- */
+.story { position: absolute; inset: 0; z-index: 8; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none; visibility: hidden; opacity: 0; transition: opacity .7s, visibility 0s .7s; }
+.story::-webkit-scrollbar { display: none; }
+.story:focus { outline: none; }
+.app[data-mode="story"] .story { visibility: visible; opacity: 1; transition: opacity .7s; }
+.step { min-height: 100vh; min-height: 100svh; display: flex; align-items: center; padding: calc(var(--top) + 16px) 0 32px clamp(20px, 4vw, 60px); pointer-events: none; }
+.step:last-child { min-height: 115svh; }
+.scard { --act: var(--act0); pointer-events: auto; width: min(400px, calc(100vw - 40px)); background: color-mix(in srgb, var(--panel) 94%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid color-mix(in srgb, var(--line) 80%, transparent); border-radius: 20px; padding: 22px 24px 20px; box-shadow: var(--shadow); opacity: .28; transform: translateY(10px); transition: opacity .6s, transform .7s cubic-bezier(.2,.7,.2,1); }
+.step.on .scard { opacity: 1; transform: none; }
+.act-h { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.act-h .sw { --c: var(--act); width: 20px; height: 13px; }
+.act-n { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--act); }
+.act-t { font-size: 13px; font-weight: 600; color: var(--muted); }
+.scard .k { font-size: 12.5px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; margin: 0 0 6px; }
+.scard h2 { font-family: var(--display); font-size: clamp(24px, 2.2vw, 30px); line-height: 1.08; letter-spacing: -.028em; font-weight: 700; margin: 0 0 10px; text-wrap: balance; }
+.scard p { margin: 0 0 16px; color: color-mix(in srgb, var(--ink) 84%, transparent); font-size: 15px; line-height: 1.58; text-wrap: pretty; }
+.sstats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; border-top: 1px solid var(--line); padding-top: 12px; }
+.sstats b { display: block; font-size: 22px; font-weight: 700; letter-spacing: -.03em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.sstats span { display: block; font-size: 11.5px; line-height: 1.32; color: var(--muted); margin-top: 4px; }
+.slegend { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+.slegend li { display: inline-flex; align-items: center; gap: 6px; }
+.whatif { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--act); border: 1px dashed currentColor; border-radius: 999px; padding: 1px 8px; margin-left: 6px; vertical-align: 2px; }
+/* opening and closing */
+.step.title { justify-content: center; padding-left: 20px; padding-right: 20px; }
+.step.title .scard { border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; text-align: center; width: min(760px, 100%); padding: 70px 60px;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--paper) 94%, transparent) 0%, color-mix(in srgb, var(--paper) 82%, transparent) 62%, color-mix(in srgb, var(--paper) 0%, transparent) 100%); }
+.acts button[data-act="0"] { display: none; }
+.step.title h2 { font-size: clamp(46px, 7vw, 92px); line-height: .92; letter-spacing: -.05em; margin-bottom: 16px; text-shadow: 0 0 30px var(--paper), 0 0 12px var(--paper); }
+.step.title h2 em { display: block; font-style: normal; font-weight: 300; color: var(--muted); }
+.step.title p { max-width: 44ch; margin: 0 auto 26px; font-size: 16.5px; color: var(--muted); text-shadow: 0 0 14px var(--paper), 0 0 4px var(--paper); }
+.scrollcue { display: inline-flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.scrollcue svg { width: 16px; height: 16px; animation: cue 2.4s ease-in-out infinite; }
+@keyframes cue { 0%, 100% { transform: translateY(0); opacity: .5; } 50% { transform: translateY(5px); opacity: 1; } }
+.endcta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+/* parts rail */
+.acts { position: absolute; z-index: 9; right: 22px; top: 50%; transform: translateY(-50%); display: grid; gap: 2px; visibility: hidden; opacity: 0; transition: opacity .6s, visibility 0s .6s; }
+.app[data-mode="story"] .acts { visibility: visible; opacity: 1; transition: opacity .6s; }
+.acts button { --act: var(--act0); display: flex; align-items: center; justify-content: flex-end; gap: 10px; border: 0; background: none; cursor: pointer; padding: 6px 0; color: var(--muted); font-size: 12.5px; font-weight: 600; }
+.acts button span { opacity: 0; transform: translateX(6px); transition: opacity .25s, transform .25s; text-shadow: 0 0 8px var(--paper), 0 0 3px var(--paper); white-space: nowrap; }
+.acts:hover button span, .acts button:focus-visible span, .acts button[aria-current="true"] span { opacity: 1; transform: none; }
+.acts i { width: 9px; height: 9px; border-radius: var(--blot); background: color-mix(in srgb, var(--ink) 20%, transparent); transition: transform .3s, background .3s; flex: none; }
+.acts button.done i { background: color-mix(in srgb, var(--act) 55%, transparent); }
+.acts button[aria-current="true"] { color: var(--ink); }
+.acts button[aria-current="true"] i { background: var(--act); transform: scale(1.6); }
+.sprog { position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 21; display: none; transform-origin: left; transform: scaleX(var(--p, 0)); background: var(--act, var(--ink)); }
+
+/* the year on the map, in the story */
+.cyear { position: absolute; z-index: 9; right: clamp(20px, 4vw, 56px); bottom: clamp(16px, 4vh, 40px); display: grid; justify-items: end; pointer-events: none; color: var(--ink); opacity: 0; transition: opacity .6s; }
+.app[data-mode="story"] .cyear { opacity: 1; }
+.cyear-l { font-weight: 600; font-size: 13px; color: var(--muted); margin-bottom: 10px; text-shadow: 0 0 8px var(--paper), 0 0 3px var(--paper); }
+#cYear { font-family: var(--display); font-weight: 800; font-size: clamp(76px, 9.5vw, 150px); line-height: .78; letter-spacing: -.055em; font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--ink) 88%, transparent); text-shadow: 0 4px 40px color-mix(in srgb, var(--paper) 80%, transparent); }
+
+/* callouts: leader-line labels pinned to the buildings the story is about */
+#callouts { --act: var(--act0); position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 3; transition: opacity .8s; }
+.co { position: absolute; left: 0; top: 0; opacity: 0; transition: opacity .6s; will-change: transform; }
+.co.on { opacity: 1; }
+.co::before { content: ""; position: absolute; left: -.5px; bottom: 0; width: 1px; height: var(--lead, 36px); background: color-mix(in srgb, var(--ink) 70%, transparent); }
+.co::after { content: ""; position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--act); box-shadow: 0 0 0 3px color-mix(in srgb, var(--paper) 70%, transparent); }
+.co-tag { position: absolute; left: -12px; bottom: var(--lead, 36px); background: var(--panel); color: var(--ink); padding: 6px 11px 7px 10px; border-left: 3px solid var(--act); border-radius: 3px 8px 8px 3px; white-space: nowrap; font-size: 13px; line-height: 1.3; box-shadow: 0 8px 22px rgba(34, 44, 38, .16); }
+.co.flip .co-tag { left: auto; right: -12px; border-left: 0; border-right: 3px solid var(--act); border-radius: 8px 3px 3px 8px; text-align: right; }
+.co-tag small { display: block; font-weight: 600; font-size: 11px; letter-spacing: .02em; color: var(--muted); margin-bottom: 1px; }
+.co-tag b { font-weight: 650; }
+
+/* ---------- sandbox ---------- */
+.panel { position: absolute; top: calc(var(--top) + 2px); left: 16px; z-index: 7; width: min(360px, calc(100% - 32px)); max-height: calc(100% - var(--top) - 18px); overflow-y: auto; overscroll-behavior: contain;
+  background: color-mix(in srgb, var(--panel) 95%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow);
+  padding: 22px 22px 20px; display: flex; flex-direction: column; gap: 22px; min-width: 0;
+  transform: translateX(calc(-100% - 24px)); opacity: 0; visibility: hidden; transition: transform .55s cubic-bezier(.6,0,.2,1), opacity .4s, visibility 0s .55s; }
+.app[data-mode="sandbox"] .panel { transform: none; opacity: 1; visibility: visible; transition: transform .6s cubic-bezier(.2,.7,.2,1), opacity .4s; }
+.panel header h1 { font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1; letter-spacing: -.035em; margin: 6px 0 8px; }
+.lede { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; text-wrap: pretty; }
+h2.h { font-family: var(--display); font-weight: 700; font-size: 15px; line-height: 1.25; letter-spacing: -.01em; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+h2.h .sw { width: 14px; height: 10px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); border-block: 1px solid var(--line); }
 .stat { padding: 12px 10px 12px 0; display: grid; gap: 2px; align-content: start; min-width: 0; }
 .stat + .stat { padding-left: 12px; border-left: 1px solid var(--line); }
-.stat b { font-family: var(--display); font-weight: 700; font-size: 26px; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.stat b { font-family: var(--display); font-weight: 700; font-size: 24px; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
 .stat span { font-size: 12px; color: var(--muted); line-height: 1.3; margin-top: 3px; }
-.specnote { display: block; font-style: normal; color: var(--s-spec); font-family: var(--body); font-size: 11px; margin-top: 3px; }
-
-/* Controls */
-.seg { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-.seg button { border: 0; background: transparent; padding: 8px 2px; font-size: 13px; font-weight: 500; cursor: pointer; border-left: 1px solid var(--line); }
-.seg button:first-child { border-left: 0; }
-.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); font-weight: 600; }
+.specnote { display: block; font-style: normal; color: var(--faint); font-size: 11px; margin-top: 3px; }
+.seg { display: grid; grid-template-columns: repeat(5, 1fr); background: color-mix(in srgb, var(--ink) 5%, transparent); border-radius: 10px; padding: 3px; gap: 2px; }
+.seg button { border: 0; background: transparent; padding: 7px 2px; font-size: 12.5px; font-weight: 500; cursor: pointer; border-radius: 8px; color: var(--muted); }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--panel); color: var(--ink); font-weight: 650; box-shadow: 0 1px 4px rgba(34, 44, 38, .14); }
 .segnote { font-size: 13px; line-height: 1.45; color: var(--muted); margin: 8px 0 0; text-wrap: pretty; }
-.toggles { display: grid; gap: 8px; margin-top: 12px; }
-.tog { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-weight: 500; line-height: 1.35; }
-.tog input { appearance: none; -webkit-appearance: none; flex: none; width: 30px; height: 18px; border-radius: 9px; background: var(--line); position: relative; margin: 0; cursor: pointer; transition: background .15s; }
-.tog input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--panel); transition: transform .15s; }
-.tog input:checked { background: var(--accent); }
+.toggles { display: grid; gap: 10px; margin-top: 14px; }
+.tog { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-weight: 550; line-height: 1.35; }
+.tog input { appearance: none; -webkit-appearance: none; flex: none; width: 30px; height: 18px; border-radius: 9px; background: var(--line); position: relative; cursor: pointer; margin: 0; transition: background .2s; }
+.tog input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--panel); box-shadow: 0 1px 2px rgba(0,0,0,.18); transition: transform .2s; }
+.tog input:checked { background: var(--ink); }
 .tog input:checked::after { transform: translateX(12px); }
+.tog > span { flex: 1; min-width: 0; }
 .tog small { display: block; color: var(--muted); font-size: 12.5px; font-weight: 400; line-height: 1.4; margin-top: 2px; }
-.layers .tog.lead { font-weight: 600; }
-.layers .tog.lead small { font-weight: 400; }
-.bikekey { list-style: none; margin: 8px 0 0 40px; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); }
-.bikekey li { display: inline-flex; align-items: center; gap: 6px; }
-.bikekey svg { width: 24px; height: 8px; flex: none; }
+.tog .sw { margin-top: 4px; }
+.ramp { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; font-size: 12.5px; }
+.ramp li { display: flex; align-items: center; gap: 8px; }
+.ramp-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); line-height: 1.4; }
+.legkey { list-style: none; margin: 8px 0 0 40px; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); }
+.legkey li { display: inline-flex; align-items: center; gap: 6px; }
 .layers:has(#tBike:not(:checked)) .bikekey { opacity: .4; }
-.toggles.minor { gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; }
+.toggles.minor { padding-top: 14px; border-top: 1px solid var(--line); font-size: 13.5px; }
 .toggles.minor small { font-size: 12px; }
-
-/* Legend + list */
+.howto { margin: 12px 0 0; font-size: 12px; color: var(--faint); line-height: 1.45; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px 4px 8px; font-size: 12.5px; font-weight: 500; background: transparent; cursor: pointer; }
-.chip i, .dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex: none; }
+.chip i, .dot { width: 11px; height: 9px; border-radius: var(--blot); display: inline-block; flex: none; }
 .chip[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--panel); }
-.chip em { font-style: normal; font-family: var(--body); font-size: 11.5px; font-variant-numeric: tabular-nums; opacity: .75; }
+.chip em { font-style: normal; font-size: 11.5px; font-variant-numeric: tabular-nums; opacity: .75; }
 .plist { list-style: none; margin: 10px 0 0; padding: 0; display: grid; }
-.plist button { width: 100%; display: grid; grid-template-columns: 10px 1fr auto; gap: 10px; align-items: baseline; text-align: left; border: 0; border-top: 1px solid var(--line); background: transparent; padding: 9px 2px; line-height: 1.35; cursor: pointer; }
-.plist button:hover { background: color-mix(in srgb, var(--ink) 5%, transparent); }
-.plist button[aria-current="true"] { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.plist button { width: 100%; display: grid; grid-template-columns: 11px 1fr auto; gap: 10px; align-items: baseline; text-align: left; border: 0; border-top: 1px solid var(--line); background: transparent; padding: 9px 2px; line-height: 1.35; cursor: pointer; }
+.plist button:hover { background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.plist button[aria-current="true"] { background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .plist .dot { transform: translateY(1px); }
 .plist .nm { min-width: 0; font-weight: 500; }
 .plist .nm small { display: block; color: var(--muted); font-size: 12px; font-weight: 400; margin-top: 1px; }
-.plist .yr { font-family: var(--body); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.plist .yr { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .plist .future .nm { opacity: .55; }
-
 details.sect { border-top: 1px solid var(--line); padding-top: 16px; }
-details.sect summary { cursor: pointer; font-family: var(--body); font-weight: 600; font-size: 13px; color: var(--muted); list-style-position: inside; }
+details.sect summary { cursor: pointer; font-weight: 600; font-size: 13.5px; color: var(--muted); list-style-position: inside; }
 details.sect summary:hover { color: var(--ink); }
 details.sect summary em { font-style: normal; opacity: .7; margin-left: 4px; }
 details.sect[open] summary { margin-bottom: 10px; }
@@ -150,204 +252,147 @@ details.about p, details.about li { color: var(--muted); font-size: 13px; line-h
 details.about ul { padding-left: 18px; margin: 6px 0; }
 details.about a { word-break: break-word; }
 
-/* Stage overlays */
-.views { position: absolute; top: 14px; right: 14px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; max-width: calc(100% - 28px); }
-.views button { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 7px 14px; box-shadow: 0 2px 8px rgba(0,0,0,.08); font-size: 13px; font-weight: 500; cursor: pointer; }
+/* timeline dock */
+.dock { position: absolute; z-index: 6; bottom: 18px; left: 396px; right: 20px; margin-inline: auto; max-width: 760px; display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 14px; padding: 10px 20px 10px 10px; border-radius: 999px; background: color-mix(in srgb, var(--panel) 94%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid var(--line); box-shadow: var(--shadow); opacity: 0; visibility: hidden; transform: translateY(16px); transition: opacity .4s, transform .5s, visibility 0s .5s; }
+.app[data-mode="sandbox"] .dock { opacity: 1; visibility: visible; transform: none; transition: opacity .4s .15s, transform .6s .15s cubic-bezier(.2,.7,.2,1); }
+.dplay { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--ink); color: var(--panel); display: grid; place-items: center; cursor: pointer; }
+.dplay svg { width: 12px; height: 12px; fill: currentColor; }
+.dyear { font-family: var(--display); font-weight: 800; font-size: 30px; line-height: 1; letter-spacing: -.045em; font-variant-numeric: tabular-nums; min-width: 2.3em; }
+.dyear small { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0; color: var(--muted); margin-top: 3px; white-space: nowrap; }
+.track { position: relative; padding: 4px 0 18px; }
+.track input { --p: 1; -webkit-appearance: none; appearance: none; width: 100%; height: 22px; margin: 0; background: transparent; cursor: pointer; display: block; }
+.track input::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--ink) calc(var(--p) * 100%), var(--line) 0); }
+.track input::-moz-range-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--ink) calc(var(--p) * 100%), var(--line) 0); }
+.track input::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -7px; border-radius: 50%; background: var(--panel); border: 2px solid var(--ink); box-shadow: 0 2px 6px rgba(0,0,0,.16); }
+.track input::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--panel); border: 2px solid var(--ink); }
+.ticks { position: absolute; left: 9px; right: 9px; bottom: 0; height: 14px; font-size: 11px; font-weight: 600; color: var(--faint); font-variant-numeric: tabular-nums; pointer-events: none; }
+.ticks span { position: absolute; transform: translateX(-50%); }
+.ticks span.mark { color: var(--muted); }
+.ticks span.mark::before { content: ""; position: absolute; left: 50%; top: -12px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--act4); }
+
+/* map furniture (sandbox) */
+.views { position: absolute; z-index: 5; top: calc(var(--top) + 2px); right: 16px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; max-width: calc(100% - 410px); }
+.views button { border: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 92%, transparent); border-radius: 999px; padding: 6px 13px; box-shadow: 0 2px 8px rgba(34,44,38,.07); font-size: 13px; font-weight: 500; cursor: pointer; }
 .views button:hover { border-color: var(--ink); }
-.hint { position: absolute; left: 404px; bottom: calc(var(--lbh) + var(--bpad) + 40px); right: 260px; font-size: 12px; color: var(--muted); text-shadow: 0 0 6px var(--scene-bg); pointer-events: none; }
-.compass { position: absolute; right: 14px; top: 54px; width: 38px; height: 38px; pointer-events: none; }
+.compass { position: absolute; z-index: 5; right: 16px; top: calc(var(--top) + 44px); width: 36px; height: 36px; pointer-events: none; }
 .compass svg { width: 100%; height: 100%; }
+.views, .compass { opacity: 0; visibility: hidden; transition: opacity .4s, visibility 0s .4s; }
+.app[data-mode="sandbox"] .views, .app[data-mode="sandbox"] .compass { opacity: 1; visibility: visible; transition: opacity .4s; }
+
+/* labels on the map */
 #labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.lbl { position: absolute; left: 0; top: 0; white-space: nowrap; font-family: var(--body); font-weight: 600; font-size: 12.5px; letter-spacing: .01em; color: var(--ink); opacity: .7; text-shadow: 0 0 3px var(--scene-bg), 0 0 6px var(--scene-bg); will-change: transform; }
-.lbl.water { color: var(--rail); font-style: italic; text-transform: none; letter-spacing: .03em; font-family: var(--body); font-weight: 500; font-size: 12.5px; }
-.lbl.poi { font-size: 11.5px; font-weight: 500; opacity: .62; }
+.lbl { position: absolute; left: 0; top: 0; white-space: nowrap; font-weight: 600; font-size: 12.5px; letter-spacing: .01em; color: var(--ink); opacity: .66; text-shadow: 0 0 3px var(--paper), 0 0 7px var(--paper); will-change: transform; transition: opacity .4s; }
+.lbl.water { color: var(--water-ink); font-style: italic; letter-spacing: .04em; font-weight: 500; font-size: 13px; opacity: .8; }
+.lbl.poi { font-size: 11.5px; font-weight: 500; opacity: .58; }
 .lbl.os { font-size: 11.5px; font-weight: 500; font-style: italic; color: var(--os-ink); opacity: .8; }
 .lbl.road { font-size: 11px; font-weight: 500; color: var(--muted); opacity: .9; letter-spacing: .02em; }
-.lbl.sel { font-family: var(--body); text-transform: none; letter-spacing: 0; font-weight: 600; font-size: 13px; opacity: 1; background: var(--ink); color: var(--panel); text-shadow: none; padding: 2px 7px; border-radius: 3px; }
-.card { position: absolute; z-index: 6; top: 56px; right: 14px; width: min(340px, calc(100% - 28px)); max-height: calc(100% - var(--lbh) - 72px); overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 16px 14px; box-shadow: 0 10px 30px rgba(0,0,0,.14); display: grid; gap: 8px; }
+.lbl.sel { letter-spacing: 0; font-weight: 600; font-size: 13px; opacity: 1; background: var(--ink); color: var(--panel); text-shadow: none; padding: 2px 8px; border-radius: 4px; }
+.app[data-mode="story"] .lbl:not(.sel):not(.water) { opacity: .38; }
+#labels { transition: opacity .6s; }
+.app[data-mode="intro"] #labels { opacity: 0; }
+.hovtip { position: absolute; left: 0; top: 0; z-index: 6; pointer-events: none; max-width: min(280px, calc(100% - 16px)); font-size: 13px; font-weight: 600; line-height: 1.35; background: var(--ink); color: var(--panel); padding: 4px 9px; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.18); opacity: 0; transition: opacity .12s; }
+.hovtip.on { opacity: 1; }
+.hovtip .tipd { display: block; font-weight: 400; font-size: 12px; opacity: .75; margin-top: 2px; line-height: 1.35; }
+.hovtip small { font-weight: 400; opacity: .7; margin-left: 6px; }
+
+/* detail card */
+.card { position: absolute; z-index: 6; top: calc(var(--top) + 84px); right: 16px; width: min(340px, calc(100% - 32px)); max-height: calc(100% - var(--top) - 190px); overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 16px; box-shadow: var(--shadow); display: grid; gap: 8px; }
 .card h3 { font-family: var(--display); font-weight: 700; font-size: 22px; line-height: 1.1; letter-spacing: -.025em; margin: 0; padding-right: 28px; text-wrap: balance; }
-.card .x { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; border: 0; background: transparent; cursor: pointer; font-size: 18px; color: var(--muted); border-radius: 6px; }
-.card .x:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
-.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-family: var(--body); font-weight: 600; padding: 3px 8px; border-radius: 999px; color: #fff; justify-self: start; }
+.card .x { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; border: 0; background: transparent; cursor: pointer; font-size: 18px; color: var(--muted); border-radius: 8px; }
+.card .x:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); }
+.pill { --c: var(--ink); display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; padding: 3px 10px 3px 7px; border-radius: 999px; background: color-mix(in srgb, var(--c) 18%, var(--panel)); color: var(--ink); justify-self: start; }
+.pill::before { content: ""; width: 11px; height: 9px; border-radius: var(--blot); background: var(--c); }
 .card .addr { color: var(--muted); font-size: 13px; margin: 0; }
 .facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 4px 0; font-size: 13.5px; line-height: 1.4; }
 .facts dt { color: var(--muted); }
 .facts dd { margin: 0; font-variant-numeric: tabular-nums; }
 .card p.note { margin: 0; font-size: 13.5px; line-height: 1.55; text-wrap: pretty; }
-.card .tbd { margin: 0; font-size: 12.5px; padding: 8px 10px; border: 1.5px dashed var(--s-uc); border-radius: 8px; background: color-mix(in srgb, var(--s-uc) 12%, transparent); }
-.tbdtag { color: var(--s-uc); font-weight: 600; }
+.card .tbd { margin: 0; font-size: 12.5px; padding: 8px 10px; border: 1.5px dashed var(--move); border-radius: 8px; background: color-mix(in srgb, var(--move) 10%, transparent); }
+.tbdtag { color: var(--move); font-weight: 600; }
 .card .tbd b { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 2px; }
 .card .src { display: grid; gap: 6px; margin-top: 4px; padding-top: 10px; border-top: 1px solid var(--line); }
-.card .srcmain { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-family: var(--body); font-weight: 700; font-size: 14px; color: var(--ink); background: color-mix(in srgb, var(--ink) 5%, transparent); text-decoration: none; border: 1px solid color-mix(in srgb, var(--ink) 35%, transparent); border-radius: 8px; padding: 10px 14px; transition: background .15s, border-color .15s, transform .15s; }
-.card .srcmain:hover { border-color: var(--ink); background: color-mix(in srgb, var(--ink) 10%, transparent); }
-.card .srcmain:active { transform: translateY(1px); }
+.card .srcmain { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-weight: 700; font-size: 14px; color: var(--ink); background: color-mix(in srgb, var(--ink) 4%, transparent); text-decoration: none; border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); border-radius: 10px; padding: 10px 14px; transition: background .15s, border-color .15s; }
+.card .srcmain:hover { border-color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, transparent); }
 .card .srcmain span { font-size: 16px; line-height: 1; color: var(--accent); }
 .card .srcmore { margin: 0; font-size: 12.5px; color: var(--muted); }
-.card .srcmore a { color: inherit; }
-.basis { font-family: var(--body); font-weight: 600; font-size: 12px; color: var(--muted); margin-left: 4px; }
-#loading { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-family: var(--body); font-weight: 600; font-size: 13.5px; color: var(--muted); background: radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--accent) 9%, var(--scene-bg)), var(--scene-bg) 62%); transition: opacity .7s ease, visibility 0s .7s; }
+.basis { font-weight: 600; font-size: 12px; color: var(--muted); margin-left: 4px; }
+
+/* loading */
+#loading { position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-weight: 600; font-size: 13.5px; color: var(--muted); background: var(--paper); transition: opacity .9s ease, visibility 0s .9s; }
 #loading.done { opacity: 0; visibility: hidden; }
-#loadMsg { font-family: var(--body); font-style: italic; font-weight: 500; font-size: 18px; letter-spacing: -.01em; color: var(--ink); opacity: .8; }
+#loadMsg { font-style: italic; font-weight: 500; font-size: 18px; letter-spacing: -.01em; color: var(--ink); opacity: .75; }
 #loading.done .vista { transform: scale(1.06); }
 #loading .vista { width: min(340px, 78vw); height: auto; overflow: hidden; transition: transform .7s ease; }
-#loading .hills { fill: color-mix(in srgb, var(--muted) 22%, transparent); }
-#loading .hills.near { fill: color-mix(in srgb, var(--muted) 34%, transparent); }
-#loading .b { fill: var(--ink); opacity: .82; transform-box: fill-box; transform-origin: bottom; transform: scaleY(0); animation: build 2s cubic-bezier(.3,.7,.2,1) infinite; }
-#loading .b.new { fill: var(--accent); opacity: 1; }
-#loading .sun { fill: #f2c55c; opacity: .9; animation: sun 2s ease-in-out infinite; }
-#loading .wave { fill: color-mix(in srgb, var(--flood) 40%, transparent); animation: swell 2s ease-in-out infinite; }
+#loading .hills { fill: color-mix(in srgb, var(--land-high) 55%, transparent); }
+#loading .hills.near { fill: color-mix(in srgb, var(--nature) 45%, transparent); }
+#loading .b { fill: var(--bldg); stroke: color-mix(in srgb, var(--ink) 30%, transparent); stroke-width: .8; transform-box: fill-box; transform-origin: bottom; transform: scaleY(0); animation: build 2s cubic-bezier(.3,.7,.2,1) infinite; }
+#loading .b.new { fill: var(--s-approved); stroke: none; }
+#loading .sun { fill: #e8b960; opacity: .85; animation: sun 2s ease-in-out infinite; }
+#loading .wave { fill: color-mix(in srgb, var(--water) 75%, transparent); animation: swell 2s ease-in-out infinite; }
 #loading .wave path { animation: drift 1.2s linear infinite; }
-#loading .wave.back { fill: color-mix(in srgb, var(--flood) 30%, transparent); }
+#loading .wave.back { fill: color-mix(in srgb, var(--water) 50%, transparent); }
 #loading .wave.back path { animation-duration: 3.6s; animation-direction: reverse; }
 #loading.err .vista { display: none; }
 @keyframes build { 0% { transform: scaleY(0); } 55%, 92% { transform: scaleY(1); } 100% { transform: scaleY(0); } }
 @keyframes sun { 0% { transform: translateY(14px); opacity: 0; } 20%, 85% { opacity: .9; } 70% { transform: translateY(-6px); } 100% { transform: translateY(-6px); opacity: 0; } }
 @keyframes swell { 0%, 8% { transform: translateY(6px); } 70%, 92% { transform: translateY(-5px); } 100% { transform: translateY(6px); } }
 @keyframes drift { from { transform: translateX(0); } to { transform: translateX(-40px); } }
-[hidden] { display: none !important; }
 
-/* Story mode: the panel slides away, the model goes full-bleed between letterbox bars, and each chapter
-   brings its own camera move, caption, impact figures and callouts on the projects that matter. */
-.panel { transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .4s; }
-.app.cinema .panel { transform: translateX(calc(-100% - 24px)); opacity: 0; visibility: hidden; transition: transform .6s cubic-bezier(.6,0,.2,1), opacity .4s, visibility 0s .6s; }
-.views, .hint, .compass { transition: opacity .4s; }
-.app.cinema .views, .app.cinema .hint, .app.cinema .compass { opacity: 0; pointer-events: none; }
-.app.cinema .lbl:not(.sel) { opacity: .4; }
-.app.cinema .card { top: calc(var(--lbh) + 12px); max-height: calc(100% - 2 * var(--lbh) - 24px); z-index: 6; }
-
-#callouts { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 3; transition: opacity .8s; }
-.titling #callouts, .titling .cyear { opacity: 0 !important; }
-.co { position: absolute; left: 0; top: 0; opacity: 0; transition: opacity .6s; will-change: transform; }
-.co.on { opacity: 1; }
-.co::before { content: ""; position: absolute; left: -.5px; bottom: 0; width: 1px; height: var(--lead, 36px); background: var(--cine-ink); box-shadow: 0 0 2px var(--cine-shade); }
-.co::after { content: ""; position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--cine-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cine-shade) 55%, transparent); }
-.co-tag { position: absolute; left: -12px; bottom: var(--lead, 36px); background: var(--cine-bg); color: var(--cine-ink); padding: 6px 11px 7px 10px; border-left: 2px solid var(--cine-accent); border-radius: 2px; white-space: nowrap; font-size: 13px; line-height: 1.3; box-shadow: 0 8px 22px rgba(0,0,0,.28); }
-.co.flip .co-tag { left: auto; right: -12px; border-left: 0; border-right: 2px solid var(--cine-accent); text-align: right; }
-.co-tag small { display: block; font-family: var(--body); font-weight: 600; font-size: 11px; letter-spacing: .04em; color: var(--cine-accent); margin-bottom: 1px; }
-.co-tag b { font-weight: 600; }
-
-.cine { position: absolute; inset: 0; z-index: 4; pointer-events: none; color: var(--cine-ink); visibility: hidden; transition: visibility 0s .8s; }
-.app.cinema .cine { visibility: visible; transition: none; }
-.cine button { pointer-events: auto; }
-.bar { position: absolute; left: 0; right: 0; height: var(--lbh); background: var(--cine-bg); color: var(--cine-ink); display: flex; align-items: center; gap: 16px; padding-inline: clamp(16px, 3vw, 40px); }
-.bar.top { top: 0; transform-origin: top; transform: scaleY(0); transition: transform .8s cubic-bezier(.6,0,.2,1); }
-/* the timeline bar fades up into the map instead of starting at a hard edge */
-.bar.bot { bottom: 0; z-index: 6; background: none; height: calc(var(--lbh) + var(--bpad)); padding-bottom: var(--bpad); }
-.bar.bot::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: calc(100% + 64px); z-index: -1; pointer-events: none; background: linear-gradient(to top, color-mix(in srgb, var(--cine-shade) 90%, transparent) 0, color-mix(in srgb, var(--cine-shade) 72%, transparent) var(--lbh), color-mix(in srgb, var(--cine-shade) 32%, transparent) calc(var(--lbh) + 26px), transparent 100%); }
-.app.cinema .bar.top { transform: none; }
-.bar.top > * { opacity: 0; transition: opacity .3s; }
-.app.cinema .bar.top > * { opacity: 1; transition: opacity .5s .55s; }
-.scrim, .vign, .scrimtop { position: absolute; left: 0; right: 0; pointer-events: none; opacity: 0; transition: opacity .9s; }
-.scrim { bottom: calc(var(--lbh) + var(--bpad)); height: 58%; background: linear-gradient(to top, color-mix(in srgb, var(--cine-shade) 88%, transparent) 0%, color-mix(in srgb, var(--cine-shade) 62%, transparent) 38%, transparent 100%); }
-.scrimtop { top: var(--lbh); height: 22%; background: linear-gradient(to bottom, color-mix(in srgb, var(--cine-shade) 50%, transparent), transparent); display: none; }
-.vign { inset: 0; background: radial-gradient(ellipse 75% 70% at 50% 42%, transparent 55%, color-mix(in srgb, var(--cine-shade) 32%, transparent) 100%); }
-.app.cinema .scrim, .app.cinema .vign, .app.cinema .scrimtop { opacity: 1; }
-
-.cine-brand { font-family: var(--body); font-weight: 600; font-size: 13px; color: var(--cine-dim); white-space: nowrap; }
-.cine-ch { flex: 1; min-width: 0; font-family: var(--body); font-weight: 600; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--cine-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-.cbtn { background: transparent; border: 1px solid color-mix(in srgb, var(--cine-ink) 24%, transparent); color: var(--cine-ink); border-radius: 999px; height: 34px; min-width: 34px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 500; white-space: nowrap; }
-.cbtn:hover { border-color: var(--cine-ink); }
-.cbtn svg { width: 12px; height: 12px; fill: currentColor; flex: none; }
-.cbtn.icon { padding: 0; }
-.cbtn.main { background: var(--cine-ink); color: var(--cine-bg); border-color: var(--cine-ink); font-weight: 600; padding: 0 16px 0 13px; min-width: 104px; }
-.cbtn-link { border: 0; background: none; padding: 4px 2px; color: var(--cine-dim); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; white-space: nowrap; }
-.cbtn-link:hover { color: var(--cine-ink); }
-.cctl { align-items: center; }
-.cbtn kbd { font-family: var(--body); font-size: 10px; opacity: .6; }
-.cctl { display: flex; gap: 6px; flex: none; }
-.segs { flex: 1; display: flex; gap: 5px; min-width: 0; touch-action: pan-y; }
-.app:not(.cinema) .segs { cursor: ew-resize; }
-.sg { flex: 1; min-width: 0; border: 0; background: none; padding: 6px 0; cursor: pointer; color: var(--cine-dim); display: grid; gap: 7px; text-align: left; }
-.sg i { display: block; height: 3px; border-radius: 2px; background: color-mix(in srgb, var(--cine-ink) 20%, transparent); position: relative; overflow: hidden; }
-.sg i::after { content: ""; position: absolute; inset: 0; background: var(--cine-ink); transform-origin: left; transform: scaleX(var(--p, 0)); }
-.sg span { font-family: var(--body); font-weight: 600; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sg span b { font-weight: 500; color: var(--cine-ink); opacity: .55; margin-right: 6px; }
-.sg[aria-current="true"] span { color: var(--cine-ink); }
-.app:not(.cinema) .sg[aria-current="true"] i::after { background: var(--cine-accent); }
-.segtip { position: absolute; bottom: calc(100% + 10px); left: 0; transform: translateX(-50%); width: max-content; max-width: min(300px, 80vw); background: var(--cine-bg); color: var(--cine-ink); border: 1px solid color-mix(in srgb, var(--cine-ink) 14%, transparent); border-radius: 8px; padding: 9px 12px 10px; pointer-events: none; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
-.segtip small { display: block; font-family: var(--body); font-weight: 600; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--cine-accent); margin-bottom: 3px; }
-.segtip b { display: block; font-family: var(--display); font-weight: 600; font-size: 16px; line-height: 1.2; letter-spacing: -.015em; text-wrap: balance; }
-.sg:hover span { color: var(--cine-ink); }
-
-.cap { position: absolute; left: clamp(16px, 4vw, 64px); bottom: calc(var(--lbh) + var(--bpad) + clamp(18px, 4vh, 40px)); width: min(600px, 58%); }
-.cap > * { opacity: 0; transform: translateY(14px); transition: opacity .25s, transform .25s; }
-.cap.in > * { opacity: 1; transform: none; transition: opacity .7s, transform .9s cubic-bezier(.2,.7,.2,1); }
-.cap.in > :nth-child(2) { transition-delay: .12s; }
-.cap.in > :nth-child(3) { transition-delay: .28s; }
-.cap.in > :nth-child(4) { transition-delay: .44s; }
-.cap-k { font-family: var(--body); font-weight: 600; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; font-variant-numeric: tabular-nums; color: var(--cine-accent); margin-bottom: 12px; }
-.cap-h { font-family: var(--display); font-weight: 700; text-transform: none; color: inherit; font-size: clamp(32px, 3.9vw, 56px); line-height: 1; letter-spacing: -.035em; margin: 0 0 14px; text-wrap: balance; text-shadow: 0 2px 28px color-mix(in srgb, var(--cine-shade) 60%, transparent); }
-.cap-d { font-size: clamp(14.5px, 1.15vw, 17px); line-height: 1.55; color: color-mix(in srgb, var(--cine-ink) 88%, transparent); max-width: 58ch; margin: 0 0 18px; text-wrap: pretty; }
-.cap-s { display: flex; gap: clamp(18px, 3vw, 44px); border-top: 1px solid color-mix(in srgb, var(--cine-ink) 20%, transparent); padding-top: 14px; }
-.cap-s div { display: grid; gap: 4px; align-content: start; min-width: 0; }
-.cap-s b { font-family: var(--display); font-weight: 700; font-size: clamp(24px, 2.3vw, 36px); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.cap-s span { font-size: 12.5px; line-height: 1.35; color: var(--cine-dim); max-width: 20ch; }
-
-/* The year lives on the map in both modes: a corner readout while exploring, the big film year in the story. */
-.cyear { position: absolute; z-index: 2; right: 20px; bottom: calc(var(--lbh) + var(--bpad) + 30px); display: grid; justify-items: end; pointer-events: none; color: var(--ink); transition: right .8s cubic-bezier(.6,0,.2,1), bottom .8s cubic-bezier(.6,0,.2,1), color .6s, opacity .6s; }
-.cyear-l { font-family: var(--body); font-weight: 600; font-size: 13px; color: var(--muted); margin-bottom: 10px; text-shadow: 0 0 6px var(--scene-bg); transition: color .6s; }
-#cYear { font-family: var(--display); font-weight: 800; font-size: clamp(68px, 7.5vw, 124px); line-height: .78; letter-spacing: -.05em; font-variant-numeric: tabular-nums; text-shadow: 0 0 22px var(--scene-bg), 0 0 6px var(--scene-bg); transition: font-size .8s cubic-bezier(.6,0,.2,1), text-shadow .6s; }
-.app.cinema .cyear { z-index: 5; color: var(--cine-ink); right: clamp(16px, 4vw, 64px); bottom: calc(var(--lbh) + var(--bpad) + clamp(12px, 3vh, 30px)); }
-.app.cinema .cyear-l { color: var(--cine-dim); text-shadow: none; }
-.app.cinema #cYear { font-size: clamp(84px, 11.5vw, 190px); text-shadow: 0 4px 40px color-mix(in srgb, var(--cine-shade) 60%, transparent); }
-
-.titlecard { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; gap: 18px; padding: 24px; background: color-mix(in srgb, var(--cine-shade) 74%, transparent); opacity: 0; transition: opacity 1.1s; }
-.titlecard.in { opacity: 1; }
-.tc-k { font-family: var(--body); font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--cine-accent); }
-.tc-h { font-family: var(--display); font-weight: 700; font-size: clamp(54px, 8vw, 124px); line-height: .9; letter-spacing: -.045em; }
-.tc-h em { color: var(--cine-accent); }
-.titlecard p { margin: 0; max-width: 44ch; color: var(--cine-dim); font-size: 16px; line-height: 1.5; text-wrap: balance; }
-
+/* ---------- phones ---------- */
 @media (max-width: 760px) {
-  body { overflow: auto; }
-  .app { display: flex; flex-direction: column; height: auto; min-height: 100%; }
-  .stage { position: relative; inset: auto; order: 0; height: 62svh; min-height: 360px; flex: none; }
-  .panel { position: static; order: 1; width: auto; max-height: none; overflow: visible; border: 0; border-radius: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--panel); padding: 20px 16px 28px; }
-  h1 { font-size: 44px; }
-  .card { top: auto; bottom: 10px; right: 10px; left: 10px; width: auto; max-height: 62%; }
-  .views { top: 10px; right: 10px; gap: 4px; }
-  .views button { padding: 5px 6px; font-size: 12px; }
-}
-@media (max-width: 760px) {
-  :root { --lbh: 46px; }
-  html.cine-on, html.cine-on body { overflow: hidden; }
-  .app.cinema .stage { position: fixed; inset: 0; height: auto; min-height: 0; z-index: 30; }
-  .app.cinema .panel { display: none; }
-  .cine-brand, .sg span, .cbtn kbd, .cbtn .lbl-x { display: none; }
-  .cine-ch { text-align: left; }
-  .bar.bot { gap: 10px; }
-  .lbl-long, #cOver { display: none; }
-  .cbtn.main { min-width: 0; }
-  .hint { display: none; }
-  .cyear { right: 12px; bottom: calc(var(--lbh) + var(--bpad) + 26px); }
-  .compass { top: 50px; right: 10px; }
-  .cbtn.main { min-width: 0; padding: 0 12px; }
-  .scrim { height: 74%; }
-  .scrimtop { display: block; }
-  .cap { left: 16px; right: 16px; width: auto; bottom: calc(var(--lbh) + var(--bpad) + 14px); }
-  .cap-k { font-size: 11px; margin-bottom: 8px; }
-  .cap-h { font-size: 29px; margin-bottom: 10px; }
-  .cap-d { font-size: 13.5px; line-height: 1.5; margin-bottom: 12px; }
-  .cap-s { gap: 16px; padding-top: 10px; }
-  .cap-s b { font-size: 21px; }
-  .cap-s span { font-size: 11.5px; }
-  .cyear-l { font-size: 11px; margin-bottom: 6px; }
-  #cYear { font-size: 52px; }
-  .app.cinema .cyear { top: calc(var(--lbh) + 10px); bottom: auto; right: 16px; }
-  .app.cinema .cyear-l { order: 2; margin: 6px 0 0; }
-  .app.cinema #cYear { font-size: 60px; }
+  :root { --top: 54px; }
+  .topbar { padding: 0 10px 0 14px; }
+  .brand { font-size: 14.5px; }
+  .modes button { padding: 6px 11px; font-size: 13px; }
+  .modes .long { display: none; }
+  .intro h1 { font-size: 52px; }
+  .intro p { font-size: 15.5px; }
+  .btn { min-width: 0; width: 100%; }
+  .intro-cta { width: 100%; max-width: 340px; flex-direction: column; }
+
+  /* story: map fixed behind, cards rise from the bottom */
+  .step { align-items: flex-end; padding: calc(var(--top) + 8px) 12px 14px; }
+  .scard { width: 100%; padding: 18px 18px 16px; border-radius: 18px; }
+  .scard h2 { font-size: 23px; }
+  .scard p { font-size: 14px; margin-bottom: 12px; }
+  .sstats b { font-size: 19px; }
+  .step.title { align-items: center; }
+  .step.title h2 { font-size: 50px; }
+  .acts { display: none; }
+  .sprog { display: block; }
+  .cyear { top: calc(var(--top) + 6px); bottom: auto; right: 14px; }
+  .cyear-l { order: 2; margin: 6px 0 0; font-size: 11px; }
+  #cYear { font-size: 48px; }
   .co-tag { font-size: 11.5px; padding: 4px 8px 5px; }
   .co-tag small { font-size: 10px; }
-  .tc-h { font-size: 48px; }
-  .titlecard p { font-size: 14px; }
+
+  /* sandbox: the page scrolls — map on top, controls underneath */
+  .app[data-mode="sandbox"] { overflow-y: auto; height: 100%; display: flex; flex-direction: column; }
+  .app[data-mode="sandbox"] .topbar { position: sticky; order: -1; flex: none; background: color-mix(in srgb, var(--paper) 94%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+  .app[data-mode="sandbox"] .topbar::before { display: none; }
+  .app[data-mode="sandbox"] .stage { position: relative; inset: auto; flex: none; height: 60svh; min-height: 340px; }
+  .app[data-mode="sandbox"] .views { top: 8px; }
+  .ticks .mn { display: none; }
+  .app:not([data-mode="sandbox"]) .panel { display: none; }
+  .panel { position: static; width: auto; max-height: none; overflow: visible; border: 0; border-radius: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--panel); transform: none; padding: 20px 18px 40px; }
+  .dock { left: 10px; right: 10px; bottom: 10px; padding: 8px 14px 8px 8px; gap: 10px; }
+  .dplay { width: 34px; height: 34px; }
+  .dyear { font-size: 24px; }
+  .dyear small { display: none; }
+  .views { top: calc(var(--top) + 6px); right: 10px; left: 10px; max-width: none; gap: 4px; justify-content: flex-start; }
+  .views button { padding: 5px 9px; font-size: 12px; }
+  .compass { display: none; }
+  .card { top: auto; bottom: 74px; right: 10px; left: 10px; width: auto; max-height: 58%; }
 }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 
-<div class="app">
+<div class="app" data-mode="intro">
   <section class="stage" id="stage" aria-label="3D model of San Rafael">
     <canvas id="scene"></canvas>
     <div id="labels" aria-hidden="true"></div>
+    <div id="callouts" aria-hidden="true"></div>
+    <div class="cyear" aria-hidden="true"><span class="cyear-l" id="cYearL"></span><span id="cYear">2058</span></div>
     <div class="views" role="group" aria-label="Camera views">
       <button type="button" data-view="overview">Overview</button>
       <button type="button" data-view="downtown">Downtown</button>
@@ -355,50 +400,55 @@ details.about a { word-break: break-word; }
       <button type="button" data-view="canal">Canal</button>
       <button type="button" data-view="novato">Novato</button>
     </div>
-    <div class="cyear" aria-hidden="true"><span class="cyear-l" id="cYearL"></span><span id="cYear">2058</span></div>
-    <div class="hint">Drag to pan · right-drag or two fingers to rotate · scroll to zoom · click a building or flood zone</div>
-    <div class="compass" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="var(--panel)" stroke="var(--line)"/><g id="needle"><path d="M20 6 L24 20 L16 20 Z" fill="var(--accent)"/><path d="M20 34 L24 20 L16 20 Z" fill="var(--muted)"/></g></svg></div>
-    <div id="callouts" aria-hidden="true"></div>
-    <div class="cine" id="cine" inert>
-      <div class="vign"></div>
-      <div class="scrim"></div>
-      <div class="scrimtop"></div>
-      <div class="titlecard" id="cTitle">
-        <div class="tc-k">A story in <span id="cN">nine</span> chapters</div>
-        <div class="tc-h">San Rafael<br><em>2026 → 2058</em></div>
-        <p>What is actually being built, what has only been proposed, and what the bay may do in the meantime.</p>
+    <div class="compass" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="var(--panel)" stroke="var(--line)"/><g id="needle"><path d="M20 6 L24 20 L16 20 Z" fill="var(--act2)"/><path d="M20 34 L24 20 L16 20 Z" fill="var(--faint)"/></g></svg></div>
+    <div class="dock" id="dock" role="group" aria-label="Year">
+      <button class="dplay" id="dPlay" type="button" aria-label="Play through the years"><svg viewBox="0 0 12 12" aria-hidden="true"><path id="dPlayIcon" d="M2 1 L11 6 L2 11 Z"/></svg></button>
+      <div class="dyear"><span id="dYear">2058</span><small id="dYearL">Likely case</small></div>
+      <div class="track">
+        <input type="range" id="yr" min="2026" max="2058" step="1" value="2058" aria-label="Year">
+        <div class="ticks" id="ticks" aria-hidden="true"></div>
       </div>
-      <section class="cap" id="cap" aria-live="polite">
-        <div class="cap-k" id="capK"></div>
-        <h2 class="cap-h" id="capH"></h2>
-        <p class="cap-d" id="capD"></p>
-        <div class="cap-s" id="capS"></div>
-      </section>
-      <div class="bar top">
-        <span class="cine-brand">San Rafael 2058</span>
-        <span class="cine-ch" id="cCh"></span>
-        <button class="cbtn" id="cExit" type="button" aria-label="Exit the story"><span class="lbl-x">Exit story</span> <kbd>Esc</kbd><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 1.4 L6 4.9 L9.5 1.4 L10.6 2.5 L7.1 6 L10.6 9.5 L9.5 10.6 L6 7.1 L2.5 10.6 L1.4 9.5 L4.9 6 L1.4 2.5 Z"/></svg></button>
-      </div>
-    </div>
-    <div class="bar bot" id="tbar">
-      <div class="cctl">
-        <button class="cbtn icon" id="cPrev" type="button" aria-label="Previous chapter"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1 H3 V11 H1.5 Z M11 1 L4 6 L11 11 Z"/></svg></button>
-        <button class="cbtn main" id="cPlay" type="button"><svg viewBox="0 0 12 12" aria-hidden="true"><path id="cPlayIcon" d="M2 1 L11 6 L2 11 Z"/></svg><span id="cPlayLbl">Watch the story</span></button>
-        <button class="cbtn icon" id="cNext" type="button" aria-label="Next chapter"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M9 1 H10.5 V11 H9 Z M1 1 L8 6 L1 11 Z"/></svg></button>
-        <button class="cbtn-link" id="cOver" type="button" hidden>Start over</button>
-      </div>
-      <nav class="segs" id="cSegs" aria-label="Timeline by chapter. Drag, or use the arrow keys, to choose a year"></nav>
-      <div class="segtip" id="segTip" hidden></div>
     </div>
     <article id="card" class="card" hidden aria-live="polite"></article>
     <div id="loading" role="status"><svg class="vista" viewBox="0 0 300 140" aria-hidden="true"><defs><linearGradient id="ldFade"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".18" stop-color="#fff"/><stop offset=".82" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><linearGradient id="ldFadeV" x2="0" y2="1"><stop offset=".7" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><mask id="ldMask"><rect width="300" height="140" fill="url(#ldFade)"/></mask><mask id="ldMaskV"><rect width="300" height="140" fill="url(#ldFadeV)"/></mask></defs><g mask="url(#ldMask)"><g mask="url(#ldMaskV)"><circle class="sun" cx="236" cy="22" r="12"/><path class="hills" d="M0 92 C40 60 70 58 110 76 S180 50 220 66 S280 70 300 80 V120 H0 Z"/><path class="hills near" d="M0 104 C30 92 60 96 90 102 S200 90 240 98 S290 104 300 102 V120 H0 Z"/><rect class="b" x="30" y="84" width="14" height="26" style="animation-delay:0.02s"/><rect class="b new" x="46" y="70" width="10" height="40" style="animation-delay:0.07s"/><rect class="b" x="58" y="80" width="16" height="30" style="animation-delay:0.03s"/><rect class="b new" x="78" y="56" width="12" height="54" style="animation-delay:0.14s"/><rect class="b" x="92" y="74" width="14" height="36" style="animation-delay:0.05s"/><rect class="b new" x="110" y="40" width="18" height="70" style="animation-delay:0.22s"/><rect class="b" x="130" y="66" width="10" height="44" style="animation-delay:0.07s"/><rect class="b new" x="142" y="52" width="14" height="58" style="animation-delay:0.29s"/><rect class="b" x="160" y="78" width="16" height="32" style="animation-delay:0.08s"/><rect class="b new" x="178" y="62" width="12" height="48" style="animation-delay:0.36s"/><rect class="b" x="192" y="72" width="20" height="38" style="animation-delay:0.10s"/><rect class="b new" x="214" y="48" width="10" height="62" style="animation-delay:0.43s"/><rect class="b" x="226" y="82" width="14" height="28" style="animation-delay:0.12s"/><rect class="b" x="244" y="68" width="12" height="42" style="animation-delay:0.13s"/><g transform="translate(0 104)"><g class="wave back"><path d="M0 6 Q10 0 20 6 T40 6 T60 6 T80 6 T100 6 T120 6 T140 6 T160 6 T180 6 T200 6 T220 6 T240 6 T260 6 T280 6 T300 6 T320 6 T340 6 V22 H0 Z"/></g></g><g transform="translate(0 108)"><g class="wave"><path d="M0 6 Q10 0 20 6 T40 6 T60 6 T80 6 T100 6 T120 6 T140 6 T160 6 T180 6 T200 6 T220 6 T240 6 T260 6 T280 6 T300 6 T320 6 T340 6 V22 H0 Z"/></g></g></g></g></svg><span id="loadMsg">Raising the hills…</span></div>
   </section>
 
-  <aside class="panel">
-    <header>
+  <header class="topbar">
+    <button class="brand" type="button" id="brand" aria-label="Back to the start">San Rafael <span>2058</span></button>
+    <nav class="modes" role="tablist" aria-label="Mode">
+      <button type="button" role="tab" data-mode="story" aria-selected="false"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L11 6 L2 11 Z"/></svg><span>Watch<span class="long"> the story</span></span></button>
+      <button type="button" role="tab" data-mode="sandbox" aria-selected="false">Sandbox</button>
+    </nav>
+  </header>
+
+  <section class="intro" id="intro" aria-label="Welcome">
+    <div class="intro-in">
       <div class="eyebrow">Marin County, California</div>
-      <h1>San Rafael <span id="h1year">2058</span></h1>
-      <p class="lede">See what’s being built and planned across town, and how much the bay could rise around it.</p>
+      <h1>San Rafael <em>2026 → 2058</em></h1>
+      <p>What is actually being built, what has only been proposed, and what the bay may do in the meantime.</p>
+      <div class="intro-cta">
+        <button class="btn primary" type="button" data-go="story">Watch the story<small>Five short parts · scroll at your own pace</small></button>
+        <button class="btn" type="button" data-go="sandbox">Open the sandbox<small>Change the year, the bay and the layers</small></button>
+      </div>
+      <ul class="key" aria-label="Colour key">
+        <li><i class="sw ramp"></i>New homes</li>
+        <li><i class="sw" style="--c:var(--civic)"></i>Civic &amp; work</li>
+        <li><i class="sw" style="--c:var(--move)"></i>Getting around</li>
+        <li><i class="sw" style="--c:var(--flood)"></i>Water</li>
+        <li><i class="sw" style="--c:var(--nature)"></i>Nature</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="story" id="story" tabindex="-1" aria-label="The story"><div id="steps"></div></section>
+  <nav class="acts" id="acts" aria-label="Parts of the story"></nav>
+  <div class="sprog" id="sprog" aria-hidden="true"></div>
+
+  <aside class="panel" id="panel" aria-label="Sandbox controls">
+    <header>
+      <div class="eyebrow">Sandbox</div>
+      <h1>Try your own 2058</h1>
+      <p class="lede">Drag the year, raise the bay and switch layers. Click any colored building, bike route or flooded area for details.</p>
     </header>
 
     <section class="stats" aria-label="Totals for the selected year">
@@ -408,7 +458,7 @@ details.about a { word-break: break-word; }
     </section>
 
     <section aria-label="Sea level">
-      <h2>How much will the bay rise?</h2>
+      <h2 class="h"><i class="sw" style="--c:var(--flood)"></i>How much will the bay rise?</h2>
       <div class="seg" role="group" aria-label="Sea level rise forecast" id="scen">
         <button type="button" data-s="Low">Lowest</button>
         <button type="button" data-s="IntLow">Lower</button>
@@ -423,20 +473,38 @@ details.about a { word-break: break-word; }
       </div>
     </section>
 
+    <section aria-label="New buildings">
+      <h2 class="h"><i class="sw ramp" style="width:22px"></i>How sure is each building?</h2>
+      <ul class="ramp">
+        <li><i class="sw" style="--c:var(--s-built)"></i>Built since 2020</li>
+        <li><i class="sw" style="--c:var(--s-uc)"></i>Under construction</li>
+        <li><i class="sw" style="--c:var(--s-approved)"></i>Approved</li>
+        <li><i class="sw" style="--c:var(--s-proposed)"></i>Proposed</li>
+        <li><i class="sw" style="--c:var(--s-concept)"></i>Concept only</li>
+        <li><i class="sw ghost"></i>Sketch, no proposal</li>
+        <li><i class="sw ramp civic"></i>Civic &amp; workplaces</li>
+        <li><i class="sw" style="--c:var(--move)"></i>Transit &amp; roads</li>
+        <li><i class="sw" style="--c:var(--nature)"></i>Marsh &amp; parks</li>
+      </ul>
+      <p class="ramp-note">The deeper the color, the surer the building: rose for homes, violet for libraries, hospitals, hotels and workplaces. White blocks are the city as it stands.</p>
+    </section>
+
     <section aria-label="Map layers" class="layers">
-      <h2>On the map</h2>
-      <label class="tog lead"><input type="checkbox" id="tBike" checked><span>Bike routes<small>Today’s bikeways and the city’s draft plan.</small></span></label>
-      <ul class="bikekey" aria-label="Bike route key">
-        <li><svg viewBox="0 0 24 8" aria-hidden="true"><line x1="1" y1="4" x2="23" y2="4" stroke="var(--s-built)" stroke-width="2.5" stroke-linecap="round"/></svg>Today</li>
-        <li><svg viewBox="0 0 24 8" aria-hidden="true"><line x1="1" y1="4" x2="23" y2="4" stroke="var(--s-proposed)" stroke-width="2.5" stroke-dasharray="5 3"/></svg>Planned</li>
-        <li><svg viewBox="0 0 24 8" aria-hidden="true"><line x1="1" y1="4" x2="23" y2="4" stroke="var(--s-proposed)" stroke-width="5" stroke-dasharray="6 3"/></svg>Top priority</li>
-        <li><svg viewBox="0 0 24 8" aria-hidden="true"><circle cx="12" cy="4" r="3.5" fill="var(--s-proposed)"/></svg>Crossing fix</li>
+      <h2 class="h">On the map</h2>
+      <label class="tog"><input type="checkbox" id="tBike"><span>Bike routes<small>Today’s bikeways and the city’s draft plan.</small></span></label>
+      <ul class="legkey bikekey" aria-label="Bike route key">
+        <li><i class="sw line" style="--c:var(--move)"></i>Today</li>
+        <li><i class="sw dash" style="--c:var(--move-2)"></i>Planned</li>
+        <li><i class="sw dash" style="--c:var(--move-2);height:5px"></i>Top priority</li>
+        <li><i class="sw dot" style="--c:var(--move-2)"></i>Crossing fix</li>
       </ul>
       <div class="toggles minor">
+        <label class="tog"><input type="checkbox" id="tSpec" checked><span>Growth after 2034<small>White ghosts where housing is allowed but nobody has proposed it yet.</small></span></label>
         <label class="tog"><input type="checkbox" id="tTrees"><span>Trees<small>Estimated from satellite imagery. About 6% of the Canal is under trees, against 42% of Gerstle Park.</small></span></label>
-        <label class="tog"><input type="checkbox" id="tSpec" checked><span>Growth after 2034<small>Faded buildings where housing is allowed but not yet proposed.</small></span></label>
-        <label class="tog"><input type="checkbox" id="tLabels" checked><span>Neighborhood names</span></label>
+        <label class="tog"><input type="checkbox" id="tLabels" checked><span>Place names</span></label>
+        <label class="tog"><input type="checkbox" id="tPaint" checked><span>Painted look<small>Paper grain and soft watercolor edges. Turn off if the map feels slow.</small></span></label>
       </div>
+      <p class="howto">Drag to pan · right-drag or two fingers to rotate · scroll to zoom</p>
     </section>
 
     <details class="sect">
@@ -746,9 +814,81 @@ controls.enableDamping = true; controls.dampingFactor = 0.08; controls.maxPolarA
 // map-style controls: left-drag / one finger pans; right-drag (or shift/⌘-drag) / two fingers rotate
 controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
 controls.touches = { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_ROTATE };
-const hemi = new THREE.HemisphereLight(0xffffff, 0x77786c, 0.62); scene.add(hemi);
-const sun = new THREE.DirectionalLight(0xfff6e8, 0.62); sun.position.set(-5000, 4200, 2000); scene.add(sun);
-scene.fog = new THREE.Fog(0xdde3dc, 12000, 30000);
+// soft, even daylight: a bright sky fill and a low warm sun, so massing reads without hard contrast
+const hemi = new THREE.HemisphereLight(0xffffff, 0x8e9585, 0.7); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff2de, 0.5); sun.position.set(-5000, 4200, 2000); scene.add(sun);
+scene.fog = new THREE.Fog(0xeff0e9, 9000, 28000); // distance fades into the paper
+
+/* ---------------- watercolor finish ----------------
+   The scene renders into an offscreen target; a full-screen pass then paints it onto "paper": a slight hand-drawn
+   wobble, colour bleeding into a soft blur, pigment pooling darker along colour edges, granulation in the washes,
+   paper fibre, and a vignette that fades the edges of the frame into the paper. One tiling noise texture
+   (four channels of different grain) feeds this pass and the mottled washes on the ground and water. */
+function makeNoiseTex() {
+  const N = 256, f = [new Float32Array(N * N), new Float32Array(N * N), new Float32Array(N * N), new Float32Array(N * N)];
+  let s = 917; const rand = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
+  const vn = (g, p, x, y) => { const xi = Math.floor(x), yi = Math.floor(y), u = x - xi, v = y - yi, su = u * u * (3 - 2 * u), sv = v * v * (3 - 2 * v);
+    const i0 = xi % p, i1 = (i0 + 1) % p, j0 = yi % p, j1 = (j0 + 1) % p, a = g[j0 * p + i0], b = g[j0 * p + i1], c = g[j1 * p + i0], d = g[j1 * p + i1];
+    return a + (b - a) * su + (c - a) * sv + (a - b - c + d) * su * sv; };
+  // tileable fbm: each octave is value noise on a lattice whose period divides the texture size
+  [[4, 4], [4, 4], [16, 3], [64, 2]].forEach(([base, oct], ch) => {
+    const ls = []; for (let o = 0; o < oct; o++) { const p = base << o, g = new Float32Array(p * p); for (let i = 0; i < g.length; i++) g[i] = rand(); ls.push([g, p, 0.5 ** o]); }
+    let lo = 1, hi = 0;
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { let v = 0; for (const [g, p, a] of ls) v += a * vn(g, p, x * p / N, y * p / N); f[ch][y * N + x] = v; lo = Math.min(lo, v); hi = Math.max(hi, v); }
+    for (let i = 0; i < N * N; i++) f[ch][i] = (f[ch][i] - lo) / (hi - lo); // stretch to the full 0–1 range
+  });
+  const data = new Uint8Array(N * N * 4);
+  for (let i = 0; i < N * N; i++) for (let c = 0; c < 4; c++) data[i * 4 + c] = Math.round(f[c][i] * 255);
+  const t = new THREE.DataTexture(data, N, N, THREE.RGBAFormat);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.magFilter = THREE.LinearFilter; t.minFilter = THREE.LinearMipmapLinearFilter; t.generateMipmaps = true; t.needsUpdate = true;
+  return t;
+}
+const noiseTex = makeNoiseTex();
+const post = {
+  on: true, rt: null,
+  scene: new THREE.Scene(), cam: new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1),
+  mat: new THREE.ShaderMaterial({
+    depthTest: false, depthWrite: false,
+    uniforms: { tScene: { value: null }, tNoise: { value: noiseTex }, uRes: { value: new THREE.Vector2(1, 1) }, uPaper: { value: new THREE.Color(0xf3f2ec) }, uDpr: { value: 1 } },
+    vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+    fragmentShader: `uniform sampler2D tScene, tNoise; uniform vec2 uRes; uniform vec3 uPaper; uniform float uDpr; varying vec2 vUv;
+void main() {
+  vec2 px = 1.0 / uRes, q = vUv * uRes / uDpr;                     // q: CSS pixels, so grain looks the same on any screen
+  vec4 nLo = texture2D(tNoise, q / 900.0), nMid = texture2D(tNoise, q / 420.0 + 0.37), nHi = texture2D(tNoise, q / 200.0 + 0.71);
+  vec2 uv = vUv + (nLo.rg - 0.5) * 2.6 * px * uDpr;                 // hand-drawn wobble, about a pixel each way
+  vec3 c = texture2D(tScene, uv).rgb;
+  float r = 1.4 * uDpr;
+  vec3 x1 = texture2D(tScene, uv + vec2(px.x * r, 0.0)).rgb, x0 = texture2D(tScene, uv - vec2(px.x * r, 0.0)).rgb;
+  vec3 y1 = texture2D(tScene, uv + vec2(0.0, px.y * r)).rgb, y0 = texture2D(tScene, uv - vec2(0.0, px.y * r)).rgb;
+  vec3 blur = (x0 + x1 + y0 + y1) * 0.25;
+  float edge = clamp(dot(abs(x1 - x0) + abs(y1 - y0), vec3(0.3333)) * 2.4, 0.0, 1.0);
+  vec3 col = mix(c, blur, 0.28);                                    // pigment bleeds a little
+  col *= 1.0 - edge * 0.17;                                          // and pools darker at its edges
+  float lum = dot(col, vec3(0.299, 0.587, 0.114));
+  col *= 1.0 - (nMid.b - 0.5) * 0.11 * (1.25 - lum);                 // granulation, stronger in darker washes
+  col *= 0.985 + (nHi.a - 0.5) * 0.045;                              // paper fibre
+  col = mix(vec3(lum), col, 0.94);                                   // watercolour sits a touch below full saturation
+  vec2 d = (vUv - 0.5) * vec2(uRes.x / uRes.y, 1.0);
+  float vig = smoothstep(0.42, 1.0, length(d) + (nLo.b - 0.5) * 0.22); // ragged, painted-out edges
+  col = mix(col, uPaper, vig * 0.62);
+  gl_FragColor = vec4(col, 1.0);
+}`
+  })
+};
+post.scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), post.mat));
+function postSize(w, h) {
+  const pr = renderer.getPixelRatio(), W = Math.round(w * pr), H = Math.round(h * pr);
+  if (!post.rt) {
+    const MS = renderer.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget;
+    post.rt = MS ? new THREE.WebGLMultisampleRenderTarget(W, H, { format: THREE.RGBAFormat }) : new THREE.WebGLRenderTarget(W, H, { format: THREE.RGBAFormat });
+    if (MS) post.rt.samples = 4;
+  } else post.rt.setSize(W, H);
+  post.mat.uniforms.tScene.value = post.rt.texture; post.mat.uniforms.uRes.value.set(W, H); post.mat.uniforms.uDpr.value = pr;
+}
+function draw() {
+  if (post.on && post.rt) { renderer.setRenderTarget(post.rt); renderer.render(scene, camera); renderer.setRenderTarget(null); renderer.render(post.scene, post.cam); }
+  else renderer.render(scene, camera);
+}
 
 const css = getComputedStyle(document.documentElement);
 const tok = n => new THREE.Color((css.getPropertyValue(n) || '#888').trim());
@@ -783,7 +923,7 @@ const LC_A = [0, 0.62, 0.5, 0.42, 0.7, 0.7, 1, 0, 0.75, 0.7, 0.55, 0.7, 0.6, 0.8
 const ground = { W: 0, H: 0, cls: null, thr: null, park: null, colorTex: null, floodTex: null };
 const groundU = {
   uCover: { value: null }, uFloodT: { value: null }, uOn: { value: 0 }, uFlood: { value: new THREE.Color() },
-  uX0: { value: 0 }, uZ0: { value: 0 }, uGW: { value: 1 }, uGH: { value: 1 }, uLevel: { value: -99 }, uHover: { value: -1 },
+  uX0: { value: 0 }, uZ0: { value: 0 }, uGW: { value: 1 }, uGH: { value: 1 }, uLevel: { value: -99 }, uHover: { value: -1 }, uNoise: { value: noiseTex },
   uZa: { value: ZONES.map(() => new THREE.Vector4()) }, uZb: { value: ZONES.map(() => new THREE.Vector4(1, 1, -99, 0)) }
 };
 function setupGround(img) {
@@ -828,12 +968,20 @@ function paintGround(T) { // theme colours → cover texture (rgb colour, a cove
 terrainMat.onBeforeCompile = sh => {
   Object.assign(sh.uniforms, groundU);
   sh.vertexShader = 'varying vec2 vGxz;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\nvGxz = (modelMatrix * vec4(transformed, 1.0)).xz;');
-  sh.fragmentShader = `uniform sampler2D uCover, uFloodT; uniform float uOn, uX0, uZ0, uGW, uGH, uLevel, uHover; uniform vec3 uFlood;
+  sh.fragmentShader = `uniform sampler2D uCover, uFloodT, uNoise; uniform float uOn, uX0, uZ0, uGW, uGH, uLevel, uHover; uniform vec3 uFlood;
 uniform vec4 uZa[${ZONES.length}], uZb[${ZONES.length}]; varying vec2 vGxz;\n` + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+// watercolour washes: broad uneven blooms over everything, and blotted dabs (about tree-crown size) where the cover is green
+{
+  vec4 nw = texture2D(uNoise, vGxz / 3400.0), nw2 = texture2D(uNoise, vGxz / 950.0 + 0.31);
+  diffuseColor.rgb *= 0.93 + 0.13 * nw.r + (nw2.b - 0.5) * 0.09;
+}
 if (uOn > 0.5) {
   vec2 guv = vec2((vGxz.x - uX0) / uGW, (vGxz.y - uZ0) / uGH);
   vec4 cv = texture2D(uCover, guv);
   diffuseColor.rgb = mix(diffuseColor.rgb, cv.rgb, cv.a);
+  float veg = clamp((cv.g - max(cv.r, cv.b)) * 7.0, 0.0, 1.0) * cv.a;
+  vec4 nd = texture2D(uNoise, vGxz / 240.0 + 0.7);
+  diffuseColor.rgb *= 1.0 - veg * smoothstep(0.5, 0.74, nd.b) * 0.2;
   // flooding: inside a named zone the zone's level applies (timing from local reports), elsewhere the open-bay level
   float th = texture2D(uFloodT, guv).r * 255.0;
   if (th >= 1.5 && th < 200.0) {
@@ -844,7 +992,7 @@ if (uOn > 0.5) {
       if (r < best) { best = r; lvl = uZb[i].z; fade = uZb[i].w; hov = abs(float(i) - uHover) < 0.5 ? 0.15 : 0.0; }
     }
     float dep = (lvl - (th - 1.0) * 0.5) * 12.0;
-    if (dep >= 0.0) diffuseColor.rgb = mix(diffuseColor.rgb, uFlood, fade * min(1.0, 0.32 + 0.63 * min(1.0, dep / 48.0) + hov));
+    if (dep >= 0.0) diffuseColor.rgb = mix(diffuseColor.rgb, uFlood * (0.9 + 0.2 * nd.g), fade * min(1.0, 0.46 + 0.5 * min(1.0, dep / 48.0) + hov));
   }
 }`);
 };
@@ -853,6 +1001,13 @@ let terrain;
 /* water */
 const waterMat = new THREE.MeshLambertMaterial({ transparent: true, opacity: 0.93 });
 const water = new THREE.Mesh(new THREE.PlaneGeometry(90000, 90000), waterMat); water.rotation.x = -Math.PI / 2; water.renderOrder = 1;
+// the bay as a teal wash: slow blooms of darker and lighter pigment
+waterMat.onBeforeCompile = sh => {
+  sh.uniforms.uNoise = { value: noiseTex };
+  sh.vertexShader = 'varying vec2 vWxz;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\nvWxz = (modelMatrix * vec4(transformed, 1.0)).xz;');
+  sh.fragmentShader = 'uniform sampler2D uNoise; varying vec2 vWxz;\n' + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+{ vec4 a = texture2D(uNoise, vWxz / 6000.0), b = texture2D(uNoise, vWxz / 1500.0 + 0.5); diffuseColor.rgb *= 0.88 + 0.2 * a.g + (b.b - 0.5) * 0.08; }`);
+};
 
 /* ribbons */
 function sampleLine(ll, step) {
@@ -927,11 +1082,11 @@ const BIKE_SHORT = ['', 'Path', 'Bike lanes', 'Bike route', 'Protected bike lane
 // the plan's stock descriptions, which the Type line already says in plain words
 const BIKE_STOCK = ['Class I Multi-Use Path', 'Class II Bike Lane', 'Class III Bike Route', 'Class III+ Bike Boulevard', 'Class IV Separated Bikeway', 'Bicycle Facility Improvement - TBD', 'Pedestrian Intersection Improvements', 'Bicycle Intersection Improvement'];
 const bikeDash = { value: 24 }, bikeHi = { value: -1 };
-const bikeExistMat = bikeMaterial(1.6, -2, false), bikePlanMat = bikeMaterial(2.4, -2.5, true), bikeTopMat = bikeMaterial(4.2, -3, true);
-const bikeDotMat = new THREE.PointsMaterial({ size: 7, sizeAttenuation: false, alphaTest: 0.5, transparent: false });
-const bikeDotTopMat = new THREE.PointsMaterial({ size: 11, sizeAttenuation: false, alphaTest: 0.5, transparent: false });
+const bikeExistMat = bikeMaterial(1.6, -2, false), bikePlanMat = bikeMaterial(3.2, -2.5, true), bikeTopMat = bikeMaterial(5.2, -3, true);
+const bikeDotMat = new THREE.PointsMaterial({ size: 8, sizeAttenuation: false, alphaTest: 0.5, transparent: false });
+const bikeDotTopMat = new THREE.PointsMaterial({ size: 12, sizeAttenuation: false, alphaTest: 0.5, transparent: false });
 (() => { const c = document.createElement('canvas'); c.width = c.height = 32; const x = c.getContext('2d'); x.fillStyle = '#fff'; x.beginPath(); x.arc(16, 16, 15, 0, Math.PI * 2); x.fill(); const t = new THREE.CanvasTexture(c); bikeDotMat.map = bikeDotTopMat.map = t; })();
-let bikeGroup = null, bikeData = null;
+let bikeGroup = null, bikeData = null, bikeStats = null;
 const bikeLines = [], bikeDots = [];
 function bikeMaterial(minPx, offset, dashed) {
   const m = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: offset, polygonOffsetUnits: offset });
@@ -985,6 +1140,9 @@ function buildBikes(data) {
   };
   data.e.forEach(r => add(bufs[0], decode(r, 1), 1.5, -1));
   data.p.forEach(r => { const s = add(bufs[r[1] ? 2 : 1], decode(r, 3), r[1] ? 2.5 : 2, r[2]); bikeLines.push({ cls: r[0], top: r[1], id: r[2], s }); });
+  const len = pts => pts.reduce((L, p, i) => i ? L + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0, 0);
+  bikeStats = { exist: data.e.reduce((t, r) => t + len(decode(r, 1)), 0), plan: bikeLines.reduce((t, l) => t + len(l.s), 0),
+    top: new Set(bikeLines.filter(l => l.top).map(l => l.id)).size, routes: new Set(bikeLines.map(l => l.id)).size, fixes: data.i.length };
   bufs.forEach((o, n) => {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(o.pos, 3)); geo.setAttribute('aSide', new THREE.Float32BufferAttribute(o.side, 3));
@@ -1040,7 +1198,7 @@ function showBike(b) {
     facts.push([`Water in ${Y}`, f.wet > 5 ? `About ${mi(f.wet)} of this ${mi(f.len)} route is flooded ${state.storm ? 'in the storm' : 'at high tide'}` : `Dry along its ${mi(f.len)} in this scenario`]);
   }
   card.innerHTML = `<button class="x" type="button" aria-label="Close">×</button>
-    <span class="pill" style="background:var(--s-proposed)">Draft bike &amp; walking plan</span>
+    <span class="pill" style="--c:var(--move)">Draft bike &amp; walking plan</span>
     <h3>${esc(n)}</h3>
     <dl class="facts">${facts.map(f => `<dt>${f[0]}</dt><dd>${f[1]}</dd>`).join('')}</dl>
     <p class="note">From the city’s draft Citywide Bicycle &amp; Pedestrian Plan, which the City Council is scheduled to consider adopting on October 19, 2026. The plan sets priorities for the next 5–10 years; it gives no build dates or funding for individual projects, so this route has no year on the timeline.</p>
@@ -1193,7 +1351,7 @@ function buildTrees(buf, exclude) {
     const r = Math.min(10, Math.max(2.4, 1.6 + 0.34 * h)) * (0.85 + hrnd(i, 3) * 0.3);
     q.setFromAxisAngle(yAx, hrnd(i, 4) * 6.28); sc.set(r, h, r); ps.set(x, yAt(x, z) - 0.6, z);
     m4.compose(ps, q, sc); mesh.setMatrixAt(k, m4);
-    const v = 0.86 + hrnd(i, 5) * 0.24; mesh.setColorAt(k, c.setRGB(v, v * (0.97 + hrnd(i, 6) * 0.06), v)); k++;
+    const v = 0.8 + hrnd(i, 5) * 0.32, t = hrnd(i, 6); mesh.setColorAt(k, c.setRGB(v * (0.9 + t * 0.16), v, v * (1.05 - t * 0.14))); k++; // dabs from olive to blue-green
   }
   mesh.count = k; mesh.instanceMatrix.needsUpdate = true; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
   return mesh;
@@ -1269,8 +1427,16 @@ const selMat = new THREE.MeshLambertMaterial();
 // story mode: projects outside a chapter's focus fall back to the colour of the ordinary city
 const mutedMat = new THREE.MeshLambertMaterial(), mutedSpecMat = new THREE.MeshLambertMaterial({ transparent: true, opacity: 0.22, depthWrite: false });
 
+// buildings that are not homes get the violet ramp; parks take the nature green
+const CIVIC = new Set(['AC Hotel by Marriott', 'Public Safety Center', 'BioMarin Buildings A & B', 'WildCare wildlife hospital', 'Main library & community center (Measure P)',
+  'San Rafael Inn', 'Terra Linda Park & Community Center plan', 'Kaiser San Rafael hospital replacement', 'Hampton Inn / Home2 Suites', 'San Quentin Learning Center', 'Eames Institute museum']);
+const CIVIC_ST = ['built', 'uc', 'approved', 'proposed', 'concept'];
+const isCivic = p => CIVIC.has(p.n) && CIVIC_ST.includes(p.st);
+const tokFor = p => p.kind === 'park' ? '--nature' : isCivic(p) ? `--c-${p.st}` : STATUS[p.st].tok;
+const labelFor = p => isCivic(p) ? `${STATUS[p.st].label} · civic & workplaces` : STATUS[p.st].label;
+function matFor(p) { return p.kind === 'park' ? marshMat : projMat(isCivic(p) ? 'c-' + p.st : p.st); }
 function addPart(obj, x, z, w, d, h, rot, mat) {
-  const m = new THREE.Mesh(boxGeo, mat || projMat(obj.p.st));
+  const m = new THREE.Mesh(boxGeo, mat || matFor(obj.p));
   m.scale.set(w, h, d); m.rotation.y = rot || 0;
   const g = new THREE.Group(); g.position.set(x, yAt(x, z) - 1.2, z); g.add(m);
   const e = new THREE.LineSegments(edgeGeo, edgeMat); e.scale.copy(m.scale); e.rotation.y = m.rotation.y; g.add(e);
@@ -1532,7 +1698,7 @@ function placeLabels() {
 function applyTheme() {
   const c = getComputedStyle(document.documentElement);
   const T = n => new THREE.Color((c.getPropertyValue(n) || '#888').trim());
-  const bg = T('--scene-bg'); scene.background = bg; scene.fog.color = bg;
+  const bg = T('--scene-bg'); scene.background = bg; scene.fog.color = bg; post.mat.uniforms.uPaper.value.copy(T('--paper'));
   const low = T('--land-low'), high = T('--land-high'), marsh = T('--marsh'), wat = T('--water');
   const tmp = new THREE.Color();
   for (let k = 0; k < HGT.length; k++) {
@@ -1543,21 +1709,20 @@ function applyTheme() {
   }
   tGeo.attributes.color.needsUpdate = true;
   waterMat.color = wat;
-  roadMat.color = T('--road'); streetMat.color = T('--street'); streetMinorMat.color = T('--street'); streetMainMat.color = T('--street-main'); railMat.color = T('--rail'); creekMat.color = wat.clone().lerp(T('--rail'), 0.15);
+  roadMat.color = T('--road'); streetMat.color = T('--street'); streetMinorMat.color = T('--street'); streetMainMat.color = T('--street-main'); railMat.color = T('--rail'); creekMat.color = wat.clone().lerp(T('--water-ink'), 0.2);
   railStationMat.color = T('--rail'); infraMat.color = T('--s-infra');
-  bikeExistMat.color = T('--s-built'); bikePlanMat.color = bikeTopMat.color = bikeDotMat.color = bikeDotTopMat.color = T('--s-proposed');
+  bikeExistMat.color = T('--move'); bikePlanMat.color = bikeTopMat.color = bikeDotMat.color = bikeDotTopMat.color = T('--move-2');
   treeBase.copy(T('--tree')); treeMat.color.copy(treeBase);
   const b = T('--bldg'); fabricBase.copy(b); fabricMat.color.copy(b); lmMat.color = b.clone().multiplyScalar(0.96);
   Object.keys(STATUS).forEach(s => { projMat(s).color = T(STATUS[s].tok); });
+  CIVIC_ST.forEach(s => { projMat('c-' + s).color = T('--c-' + s); });
   const sbg = T('--scene-bg'); mutedMat.color = b.clone().lerp(sbg, 0.18); mutedSpecMat.color = b.clone().lerp(sbg, 0.3);
   cine.fadeColor.setRGB(Math.min(1.3, sbg.r / Math.max(0.02, b.r)), Math.min(1.3, sbg.g / Math.max(0.02, b.g)), Math.min(1.3, sbg.b / Math.max(0.02, b.b)));
-  ringColor.copy(T('--accent')); rings.forEach(r => r.m.material.color.copy(ringColor));
-  edgeMat.color = T('--ink'); marshMat.color = T('--marsh').lerp(T('--s-built'), 0.35); selMat.color = T('--ink');
+  ringColor.copy(T(cine.active && cine.act != null ? `--act${cine.act}` : '--accent')); rings.forEach(r => r.m.material.color.copy(ringColor));
+  edgeMat.color = T('--ink'); marshMat.color = T('--nature').lerp(T('--marsh'), 0.25); selMat.color = T('--ink');
   if (protectGroup) protectGroup.userData.mat.color = T('--s-infra');
   zoneObjs.forEach(z => z.mat.uniforms.uColor.value = T('--flood'));
   groundU.uFlood.value.copy(T('--flood')); paintGround(T);
-  const dark = (c.getPropertyValue('color-scheme') || '').includes('dark');
-  hemi.intensity = dark ? 0.55 : 0.62; sun.intensity = dark ? 0.6 : 0.62;
   document.querySelectorAll('[data-tok]').forEach(el => el.style.background = `var(${el.dataset.tok})`);
   requestRender();
 }
@@ -1579,7 +1744,6 @@ function zoneThreshold(z, Y) { return z.t + (state.protect && z.protect && Y >= 
 
 function update() {
   const Y = state.year;
-  document.getElementById('h1year').textContent = Y;
   let homes = 0;
   let specHomes = 0;
   projObjs.forEach(o => { o.target = progressFor(o.p, Y); if (o.target >= 1 && o.p.u && !o.p.town) { if (o.p.st === 'spec') specHomes += o.p.u; else homes += o.p.u; } });
@@ -1589,8 +1753,10 @@ function update() {
   const sea = slrIn(Y, state.scen);
   document.getElementById('stSea').textContent = sea.toFixed(0) + '″';
   document.getElementById('cYear').textContent = Y;
-  renderStoryProgress(Y);
   document.getElementById('cYearL').textContent = `${SLR[state.scen].name} · bay +${sea.toFixed(0)}″`;
+  document.getElementById('dYear').textContent = Y;
+  document.getElementById('dYearL').textContent = `bay +${sea.toFixed(0)}″${state.storm ? ' · storm' : ''}`;
+  yrEl.value = Y; yrEl.style.setProperty('--p', (Y - 2026) / 32);
   document.getElementById('scenNote').textContent = `${SCEN_NOTE[state.scen]} The bay would be about ${Math.round(sea)} inches higher in ${Y} than in 2000.`;
   water.position.y = (sea + (state.storm ? 36 : 0)) * 0.0254 - 0.35;
   if (creek) creek.position.y = Math.max(0, water.position.y + 0.5);
@@ -1616,7 +1782,7 @@ function buildChips() {
 function renderList() {
   chipsEl.querySelectorAll('button[data-f]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.f === filter)));
   const rows = P.filter(p => filter === 'all' || p.st === filter).filter(p => state.spec || p.st !== 'spec').slice().sort((a, b) => a.y - b.y || a.n.localeCompare(b.n));
-  listEl.innerHTML = rows.map(p => `<li class="${p.y > state.year ? 'future' : ''}"><button type="button" data-id="${p.id}" ${selected && selected.p.id === p.id ? 'aria-current="true"' : ''}><i class="dot" data-tok="${STATUS[p.st].tok}" style="background:var(${STATUS[p.st].tok})"></i><span class="nm">${esc(p.n)}<small>${p.u ? p.u.toLocaleString('en-US') + ' homes · ' : ''}${esc(STATUS[p.st].label)}${p.tbd ? ' · <b class="tbdtag">Needs follow-up</b>' : ''}</small></span><span class="yr">${p.y}</span></button></li>`).join('');
+  listEl.innerHTML = rows.map(p => `<li class="${p.y > state.year ? 'future' : ''}"><button type="button" data-id="${p.id}" ${selected && selected.p.id === p.id ? 'aria-current="true"' : ''}><i class="dot" data-tok="${tokFor(p)}" style="background:var(${tokFor(p)})"></i><span class="nm">${esc(p.n)}<small>${p.u ? p.u.toLocaleString('en-US') + ' homes · ' : ''}${esc(labelFor(p))}${p.tbd ? ' · <b class="tbdtag">Needs follow-up</b>' : ''}</small></span><span class="yr">${p.y}</span></button></li>`).join('');
 }
 listEl.addEventListener('click', e => { const b = e.target.closest('button[data-id]'); if (!b) return; const id = +b.dataset.id; select(projObjs[id]); flyTo(P[id].x, P[id].z, P[id].kind === 'ng1' || P[id].kind === 'ng2' ? 1500 : 900); });
 /* card sources: the first link is the primary one (usually the city's project page); the rest are listed small beneath it */
@@ -1643,7 +1809,7 @@ function showCard(id, scroll) {
   facts.push([p.st === 'built' ? 'Completed' : 'Done by', `${p.y}<span class="basis">${BASIS[p.yb]}</span>`]);
   const yearState = p.st === 'built' ? '' : (state.year >= p.y ? `Shown complete in ${state.year}.` : (progressFor(p, state.year) > 0 ? `Shown under construction in ${state.year}.` : `Not yet built in ${state.year}.`));
   card.innerHTML = `<button class="x" type="button" aria-label="Close">×</button>
-    <span class="pill" style="background:var(${s.tok})">${esc(s.label)}</span>
+    <span class="pill" style="--c:var(${tokFor(p)})">${esc(labelFor(p))}</span>
     <h3>${esc(p.n)}</h3>
     <p class="addr">${esc(p.a)}</p>
     <dl class="facts">${facts.map(f => `<dt>${f[0]}</dt><dd>${f[1]}</dd>`).join('')}</dl>
@@ -1657,7 +1823,7 @@ function showZone(z) {
   const Y = state.year, w = zoneWater(z, Y), t = zoneThreshold(z, Y), wet = w >= t;
   const prot = state.protect && z.protect && Y >= 2045;
   card.innerHTML = `<button class="x" type="button" aria-label="Close">×</button>
-    <span class="pill" style="background:var(--flood)">Flood exposure</span>
+    <span class="pill" style="--c:var(--flood)">Flood exposure</span>
     <h3>${esc(z.name)}</h3>
     <dl class="facts"><dt>Exposed at</dt><dd>about ${z.t} in of rise${z.subs ? ' (plus ground sinking)' : ''}</dd>
     <dt>Water in ${Y}</dt><dd>${w.toFixed(0)} in ${state.storm ? '(with storm tide)' : '(daily high tides)'}</dd>
@@ -1691,7 +1857,7 @@ function setHover(o, z, e, b) {
   const bkey = b ? b.kind + b.id : null;
   if (o === hovered && z === hoverZone && bkey === hoverBike) { if (o || z || b) placeTip(e); return; }
   hovered = o; hoverZone = z; hoverBike = bkey; bikeHi.value = b && b.kind === 'line' ? b.id : (selBike && selBike.kind === 'line' ? selBike.id : -1); requestRender();
-  if (o || z || b) { hovTip.innerHTML = o ? `${esc(o.p.n)}<small>${esc(STATUS[o.p.st].label)}</small>` : b ? bikeTip(b) : zoneTip(z); hovTip.classList.add('on'); placeTip(e); }
+  if (o || z || b) { hovTip.innerHTML = o ? `${esc(o.p.n)}<small>${esc(labelFor(o.p))}</small>` : b ? bikeTip(b) : zoneTip(z); hovTip.classList.add('on'); placeTip(e); }
   else hovTip.classList.remove('on');
 }
 function zoneTip(zo) {
@@ -1733,9 +1899,10 @@ function startFly(t, p) { fly = { t0: performance.now(), dur: matchMedia('(prefe
 document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => flyToView(b.dataset.view)));
 
 /* ---------------- story mode ---------------- */
-// Play runs a sequence of chapters. Each chapter advances the clock to its key year, flies to a shot,
-// mutes everything but its focus projects, rings and labels those, and writes a caption with its impact.
-const cine = { active: false, playing: false, ended: false, list: [], i: 0, elapsed: 0, fromAt: 0, travel: 0, from: null, focus: null, fade: 0, fadeT: 0, fadeColor: new THREE.Color(1, 1, 1), capShown: false, ctx: null };
+// The story is a column of cards that scrolls over the map. Each card is a step with a camera shot, a year, the
+// projects it is about (everything else fades back to the plain city), callouts on those projects and, for a few
+// steps, layers of its own. Between two cards the camera, the year and the water blend with the scroll position.
+const cine = { active: false, act: null, list: [], i: -1, s: 0, sT: 0, centers: [], focus: null, fade: 0, fadeT: 0, fadeColor: new THREE.Color(1, 1, 1), ctx: null, enter: 1, from: null, lastTop: 0 };
 const fmt = n => Math.round(n).toLocaleString('en-US');
 const byName = n => P.find(p => p.n === n);
 const namesTo = ns => ns.map(byName).filter(Boolean);
@@ -1744,115 +1911,157 @@ const wetAt = (z, Y) => zoneWater(z, Y) >= zoneThreshold(z, Y);
 const firstWet = z => { for (let Y = 2026; Y <= 2058; Y++) if (wetAt(z, Y)) return Y; return null; };
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const NUMW = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+const cap1 = s => s[0].toUpperCase() + s.slice(1);
+const miles = m => Math.round(m / 1609.34);
 
 const DOWNTOWN = ['Modera San Rafael', 'San Rafael Transit Center (relocated)', '703 Third Street', 'Belmont senior living', 'WildCare wildlife hospital'];
 const NORTHGATE = ['Northgate Town Square — Phase 1', '555 Northgate Drive', '4040 Civic Center Drive', 'Los Gamos', '245 Nova Albion Way'];
 const SKYLINE = ['700 Irwin Street tower', '1230 Fifth Avenue', '700 B Street (Safeway site)', '515 Third Street (United Markets site)', 'Fourth Street Market Hall & Residences', '900 A Street', '790 Mission Avenue', '901 E Street'];
-const CROSSINGS = ['US-101 / I-580 direct connector', 'San Rafael Canal Crossing & 620 Canal St park', 'Tiscornia Marsh restoration'];
+const CROSSINGS = ['US-101 / I-580 direct connector', 'San Rafael Canal Crossing & 620 Canal St park', 'San Rafael Transit Center (relocated)'];
+const MARSHES = ['Tiscornia Marsh restoration', 'McInnis Marsh restoration'];
+// the story always runs on the same assumptions; the sandbox is where they change
+const STORY_STATE = { scen: 'Int', storm: false, protect: false, spec: true };
 
 function storyCtx() {
   const canal = ZONES.find(z => z.id === 'canal');
   const built = P.filter(p => p.st === 'built').reduce((s, p) => s + (p.u || 0), 0);
   const spec = P.filter(p => p.st === 'spec');
   return {
-    built, scen: SLR[state.scen].name, storm: state.storm, protect: state.protect,
-    canalYear: firstWet(canal), canal,
+    built, canalYear: firstWet(canal), canal,
     wet2058: ZONES.filter(z => wetAt(z, 2058)).length,
     homes2058: P.reduce((s, p) => s + (p.st !== 'spec' && p.u && 2058 >= p.y ? p.u : 0), 0),
     specHomes: spec.reduce((s, p) => s + p.u, 0), specSites: spec.length
   };
 }
 
+const ACTS = [
+  { n: '', t: 'Start' },
+  { n: 'Part 1', t: 'Today' },
+  { n: 'Part 2', t: 'Where the homes go' },
+  { n: 'Part 3', t: 'Getting around' },
+  { n: 'Part 4', t: 'The rising bay' },
+  { n: 'Part 5', t: 'Toward 2058' }
+];
+// legend entries a step can show: [swatch class, colour token, label]
+const KEY = {
+  built: ['', '--s-built', 'Built since 2020'], uc: ['', '--s-uc', 'Under construction'], approved: ['', '--s-approved', 'Approved'],
+  proposed: ['', '--s-proposed', 'Proposed'], concept: ['', '--s-concept', 'Concept only'], spec: ['ghost', '', 'Sketch, no proposal'],
+  move: ['', '--move', 'Transit & roads'], bikeNow: ['line', '--move', 'Bikeways today'], bikePlan: ['dash', '--move-2', 'In the draft plan'],
+  fix: ['dot', '--move-2', 'Crossing fixes'], flood: ['', '--flood', 'Flooded at high tide'], marsh: ['', '--nature', 'Marsh restoration'],
+  gate: ['', '--move', 'Floodgate & levees'], civic: ['', '--civic', 'Civic & workplaces']
+};
+
 // shot: target [lat, lon], distance m, azimuth (0 = camera due south, + toward east), elevation deg,
-// drift = degrees of slow orbit over the chapter, dolly = fractional change in distance over the chapter
-const CHAPTERS = [
-  { id:'today', tag:'Today', dur:14, capAt:3.8, key: () => 2026,
-    shot:{ t:[37.9790,-122.5160], d:9400, az:34, el:31, drift:8, dolly:-0.1 },
+// drift = degrees of slow orbit as the card scrolls past, dolly = fractional change in distance as it does
+const STEPS = [
+  { id:'title', act:0, title:true, key: () => 2026,
+    shot:{ t:[37.9850,-122.5180], d:13500, az:16, el:38, drift:12, dolly:-0.08 },
+    focus: () => null },
+
+  { id:'today', act:1, tag:'Today', key: () => 2026,
+    shot:{ t:[37.9790,-122.5160], d:9000, az:34, el:31, drift:10, dolly:-0.1 },
     focus: () => P.filter(p => p.st === 'built'),
     call: [['Residences at Vivalon Healthy Aging Campus','Vivalon, 999 Third St','67 senior homes · 2024'], ['Casa Canal','Casa Canal','41 supportive homes · 2025'], ['Village at Loch Lomond Marina','Village at Loch Lomond','81 homes · 2023']],
+    legend: ['built', 'civic'],
     head: () => 'A small city at the edge of the bay',
-    deck: c => `Since 2020, San Rafael has finished ${fmt(c.built)} homes in its larger projects: senior housing on Third Street, supportive homes in the Canal, townhomes at Loch Lomond. Everything after this frame is a plan, an approval or a guess.`,
-    stats: c => [{ n:c.built, l:'homes finished in larger projects since 2020' }, { n:Math.round(popAt(2026) / 100) * 100, l:'residents today (est.)' }, { n:slrIn(2026, state.scen), suf:'″', l:'of bay rise since 2000' }] },
+    deck: c => `Since 2020, San Rafael has finished ${fmt(c.built)} homes in its larger projects: senior housing on Third Street, supportive homes in the Canal, townhomes at Loch Lomond. They are the only deep-rose buildings on the map. Everything after this is a plan, an approval or a guess.`,
+    stats: c => [{ n:c.built, l:'homes finished in larger projects since 2020' }, { n:Math.round(popAt(2026) / 100) * 100, l:'residents today (est.)' }, { n:slrIn(2026, 'Int'), suf:'″', l:'of bay rise since 2000' }] },
 
-  { id:'downtown', tag:'Downtown', dur:12, key: () => 2029,
+  { id:'downtown', act:2, tag:'Downtown', key: () => 2029,
     shot:{ t:[37.9718,-122.5250], dy:12, d:1500, az:24, el:27, drift:18, dolly:-0.08 },
     focus: () => namesTo(DOWNTOWN),
     call: [['Modera San Rafael','Modera, 930 Irwin St','210 homes · 8 stories'], ['San Rafael Transit Center (relocated)','New transit center','17 bus bays'], ['703 Third Street','703 Third St','120 homes'], ['Belmont senior living','1515 Fourth St','183 senior units']],
+    legend: ['uc', 'approved', 'civic', 'move'],
     head: () => 'Downtown starts building up, around a new transit hub',
     deck: () => 'Mill Creek’s 210-home Modera on Irwin Street is already out of the ground, and demolition has cleared 703 Third. The bus transit center moves a block north, freeing today’s Bettini block for housing. Senior housing on Fourth Street and a new WildCare animal hospital follow.',
     stats: () => [{ n:homesOf(DOWNTOWN), l:'homes rising downtown' }, { t:'$25.6M', l:'federal grant for the transit center' }, { n:17, l:'bus bays, one block north' }] },
 
-  { id:'northgate', tag:'Northgate', dur:12, key: () => 2031,
+  { id:'northgate', act:2, tag:'Northgate', key: () => 2031,
     shot:{ t:[38.0050,-122.5440], d:2350, az:40, el:31, drift:20, dolly:-0.08 },
     focus: () => namesTo(NORTHGATE),
     call: [['Northgate Town Square — Phase 1','Northgate Town Square','907 homes · town square'], ['555 Northgate Drive','555 Northgate Dr','193 homes · 100% affordable'], ['4040 Civic Center Drive','4040 Civic Center Dr','238 homes · office conversion'], ['Los Gamos','Los Gamos','192 homes · 100% affordable']],
+    legend: ['approved', 'proposed'],
     head: () => 'A dying mall becomes a neighborhood',
-    deck: () => 'Merlone Geier’s approved plan replaces most of Northgate Mall with a town square and apartments of two to seven stories, starting with the Sears wing. Around it, two fully affordable buildings and an office-to-housing conversion add hundreds more homes.',
-    stats: () => [{ n:homesOf(NORTHGATE), l:'homes in the Northgate cluster' }, { n:homesOf(['555 Northgate Drive', 'Los Gamos']), l:'in 100% affordable buildings' }, { n:44.8, dec:1, suf:' ac', l:'former mall site' }] },
+    deck: () => 'Merlone Geier’s approved plan replaces most of Northgate Mall with a town square and apartments of two to seven stories, starting with the Sears wing. A second phase, aimed at 2040, takes down the Macy’s wing and brings the site to 1,422 homes. Around it, two fully affordable buildings and an office-to-housing conversion add hundreds more.',
+    stats: () => [{ n:homesOf(NORTHGATE), l:'homes in the Northgate cluster' }, { n:homesOf(['555 Northgate Drive', 'Los Gamos']), l:'in 100% affordable buildings' }, { n:1422, l:'homes at the mall site after phase 2' }] },
 
-  { id:'skyline', tag:'Skyline', dur:13, key: () => 2032,
-    shot:{ t:[37.9722,-122.5243], dy:48, d:1450, az:14, el:5.5, drift:-12, dolly:-0.1 },
+  { id:'skyline', act:2, tag:'Skyline', key: () => 2032,
+    shot:{ t:[37.9722,-122.5243], dy:48, d:1450, az:14, el:7, drift:-12, dolly:-0.1 },
     focus: () => namesTo(SKYLINE),
     call: [['700 Irwin Street tower','700 Irwin St','180 ft · tallest in the city'], ['1230 Fifth Avenue','1230 Fifth Ave','13 stories · 188 homes'], ['700 B Street (Safeway site)','Safeway site, 700 B St','331 homes · proposed'], ['515 Third Street (United Markets site)','United Markets site','285 homes · proposed'], ['Fourth Street Market Hall & Residences','Fourth St Market Hall','197 homes · proposed']],
+    legend: ['approved', 'proposed'],
     head: () => 'Downtown gets a skyline, if the proposals hold',
-    deck: () => { const ps = namesTo(SKYLINE), a = ps.filter(p => p.st === 'approved').length; return `State density-bonus law lets 700 Irwin rise to about 180 ft where the zone tops out at 70. Around it, developers have filed for mid-rises on the Safeway, United Markets and Market Hall blocks. ${NUMW[a][0].toUpperCase() + NUMW[a].slice(1)} of these ${NUMW[ps.length]} buildings are approved; the rest are proposals that could still shrink, stall or disappear.`; },
+    deck: () => { const ps = namesTo(SKYLINE), a = ps.filter(p => p.st === 'approved').length; return `State density-bonus law lets 700 Irwin rise to about 180 ft where the zone tops out at 70. Around it, developers have filed for mid-rises on the Safeway, United Markets and Market Hall blocks. ${cap1(NUMW[a])} of these ${NUMW[ps.length]} buildings are approved; the paler ones are proposals that could still shrink, stall or disappear.`; },
     stats: () => [{ n:180, suf:' ft', l:'700 Irwin, the tallest building in town' }, { n:homesOf(SKYLINE), l:'homes on eight downtown blocks' }, { n:namesTo(SKYLINE).filter(p => p.st === 'proposed').length, l:'still only proposals' }] },
 
-  { id:'crossings', tag:'Crossings', dur:12, key: () => 2034,
-    shot:{ t:[37.9612,-122.5020], d:3700, az:156, el:38, drift:10, dolly:-0.08 },
+  { id:'crossings', act:3, tag:'Crossings', key: () => 2034,
+    shot:{ t:[37.9655,-122.5135], d:3300, az:156, el:38, drift:10, dolly:-0.08 },
     focus: () => namesTo(CROSSINGS),
-    call: [['US-101 / I-580 direct connector','101 → 580 flyover','$192–241M · not fully funded'], ['San Rafael Canal Crossing & 620 Canal St park','Canal Crossing','bike & walk drawbridge'], ['Tiscornia Marsh restoration','Tiscornia Marsh','raised levee + marsh']],
+    call: [['US-101 / I-580 direct connector','101 → 580 flyover','$192–241M · not fully funded'], ['San Rafael Canal Crossing & 620 Canal St park','Canal Crossing','bike & walk drawbridge'], ['San Rafael Transit Center (relocated)','New transit center','by the SMART station']],
+    legend: ['move', 'proposed'],
     head: () => 'New ways across the freeway and the creek',
-    deck: () => 'If its construction money comes through, a flyover finally links northbound 101 to eastbound 580, ending the detour through local streets. A bike-and-walk drawbridge ties the Canal to downtown, and a raised levee at Tiscornia Marsh puts wetland between Canal homes and the bay.',
-    stats: () => [{ t:'$192–241M', l:'connector estimate' }, { n:1.65, dec:2, suf:' ac', l:'new waterfront park on the Canal' }, { n:2000, suf:' ft', l:'of raised levee at Tiscornia' }] },
+    deck: () => 'If its construction money comes through, a flyover finally links northbound 101 to eastbound 580, ending the detour through local streets. Downtown’s buses move a block north to a new transit center by the SMART station, and a bike-and-walk drawbridge over San Rafael Creek ties the Canal to downtown.',
+    stats: () => [{ t:'$192–241M', l:'connector estimate, not fully funded' }, { n:17, l:'bus bays at the new transit center' }, { n:1.65, dec:2, suf:' ac', l:'new waterfront park on the Canal' }] },
 
-  { id:'water', tag:'Water', dur:14, key: c => c.canalYear == null ? 2050 : Math.max(2027, c.canalYear),
+  { id:'bikes', act:3, tag:'Bikes', when: () => !!bikeStats, set:{ bikes:true }, key: () => 2034,
+    shot:{ t:[37.9730,-122.5200], d:6400, az:18, el:54, drift:8, dolly:-0.06 },
+    focus: () => [],
+    legend: ['bikeNow', 'bikePlan', 'fix'],
+    head: () => 'A bike network, mostly still on paper',
+    deck: () => `The solid ochre lines are the roughly ${miles(bikeStats.exist)} miles of bikeways San Rafael has today. The dashed ones are another ${miles(bikeStats.plan)} miles in the city’s draft Bicycle & Pedestrian Plan, ${bikeStats.top} of its ${bikeStats.routes} routes marked top priority, plus ${bikeStats.fixes} fixes at crossings that are hard to walk or bike today. The plan sets priorities for the next 5–10 years but gives no build dates.`,
+    stats: () => [{ n:miles(bikeStats.exist), suf:' mi', l:'of bikeways today' }, { n:miles(bikeStats.plan), suf:' mi', l:'more in the draft plan' }, { n:bikeStats.fixes, l:'crossing fixes' }] },
+
+  { id:'water', act:4, tag:'Water', key: c => c.canalYear == null ? 2050 : Math.max(2027, c.canalYear),
     shot:{ t:[37.9630,-122.4985], d:3600, az:40, el:38, drift:16, dolly:-0.1 },
-    focus: () => namesTo(['Casa Canal', '88 Vivian Street', 'Marin Square vision']),
-    call: [['zone:canal','Canal District & Pickleweed', c => c.canalYear ? `${c.storm ? 'Storm' : 'Tidal'} flooding from ${c.canalYear}` : 'Dry in this scenario'], ['zone:spinnaker','Spinnaker Point & Baypoint','Flooded'], ['Casa Canal','Casa Canal','41 supportive homes · opened 2025']],
-    head: c => c.canalYear == null ? 'The Canal stays dry, for now' : c.storm ? (c.canalYear <= 2027 ? 'In a 100-year storm, the Canal floods today' : `By ${c.canalYear}, a big storm puts the Canal under`) : `By ${c.canalYear}, high tide reaches the Canal`,
-    deck: c => c.canalYear == null ? `Under the ${c.scen} scenario the water never quite tops the Canal’s exposure point before 2058. Try a higher scenario to see how quickly that changes.` :
-      `Under the ${c.scen} scenario the bay is ${slrIn(c.canalYear, state.scen).toFixed(0)} in above its 2000 level by ${c.canalYear}, and the Canal’s ground keeps sinking about 0.4 in a year. That is enough for ${c.storm ? 'a storm tide' : 'ordinary high tides'} to spill into the city’s densest neighborhood, home to 12,000–16,000 people. Bellam Blvd, its main route to 101, goes under at about a foot.${c.protect ? ' The floodgate is not finished until 2045.' : ''}`,
+    focus: () => namesTo(['Casa Canal', '88 Vivian Street', 'Marin Square vision', 'Pickleweed Park upgrades']),
+    call: [['zone:canal','Canal District & Pickleweed', c => c.canalYear ? `Tidal flooding from ${c.canalYear}` : 'Dry in this scenario'], ['zone:spinnaker','Spinnaker Point & Baypoint','Flooded'], ['Casa Canal','Casa Canal','41 supportive homes · opened 2025']],
+    legend: ['flood'],
+    head: c => c.canalYear == null ? 'The Canal stays dry, for now' : `By ${c.canalYear}, high tide reaches the Canal`,
+    deck: c => c.canalYear == null ? 'In California’s likely case the water never quite tops the Canal’s exposure point before 2058. Try a higher scenario in the sandbox to see how quickly that changes.' :
+      `In California’s likely case the bay is ${slrIn(c.canalYear, 'Int').toFixed(0)} in above its 2000 level by ${c.canalYear}, and the Canal’s ground keeps sinking about 0.4 in a year. That is enough for ordinary high tides to spill into the city’s densest neighborhood, home to 12,000–16,000 people. Bellam Blvd, its main route to 101, goes under at about a foot.`,
     stats: c => [{ t:c.canalYear ? String(c.canalYear) : 'Never', l:'first regular flooding in the Canal' }, { t:'12–16k', l:'people live in the Canal' }, { n:c.wet2058, l:`of ${ZONES.length} low-lying areas flooded by 2058` }] },
 
-  { id:'gate', tag:'Floodgate', dur:12, when: c => c.protect, key: () => 2045,
+  { id:'marsh', act:4, tag:'Marshes', key: () => 2040,
+    shot:{ t:[37.9935,-122.5010], d:6900, az:104, el:40, drift:12, dolly:-0.06 },
+    focus: () => namesTo(MARSHES),
+    call: [['Tiscornia Marsh restoration','Tiscornia Marsh','raised levee + wider marsh'], ['McInnis Marsh restoration','McInnis Marsh','22–30 ac · needs construction money']],
+    legend: ['marsh', 'flood'],
+    head: () => 'Marshes take the first wave',
+    deck: () => 'Two projects answer the water with mud and plants instead of concrete. At the mouth of San Rafael Creek, Marin Audubon’s Tiscornia Marsh raises about 2,000 ft of levee behind a gentle slope and widens the marsh in front of the Canal. Up the shore, Marin County Parks would turn dredged creek mud into tidal marsh at McInnis Park, once construction is funded. Marshes calm waves and can build up as the bay rises, but only so far.',
+    stats: () => [{ n:2000, suf:' ft', l:'of raised levee at Tiscornia' }, { t:'10–16 ac', l:'of marsh at Tiscornia' }, { t:'22–30 ac', l:'of new tidal marsh at McInnis' }] },
+
+  { id:'gate', act:4, tag:'Floodgate', whatIf:true, set:{ protect:true }, key: () => 2045,
     shot:{ t:[37.9635,-122.4950], d:3200, az:30, el:38, drift:12, dolly:-0.08 },
     focus: () => [],
     call: [['gate','Canal floodgate','Feasibility study, 2025'], ['zone!canal','Canal District','dry behind the levee']],
-    head: () => 'A floodgate buys the Canal time',
-    deck: () => 'This run assumes the floodgate at the mouth of San Rafael Creek and the levees along the shore from the 2025 feasibility study are finished in 2045. Behind them the Canal, Spinnaker Point and Francisco Blvd dry out, for as long as the walls stay ahead of the water.',
+    legend: ['gate', 'flood'],
+    head: () => 'What if a floodgate holds the water back?',
+    deck: () => 'Suppose the floodgate at the mouth of San Rafael Creek and the shoreline levees from the 2025 feasibility study are finished in 2045. None of it is funded yet. Behind the walls the Canal, Spinnaker Point and Francisco Blvd dry out, for as long as the walls stay ahead of the water. Scroll on and the walls come down again.',
     stats: () => [{ t:'2045', l:'assumed completion' }, { n:ZONES.filter(z => z.protect).length, l:'low-lying areas behind the walls' }, { n:72, suf:'″', l:'of extra protection modeled' }] },
 
-  { id:'northgate2', tag:'Northgate II', dur:12, key: () => 2040,
-    shot:{ t:[38.0030,-122.5470], d:2150, az:-28, el:34, drift:16, dolly:-0.08 },
-    focus: () => namesTo(['Northgate Town Square — Phase 1', 'Northgate Town Square — Phase 2', 'Kaiser San Rafael hospital replacement']),
-    call: [['Northgate Town Square — Phase 2','Northgate, phase 2','+515 homes · Macy’s wing'], ['Kaiser San Rafael hospital replacement','Kaiser hospital','92 beds · seismic replacement']],
-    head: () => 'Northgate’s second phase finishes the job',
-    deck: c => `The Macy’s wing comes down for the last 515 homes, completing an approved plan for 1,422. That one site adds ${(1422 / c.built).toFixed(1)} times as many homes as all of San Rafael’s larger projects from 2020 to 2026. Next door, Kaiser’s replacement hospital, pushed by the state’s seismic deadline, is open.`,
-    stats: () => [{ n:1422, l:'homes at Northgate Town Square' }, { t:'2040', l:'phase 2 target in the approved plan' }, { n:92, l:'beds in the new Kaiser hospital' }] },
-
-  { id:'sketch', tag:'Sketch', dur:12, when: () => state.spec, key: () => 2052,
+  { id:'sketch', act:5, tag:'Sketch', key: () => 2052,
     shot:{ t:[37.9780,-122.5220], d:8400, az:128, el:38, drift:-10, dolly:-0.06 },
     focus: () => P.filter(p => p.st === 'spec'),
     call: [['Former Bettini Transit Center site','Old Bettini block','illustrative · ~170 homes'], ['Southeast San Rafael Specific Plan area','Southeast San Rafael','illustrative · assumes raised ground'], ['Marin Civic Center housing site','Civic Center site','illustrative · 80 homes']],
+    legend: ['spec'],
     head: () => 'After the pipeline runs dry, a sketch',
-    deck: () => 'No developer has filed anything that would finish after the mid-2030s. These ghosted buildings fill sites the Housing Element and Downtown Precise Plan already zone for homes, at about the pace General Plan 2040 projects. Read them as capacity, not a forecast.',
+    deck: () => 'No developer has filed anything that would finish after the mid-2030s. These white ghosts fill sites the Housing Element and Downtown Precise Plan already zone for homes, at about the pace General Plan 2040 projects. Read them as capacity, not a forecast.',
     stats: c => [{ n:c.specHomes, l:'illustrative homes' }, { n:c.specSites, l:'sites already zoned for housing' }, { n:0, l:'applications filed for any of them' }] },
 
-  { id:'finale', tag:'Finale', dur:16, key: () => 2058,
-    shot:{ t:[37.9790,-122.5160], d:10200, az:4, el:30, drift:34, dolly:0.04 },
+  { id:'finale', act:5, tag:'2058', end:true, key: () => 2058,
+    shot:{ t:[37.9790,-122.5160], d:10200, az:4, el:30, drift:30, dolly:0.04 },
     focus: () => null,
-    call: [['Northgate Town Square — Phase 2','Northgate Town Square','1,422 homes'], ['700 Irwin Street tower','Downtown','up to 180 ft'], ['zone:canal','Canal District', c => c.storm ? 'floods in storms' : 'tidal flooding']],
+    call: [['Northgate Town Square — Phase 2','Northgate Town Square','1,422 homes'], ['700 Irwin Street tower','Downtown','up to 180 ft'], ['zone:canal','Canal District','tidal flooding']],
+    legend: ['built', 'approved', 'proposed', 'civic', 'flood'],
     head: () => 'San Rafael, 2058',
-    deck: c => `${fmt(c.homes2058)} new homes in real projects, about ${fmt(Math.round(popAt(2058) / 100) * 100)} residents, and a bay ${slrIn(2058, state.scen).toFixed(0)} in higher than in 2000. In the ${c.scen} scenario${c.storm ? ' with a storm tide' : ''}, ${NUMW[c.wet2058]} of ${NUMW[ZONES.length]} low-lying areas flood regularly${c.protect ? ', with the Canal floodgate holding back the rest of the southeast' : ''}. Change the sea level scenario or the Canal protection and play it again.`,
-    stats: c => [{ n:c.homes2058, l:'new homes in real projects since 2020' }, { n:Math.round(popAt(2058) / 100) * 100, l:'residents (est.)' }, { n:slrIn(2058, state.scen), suf:'″', l:'of bay rise since 2000' }] }
+    deck: c => `${fmt(c.homes2058)} new homes in real projects, about ${fmt(Math.round(popAt(2058) / 100) * 100)} residents, and a bay ${slrIn(2058, 'Int').toFixed(0)} in higher than in 2000. In the likely case, ${NUMW[c.wet2058]} of ${NUMW[ZONES.length]} low-lying areas flood regularly by then. None of it is settled. In the sandbox you can raise or lower the bay, add a storm, build the floodgate and move through the years yourself.`,
+    stats: c => [{ n:c.homes2058, l:'new homes in real projects since 2020' }, { n:Math.round(popAt(2058) / 100) * 100, l:'residents (est.)' }, { n:slrIn(2058, 'Int'), suf:'″', l:'of bay rise since 2000' }] }
 ];
 
-/* camera */
 const easeIO = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 function shotPose(s, u) {
   const [x, z] = XY(s.t[0], s.t[1]), t = new THREE.Vector3(x, yAt(x, z) + (s.dy || 0), z);
-  const az = (s.az + (s.drift || 0) * u) * D2R, el = s.el * D2R, d = s.d * (camera.aspect < 1 ? 1.8 : 1) * (1 + (s.dolly || 0) * u);
+  const az = (s.az + (s.drift || 0) * (u - 0.5)) * D2R, el = s.el * D2R, d = s.d * (camera.aspect < 1 ? 1.8 : 1) * (1 + (s.dolly || 0) * (u - 0.5));
   return { t, p: new THREE.Vector3(x + Math.sin(az) * Math.cos(el) * d, t.y + Math.sin(el) * d, z + Math.cos(az) * Math.cos(el) * d) };
 }
 // Blend two poses: target slides, view direction turns, distance moves in log space, and long moves lift into an arc.
@@ -1864,37 +2073,30 @@ function blendPose(a, b, k) {
   return { t, p: t.clone().add(dir.multiplyScalar(Math.exp(Math.log(la) + (Math.log(lb) - Math.log(la)) * k) * (1 + hop * Math.sin(Math.PI * k)))) };
 }
 
-/* rings under focus projects */
+/* soft painted rings under the buildings a step is about */
 const ringGeo = new THREE.RingGeometry(0.9, 1, 72); ringGeo.rotateX(-Math.PI / 2);
-const ringColor = new THREE.Color(0xc4521d);
+const ringColor = new THREE.Color(0x2f5d50);
 let rings = [];
 function ringR(p) { const k = p.kind; if (k === 'ng1' || k === 'ng2') return 270; if (k === 'ramp') return 170; if (k === 'bridge') return 80; if (k === 'marsh') return Math.max(p.w, p.d) * 0.62; return Math.max(p.w || 40, p.d || 40) * 0.72 + 14; }
 function buildRings(ps, minR) {
   rings.forEach(r => { scene.remove(r.m); r.m.material.dispose(); }); rings = [];
-  ps.forEach((p, i) => {
+  ps.forEach(p => {
     const o = projObjs[p.id], r = Math.max(ringR(p), minR);
-    [false, true].forEach(pulse => {
-      const m = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: ringColor, transparent: true, depthWrite: false, opacity: 0 }));
-      m.position.set(p.x, yAt(p.x, p.z) + 2, p.z); m.scale.setScalar(r); m.renderOrder = 4; m.visible = false; scene.add(m);
-      rings.push({ m, o, r, pulse, ph: i * 0.137 });
+    [[1, 0.75], [1.3, 0.25]].forEach(([k, op]) => {
+      const m = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: ringColor, transparent: true, depthWrite: false, opacity: op }));
+      m.position.set(p.x, yAt(p.x, p.z) + 2, p.z); m.scale.setScalar(r * k); m.renderOrder = 4; m.visible = false; scene.add(m);
+      rings.push({ m, o });
     });
   });
 }
-function pulseRings(now) {
-  const ts = now / 1000, rm = reduceMotion();
-  rings.forEach(r => {
-    const on = r.o.prog > 0.05; r.m.visible = on && !(r.pulse && rm); if (!r.m.visible) return;
-    if (r.pulse) { const ph = (ts * 0.45 + r.ph) % 1; r.m.scale.setScalar(r.r * (1 + ph * 0.9)); r.m.material.opacity = 0.6 * Math.pow(1 - ph, 1.6); }
-    else r.m.material.opacity = 0.85;
-  });
-}
+function showRings() { rings.forEach(r => { r.m.visible = r.o.prog > 0.05; }); }
 
 /* callouts: leader-line labels pinned to the top of each focus building or flood zone */
 const calloutsHost = document.getElementById('callouts');
 let callouts = [];
-function buildCallouts(ch) {
+function buildCallouts(st) {
   calloutsHost.innerHTML = ''; callouts = [];
-  (ch.call || []).slice(0, stage.clientWidth < 520 ? 3 : 8).forEach(([name, label, fact]) => {
+  (st.call || []).slice(0, stage.clientWidth < 520 ? 3 : 8).forEach(([name, label, fact]) => {
     let a;
     if (name.startsWith('zone')) { const zo = zoneObjs.find(o => o.z.id === name.slice(5)); if (!zo) return; a = { zo, always: name[4] === '!' }; }  // zone! = label it even when dry
     else if (name === 'gate') a = { gate: true };
@@ -1906,19 +2108,19 @@ function buildCallouts(ch) {
   });
 }
 function placeCallouts() {
-  const w = stage.clientWidth, h = stage.clientHeight, lb = document.querySelector('.cine .bar').offsetHeight;
+  const w = stage.clientWidth, h = stage.clientHeight, top = document.querySelector('.topbar').offsetHeight;
   const items = callouts.map(c => {
     let ok;
-    if (c.a.o) { const o = c.a.o; ok = o.prog > 0.3; const top = o.parts.reduce((m, pt) => Math.max(m, pt.g.position.y + pt.h * pt.g.scale.y), -1e9); tmpV.set(o.p.x, top + 2, o.p.z); }
-    else if (c.a.zo) { const zo = c.a.zo; ok = c.a.always ? state.year >= cine.list[cine.i].key : zo.cur > 0.4; tmpV.set(zo.z.x, zo.g.position.y, zo.z.z); }
+    if (c.a.o) { const o = c.a.o; ok = o.prog > 0.3; const tp = o.parts.reduce((m, pt) => Math.max(m, pt.g.position.y + pt.h * pt.g.scale.y), -1e9); tmpV.set(o.p.x, tp + 2, o.p.z); }
+    else if (c.a.zo) { const zo = c.a.zo; ok = c.a.always ? state.protect : zo.cur > 0.4; tmpV.set(zo.z.x, zo.g.position.y, zo.z.z); }
     else { ok = protectGroup.visible; const g = protectGroup.userData.gate; tmpV.set(g[0], yAt(g[0], g[1]) + 18, g[1]); }
     tmpV.project(camera);
     const sx = (tmpV.x + 1) / 2 * w, sy = (1 - tmpV.y) / 2 * h;
-    return { c, sx, sy, vis: ok && tmpV.z < 1 && sx > 16 && sx < w - 16 && sy > lb + 70 && sy < h - lb - 8 };
+    return { c, sx, sy, vis: ok && tmpV.z < 1 && sx > 16 && sx < w - 16 && sy > top + 60 && sy < h - 8 };
   });
-  // the caption and year are obstacles: a callout whose anchor sits under them is hidden, others climb above them
-  const sr = stage.getBoundingClientRect(), obst = [];
-  [capEl.classList.contains('in') ? capEl : null, document.querySelector('.cyear')].forEach(el => { if (!el) return; const r = el.getBoundingClientRect(); obst.push([r.left - sr.left - 8, r.top - sr.top - 10, r.right - sr.left + 8, r.bottom - sr.top]); });
+  // the story card, the year and the parts rail are obstacles: a callout whose anchor sits under them is hidden, others climb above them
+  const sr = stage.getBoundingClientRect(), obst = [], cur = stepsEl.children[cine.i];
+  [cur && cur.querySelector('.scard'), document.querySelector('.cyear'), actsEl].forEach(el => { if (!el || !el.offsetWidth) return; const r = el.getBoundingClientRect(); if (r.bottom < sr.top || r.top > sr.bottom) return; obst.push([r.left - sr.left - 8, r.top - sr.top - 10, r.right - sr.left + 8, r.bottom - sr.top + 6]); });
   items.forEach(it => { if (it.vis && obst.some(r => it.sx > r[0] && it.sx < r[2] && it.sy > r[1] && it.sy < r[3])) it.vis = false; });
   const placed = obst.slice();
   items.filter(it => it.vis).sort((a, b) => a.sy - b.sy).forEach(it => {
@@ -1931,6 +2133,7 @@ function placeCallouts() {
       if (!placed.some(hit)) break;
       lead += 28;
     }
+    if (y0 < top + 4) { it.vis = false; return; }
     placed.push([x0, y0, x0 + c.w, y0 + c.h]); placed.push([it.sx - 2, y0 + c.h, it.sx + 2, it.sy]);
     c.el.style.transform = `translate(${it.sx.toFixed(1)}px, ${it.sy.toFixed(1)}px)`;
     c.el.style.setProperty('--lead', lead + 'px'); c.el.classList.toggle('flip', flip);
@@ -1938,185 +2141,149 @@ function placeCallouts() {
   items.forEach(it => it.c.el.classList.toggle('on', it.vis));
 }
 
-/* caption */
-const capEl = document.getElementById('cap'), capS = document.getElementById('capS'), titleCard = document.getElementById('cTitle');
+/* story cards */
+const storyEl = document.getElementById('story'), stepsEl = document.getElementById('steps'), actsEl = document.getElementById('acts'), sprog = document.getElementById('sprog');
 const fmtStat = (v, dec, suf) => (dec ? v.toFixed(dec) : fmt(v)) + (suf || '');
-function showCaption(ch) {
-  const c = cine.ctx, rm = reduceMotion();
-  document.getElementById('capK').textContent = `${ch.from === ch.key ? ch.key : ch.from + '–' + ch.key} · ${ch.tag}`;
-  document.getElementById('capH').textContent = ch.head(c);
-  document.getElementById('capD').textContent = ch.deck(c);
-  capS.innerHTML = ch.stats(c).map(s => s.n != null
-    ? `<div><b data-n="${s.n}" data-d="${s.dec || 0}" data-s="${s.suf || ''}">${fmtStat(rm ? s.n : 0, s.dec, s.suf)}</b><span>${esc(s.l)}</span></div>`
-    : `<div><b>${esc(s.t)}</b><span>${esc(s.l)}</span></div>`).join('');
-  requestAnimationFrame(() => capEl.classList.add('in'));
-  if (rm) return;
-  const els = [...capS.querySelectorAll('b[data-n]')], t0 = performance.now();
-  const step = now => { const k = Math.min(1, Math.max(0, (now - t0 - 450) / 1400)), e = 1 - Math.pow(1 - k, 3); els.forEach(b => b.textContent = fmtStat(+b.dataset.n * e, +b.dataset.d, b.dataset.s)); if (k < 1) requestAnimationFrame(step); };
-  requestAnimationFrame(step);
+function legendHTML(keys) {
+  return keys && keys.length ? `<ul class="slegend">${keys.map(k => { const [cls, c, l] = KEY[k]; return `<li><i class="sw ${cls}"${c ? ` style="--c:var(${c})"` : ''}></i>${esc(l)}</li>`; }).join('')}</ul>` : '';
 }
-
-/* chapter control */
-const segsEl = document.getElementById('cSegs'), cPlay = document.getElementById('cPlay');
-function buildSegs(L) {
-  segsEl.innerHTML = L.map((ch, i) => `<button class="sg" type="button" data-i="${i}" aria-label="Chapter ${i + 1}: ${esc(ch.tag)}, ${ch.key}"><i></i><span><b>${ch.key}</b>${esc(ch.tag)}</span></button>`).join('');
-  document.getElementById('cN').textContent = NUMW[L.length] || L.length;
+function stepHTML(st, i, L) {
+  const c = cine.ctx;
+  if (st.title) return `<section class="step title" data-i="${i}"><div class="scard"><div class="eyebrow">A story in five parts</div>
+    <h2>San Rafael <em>2026 → 2058</em></h2><p>What is actually being built, what has only been proposed, and what the bay may do in the meantime.</p>
+    <div class="scrollcue">Scroll to begin<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6 L8 11 L13 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></section>`;
+  const prev = L[i - 1], A = ACTS[st.act], newAct = !prev || prev.act !== st.act;
+  const stats = st.stats(c).map(s => `<div><b>${s.n != null ? fmtStat(s.n, s.dec, s.suf) : esc(s.t)}</b><span>${esc(s.l)}</span></div>`).join('');
+  return `<section class="step" data-i="${i}"><article class="scard" style="--act:var(--act${st.act})">
+    ${newAct ? `<div class="act-h"><i class="sw"></i><span class="act-n">${A.n}</span><span class="act-t">${esc(A.t)}</span></div>` : ''}
+    <div class="k">${st.key} · ${esc(st.tag)}${st.whatIf ? '<span class="whatif">What if</span>' : ''}</div>
+    <h2>${esc(st.head(c))}</h2>
+    <p>${esc(st.deck(c))}</p>
+    <div class="sstats">${stats}</div>
+    ${legendHTML(st.legend)}
+    ${st.end ? `<div class="endcta"><button class="btn sm primary" type="button" data-go="sandbox">Try your own 2058</button><button class="btn sm" type="button" data-go="top">Back to the start</button></div>` : ''}
+  </article></section>`;
 }
-function segFill() { segsEl.querySelectorAll('.sg').forEach((b, i) => { b.querySelector('i').style.setProperty('--p', i < cine.i || cine.ended ? 1 : i > cine.i ? 0 : Math.min(1, cine.elapsed / cine.list[i].dur)); if (i === cine.i) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); }); }
-function goChapter(i) {
-  i = Math.max(0, Math.min(cine.list.length - 1, i));
-  const ch = cine.list[i];
-  Object.assign(cine, { i, elapsed: 0, fromAt: 0, ended: false, capShown: false, travel: reduceMotion() ? 0 : i === 0 ? 3.4 : 3, from: { t: controls.target.clone(), p: camera.position.clone() } });
-  if (state.year !== ch.from) { state.year = ch.from; update(); }
-  const fps = ch.focus(cine.ctx);
+function buildActs() {
+  const seen = new Set();
+  actsEl.innerHTML = cine.list.map((st, i) => { if (seen.has(st.act)) return ''; seen.add(st.act); return `<button type="button" data-step="${i}" data-act="${st.act}" style="--act:var(--act${st.act})"><span>${esc(ACTS[st.act].t)}</span><i></i></button>`; }).join('');
+}
+function measureSteps() { cine.centers = [...stepsEl.children].map(el => el.offsetTop + el.offsetHeight / 2); }
+function scrollPos() {
+  const line = storyEl.scrollTop + storyEl.clientHeight * 0.5, c = cine.centers;
+  if (!c.length || line <= c[0]) return 0;
+  for (let i = 0; i < c.length - 1; i++) if (line < c[i + 1]) return i + (line - c[i]) / (c[i + 1] - c[i]);
+  return c.length - 1;
+}
+function scrollToStep(i) {
+  const el = stepsEl.children[i]; if (!el) return;
+  storyEl.scrollTo({ top: el.offsetTop + el.offsetHeight / 2 - storyEl.clientHeight / 2, behavior: reduceMotion() ? 'auto' : 'smooth' });
+}
+function activateStep(i) {
+  if (i === cine.i) return;
+  cine.i = i; const st = cine.list[i];
+  [...stepsEl.children].forEach((el, k) => el.classList.toggle('on', k === i));
+  cine.act = st.act;
+  calloutsHost.style.setProperty('--act', `var(--act${st.act})`); sprog.style.setProperty('--act', `var(--act${st.act})`);
+  ringColor.copy(tok(`--act${st.act}`));
+  const protect = !!(st.set && st.set.protect);
+  if (state.protect !== protect) { state.protect = protect; update(); }
+  if (bikeGroup) bikeGroup.visible = !!(st.set && st.set.bikes);
+  const fps = st.focus ? st.focus(cine.ctx) : null;
   cine.focus = fps ? new Set(fps.map(p => p.id)) : null; cine.fadeT = fps ? 1 : 0;
-  buildRings(fps || [], ch.shot.d * 0.013);
-  buildCallouts(ch);
-  capEl.classList.remove('in');
-  document.getElementById('cCh').textContent = `${String(i + 1).padStart(2, '0')} / ${String(cine.list.length).padStart(2, '0')} · ${ch.tag}`;
-  segFill(); requestRender();
-}
-function setPlaying(on) {
-  if (on && cine.ended) { goChapter(0); }
-  else if (on && !cine.playing && cine.elapsed > 0) { cine.from = { t: controls.target.clone(), p: camera.position.clone() }; cine.fromAt = cine.elapsed; cine.travel = reduceMotion() ? 0 : 1.6; }
-  cine.playing = on; controls.enabled = !on; fly = null;
-  document.getElementById('cPlayLbl').textContent = on ? 'Pause' : cine.ended ? 'Replay' : 'Play';
-  document.getElementById('cPlayIcon').setAttribute('d', on ? 'M2 1 H5 V11 H2 Z M7 1 H10 V11 H7 Z' : 'M2 1 L11 6 L2 11 Z');
+  buildRings(fps || [], st.shot.d * 0.011);
+  buildCallouts(st);
+  actsEl.querySelectorAll('button').forEach(b => { const a = +b.dataset.act; if (a === st.act) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); b.classList.toggle('done', a < st.act); });
   requestRender();
 }
-function cineTick(dt) {
-  const ch = cine.list[cine.i], rm = reduceMotion();
-  cine.elapsed += dt; const e = cine.elapsed;
-  const to = shotPose(ch.shot, rm ? 0 : Math.min(1, e / ch.dur));
-  const k = cine.travel > 0 ? easeIO(Math.min(1, (e - cine.fromAt) / cine.travel)) : 1;
-  const pose = k < 1 ? blendPose(cine.from, to, k) : to;
+function stepPose(i, s) { return shotPose(cine.list[i].shot, reduceMotion() ? 0.5 : Math.max(0, Math.min(1, 0.5 + (s - i) * 0.9))); }
+// Runs every frame in story mode: ease toward the scroll position, then place the camera and set the year.
+function storyTick(dt) {
+  const L = cine.list, n = L.length; if (n < 2) return false;
+  let moving = false;
+  const d = cine.sT - cine.s;
+  if (Math.abs(d) > 0.0004) { cine.s += d * (1 - Math.exp(-dt * (reduceMotion() ? 40 : 4.2))); moving = true; } else cine.s = cine.sT;
+  const s = Math.max(0, Math.min(n - 1, cine.s)), i = Math.min(n - 2, Math.floor(s)), j = i + 1;
+  const k = smooth((s - i - 0.12) / 0.76); // each card holds its shot for a moment before the next one takes over
+  let pose = blendPose(stepPose(i, s), stepPose(j, s), k);
+  if (cine.enter < 1) { cine.enter = Math.min(1, cine.enter + dt / 1.8); pose = blendPose(cine.from, pose, easeIO(cine.enter)); moving = true; }
   camera.position.copy(pose.p); controls.target.copy(pose.t); camera.lookAt(pose.t);
-  const Y = Math.round(ch.from + (ch.key - ch.from) * smooth((e - 0.5) / (ch.dur * 0.5)));
+  const Y = Math.round(L[i].key + (L[j].key - L[i].key) * k);
   if (Y !== state.year) { state.year = Y; update(); }
-  if (!cine.capShown && e >= (ch.capAt || 1)) { cine.capShown = true; showCaption(ch); }
-  const titling = cine.i === 0 && e < (ch.capAt || 1) - 0.5;
-  titleCard.classList.toggle('in', titling); stage.classList.toggle('titling', titling);
-  segFill();
-  if (e >= ch.dur) { if (cine.i < cine.list.length - 1) goChapter(cine.i + 1); else { cine.ended = true; segFill(); setPlaying(false); } }
+  activateStep(Math.round(s));
+  sprog.style.setProperty('--p', (s / (n - 1)).toFixed(4));
+  return moving;
 }
-function storyList(c) {
-  const L = CHAPTERS.filter(ch => !ch.when || ch.when(c)).map((ch, order) => Object.assign({}, ch, { order, key: ch.key(c) })).sort((a, b) => a.key - b.key || a.order - b.order);
-  L.forEach((ch, i) => { ch.from = i ? L[i - 1].key : ch.key; });
-  return L;
-}
-function startStory(at) {
+function enterStory() {
+  Object.assign(state, STORY_STATE);
   cine.ctx = storyCtx();
-  cine.list = storyList(cine.ctx);
-  at = Math.max(0, Math.min(cine.list.length - 1, typeof at === 'number' ? at : 0)); cine.resumeAt = null;
-  buildSegs(cine.list); segTip.hidden = true; document.getElementById('cOver').hidden = true;
-  cine.active = true; app.classList.add('cinema'); document.documentElement.classList.add('cine-on'); cineEl.inert = false;
-  select(null); card.hidden = true; selZone = null;
-  frameForStory();
-  goChapter(at); cine.playing = false; setPlaying(true);
-  cPlay.focus({ preventScroll: true });
+  cine.list = STEPS.filter(st => !st.when || st.when(cine.ctx)).map(st => Object.assign({}, st, { key: st.key(cine.ctx) }));
+  stepsEl.innerHTML = cine.list.map((st, i, L) => stepHTML(st, i, L)).join('');
+  buildActs();
+  cine.active = true; cine.i = -1;
+  frameForStory(); measureSteps();
+  storyEl.scrollTop = cine.lastTop; cine.s = cine.sT = scrollPos();
+  cine.from = { t: controls.target.clone(), p: camera.position.clone() }; cine.enter = reduceMotion() ? 1 : 0;
+  update();
+  storyEl.focus({ preventScroll: true });
 }
-function exitStory() {
-  cine.resumeAt = cine.ended ? null : cine.i;
-  cine.active = false; cine.playing = false; cine.focus = null; cine.fadeT = 0;
-  app.classList.remove('cinema'); document.documentElement.classList.remove('cine-on'); cineEl.inert = true;
+function leaveStory() {
+  cine.lastTop = storyEl.scrollTop;
+  cine.active = false; cine.focus = null; cine.fadeT = 0; cine.i = -1; cine.act = null;
   buildRings([], 0); calloutsHost.innerHTML = ''; callouts = [];
-  capEl.classList.remove('in'); titleCard.classList.remove('in'); stage.classList.remove('titling');
-  controls.enabled = true; frameForStory(); buildSegs(storyToc().list); update(); playLabel();
-  cPlay.focus({ preventScroll: true });
+  if (bikeGroup) bikeGroup.visible = document.getElementById('tBike').checked;
+  ringColor.copy(tok('--accent'));
 }
-const app = document.querySelector('.app'), cineEl = document.getElementById('cine');
-cPlay.addEventListener('click', () => { if (cine.active) setPlaying(!cine.playing); else startStory(cine.resumeAt != null ? cine.resumeAt : 0); });
-document.getElementById('cNext').addEventListener('click', () => {
-  if (!cine.active) { const n = storyToc().list.find(ch => ch.key > state.year); setYear(n ? n.key : 2058); return; }
-  if (cine.i < cine.list.length - 1) { goChapter(cine.i + 1); setPlaying(true); }
+storyEl.addEventListener('scroll', () => { cine.sT = scrollPos(); requestRender(); }, { passive: true });
+actsEl.addEventListener('click', e => { const b = e.target.closest('button[data-step]'); if (b) scrollToStep(+b.dataset.step); });
+
+/* ---------------- modes ---------------- */
+const app = document.querySelector('.app');
+let mode = 'intro';
+const sandbox = { scen: 'Int', storm: false, protect: false, spec: true, year: 2058 }; // what the sandbox controls say
+function setMode(m) {
+  if (!['intro', 'story', 'sandbox'].includes(m) || m === mode) return;
+  const prev = mode;
+  if (prev === 'sandbox') { Object.assign(sandbox, { scen: state.scen, storm: state.storm, protect: state.protect, spec: state.spec, year: state.year }); stopYearPlay(); }
+  if (prev === 'story') leaveStory();
+  mode = m; app.dataset.mode = m;
+  document.querySelectorAll('.modes [data-mode]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.mode === m)));
+  select(null); card.hidden = true; selZone = null; selBike = null; setHover(null, null);
+  controls.enabled = m === 'sandbox'; controls.autoRotate = m === 'intro'; fly = null;
+  if (m === 'story') enterStory();
+  else {
+    Object.assign(state, sandbox); if (m === 'intro') state.year = 2058;
+    update(); frameForStory();
+    if (m === 'intro') flyToView('overview');
+  }
+  try { history.replaceState(null, '', m === 'intro' ? location.pathname + location.search : '#' + m); } catch (e) { /* file:// */ }
+  if (m === 'sandbox') app.scrollTop = 0;
+  requestRender();
+}
+document.addEventListener('click', e => {
+  const g = e.target.closest('[data-go]'); if (g) { if (g.dataset.go === 'top') scrollToStep(0); else setMode(g.dataset.go); return; }
+  const t = e.target.closest('.modes [data-mode]'); if (t) setMode(t.dataset.mode);
 });
-document.getElementById('cPrev').addEventListener('click', () => {
-  if (!cine.active) { const p = storyToc().list.filter(ch => ch.key < state.year).pop(); setYear(p ? p.key : 2026); return; }
-  goChapter(cine.elapsed > 3 ? cine.i : cine.i - 1); setPlaying(true);
-});
-document.getElementById('cOver').addEventListener('click', () => startStory(0));
-document.getElementById('cExit').addEventListener('click', exitStory);
-segsEl.addEventListener('click', e => {
-  const b = e.target.closest('.sg'); if (!b) return;
-  if (cine.active) { goChapter(+b.dataset.i); setPlaying(true); }
-  else if (e.detail === 0) setYear(storyToc().list[+b.dataset.i].key);  // keyboard; pointer input scrubs instead
-});
-// Grabbing the model pauses the film and hands over the camera; Play flies back to the shot.
-stage.addEventListener('pointerdown', e => { if (cine.active && cine.playing && e.target === canvas) setPlaying(false); }, true);
-stage.addEventListener('wheel', e => { if (cine.active && cine.playing && e.target === canvas) setPlaying(false); }, { capture: true, passive: true });
+document.getElementById('brand').addEventListener('click', () => setMode('intro'));
+window.addEventListener('hashchange', () => setMode(location.hash.slice(1) || 'intro'));
 document.addEventListener('keydown', e => {
-  if (!cine.active || e.metaKey || e.ctrlKey || e.altKey) return;
-  if (e.key === 'Escape') { if (!card.hidden) { card.hidden = true; select(null); } else exitStory(); }
-  else if (e.key === ' ' && !(e.target.closest && e.target.closest('button, a, input'))) { e.preventDefault(); setPlaying(!cine.playing); }
-  else if (e.key === 'ArrowRight') { document.getElementById('cNext').click(); }
-  else if (e.key === 'ArrowLeft') { document.getElementById('cPrev').click(); }
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === 'Escape' && !card.hidden) { card.hidden = true; select(null); selZone = null; selBike = null; }
 });
 
-/* timeline: outside the film the chapter bar is the year scrubber. Each segment spans its chapter's
-   years (from the previous chapter's year to its own), so dragging maps piecewise onto 2026–2058. */
-const segTip = document.getElementById('segTip');
-let toc = null, tocKey = '';
-const pad2 = n => String(n).padStart(2, '0');
-function storyToc() {
-  const k = [state.scen, state.storm, state.protect, state.spec].join('|');
-  if (k !== tocKey) { tocKey = k; const ctx = storyCtx(); toc = { ctx, list: storyList(ctx) }; if (!cine.active) buildSegs(toc.list); playLabel(); }
-  return toc;
-}
+/* ---------------- sandbox timeline ---------------- */
+const yrEl = document.getElementById('yr'), dPlay = document.getElementById('dPlay'), dPlayIcon = document.getElementById('dPlayIcon');
+let yearPlay = null;
+document.getElementById('ticks').innerHTML = [2026, 2030, 2035, 2040, 2045, 2050, 2058].map(y => `<span${[2030, 2035, 2045, 2050].includes(y) ? ' class="mn"' : ''} style="left:${((y - 2026) / 32 * 100).toFixed(2)}%">${y}</span>`).join('');
 function setYear(Y) { Y = Math.max(2026, Math.min(2058, Math.round(Y))); if (Y !== state.year) { state.year = Y; update(); } }
-function renderStoryProgress(Y) {
-  const { list: L } = storyToc();
-  if (cine.active) return;
-  let cur = 0; L.forEach((ch, i) => { if (ch.key <= Y) cur = i; });
-  segsEl.querySelectorAll('.sg').forEach((b, i) => {
-    const ch = L[i]; b.querySelector('i').style.setProperty('--p', Y >= ch.key ? 1 : Y <= ch.from ? 0 : (Y - ch.from) / (ch.key - ch.from));
-    if (i === cur) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
-  });
+function startYearPlay() {
+  if (state.year >= 2058) setYear(2026);
+  yearPlay = { y: state.year };
+  dPlayIcon.setAttribute('d', 'M2 1 H5 V11 H2 Z M7 1 H10 V11 H7 Z'); dPlay.setAttribute('aria-label', 'Pause'); requestRender();
 }
-function playLabel() {
-  if (cine.active) return;
-  const r = cine.resumeAt, L = toc ? toc.list : [], k = r != null ? Math.min(r, L.length - 1) : -1;
-  document.getElementById('cPlayLbl').innerHTML = k >= 0 ? `Resume<span class="lbl-long"> · ${pad2(k + 1)} ${esc(L[k].tag)}</span>` : 'Watch<span class="lbl-long"> the story</span>';
-  document.getElementById('cPlayIcon').setAttribute('d', 'M2 1 L11 6 L2 11 Z');
-  document.getElementById('cOver').hidden = k < 0;
-}
-function yearAtX(x) {
-  const L = storyToc().list, bs = [...segsEl.querySelectorAll('.sg')];
-  for (let i = 0; i < bs.length; i++) {
-    const r = bs[i].getBoundingClientRect();
-    if (x < r.right + 2.5 || i === bs.length - 1) { const t = Math.max(0, Math.min(1, (x - r.left) / r.width)); return { Y: L[i].from + (L[i].key - L[i].from) * t, i }; }
-  }
-}
-function showTip(i, b) {
-  if (i == null) { segTip.hidden = true; return; }
-  const L = cine.active ? cine.list : storyToc().list, ctx = cine.active ? cine.ctx : toc.ctx, ch = L[i];
-  segTip.innerHTML = `<small>${pad2(i + 1)} · ${esc(ch.tag)} · ${ch.key}</small><b>${esc(ch.head(ctx))}</b>`;
-  const br = document.getElementById('tbar').getBoundingClientRect(), r = b.getBoundingClientRect();
-  segTip.hidden = false;
-  const w = segTip.offsetWidth, x = Math.max(w / 2 + 8, Math.min(br.width - w / 2 - 8, r.left + r.width / 2 - br.left));
-  segTip.style.left = x + 'px';
-}
-let scrubbing = false;
-segsEl.addEventListener('pointerdown', e => {
-  if (cine.active || e.button) return;
-  scrubbing = true; segsEl.setPointerCapture(e.pointerId);
-  const h = yearAtX(e.clientX); setYear(h.Y); showTip(h.i, segsEl.querySelectorAll('.sg')[h.i]);
-});
-segsEl.addEventListener('pointermove', e => {
-  if (scrubbing) { const h = yearAtX(e.clientX); setYear(h.Y); showTip(h.i, segsEl.querySelectorAll('.sg')[h.i]); return; }
-  const b = e.target.closest('.sg'); if (b && e.pointerType === 'mouse') showTip(+b.dataset.i, b);
-});
-const endScrub = () => { scrubbing = false; segTip.hidden = true; };
-segsEl.addEventListener('pointerup', endScrub); segsEl.addEventListener('pointercancel', endScrub);
-segsEl.addEventListener('pointerleave', () => { if (!scrubbing) segTip.hidden = true; });
-segsEl.addEventListener('focusin', e => { const b = e.target.closest('.sg'); if (b) showTip(+b.dataset.i, b); });
-segsEl.addEventListener('focusout', () => { segTip.hidden = true; });
-segsEl.addEventListener('keydown', e => {
-  if (cine.active) return;
-  const d = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 }[e.key];
-  if (d) { e.preventDefault(); e.stopPropagation(); setYear(state.year + d); }
-  else if (e.key === 'Home') { e.preventDefault(); setYear(2026); }
-  else if (e.key === 'End') { e.preventDefault(); setYear(2058); }
-});
+function stopYearPlay() { yearPlay = null; dPlayIcon.setAttribute('d', 'M2 1 L11 6 L2 11 Z'); dPlay.setAttribute('aria-label', 'Play through the years'); }
+dPlay.addEventListener('click', () => yearPlay ? stopYearPlay() : startYearPlay());
+yrEl.addEventListener('input', () => { stopYearPlay(); setYear(+yrEl.value); });
 
 /* ---------------- render loop ---------------- */
 let needs = true, animating = false;
@@ -2126,8 +2293,9 @@ let lastT = 0;
 function loop(now) {
   let moving = false;
   const dt = Math.min(0.12, lastT ? (now - lastT) / 1000 : 0.016); lastT = now;
-  const kB = 1 - Math.exp(-dt * (cine.active ? 2.6 : 8)), kZ = 1 - Math.exp(-dt * 5);
-  if (cine.active && cine.playing) cineTick(dt);
+  const kB = 1 - Math.exp(-dt * (cine.active || yearPlay ? 3 : 8)), kZ = 1 - Math.exp(-dt * 5);
+  if (yearPlay) { yearPlay.y += dt * 2.2; setYear(Math.floor(yearPlay.y)); if (yearPlay.y >= 2058) stopYearPlay(); moving = true; }
+  if (cine.active) { if (storyTick(dt)) moving = true; }
   else {
   if (fly) { const t = Math.min(1, (now - fly.t0) / fly.dur), k = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; controls.target.lerpVectors(fly.ft, fly.tt, k); camera.position.lerpVectors(fly.fp, fly.tp, k); if (t >= 1) fly = null; moving = true; }
   if (controls.update()) moving = true;
@@ -2160,11 +2328,11 @@ function loop(now) {
   const fk = cine.fade * 0.6, fc = cine.fadeColor;
   fabricMat.color.setRGB(fabricBase.r * (1 + (fc.r - 1) * fk), fabricBase.g * (1 + (fc.g - 1) * fk), fabricBase.b * (1 + (fc.b - 1) * fk));
   treeMat.color.copy(treeBase).lerp(mutedMat.color, fk * 0.6);
-  if (cine.active) { moving = true; pulseRings(now); }
+  if (rings.length) showRings();
   const az = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z);
   needle.setAttribute('transform', `rotate(${(az * 180 / Math.PI).toFixed(1)} 20 20)`);
   if (bikeGroup && bikeGroup.visible) bikeDash.value = Math.pow(2, Math.round(Math.log2(Math.max(1, camera.position.distanceTo(controls.target) * streetPx.value * 18))));
-  if (needs || moving) { renderer.render(scene, camera); placeLabels(); if (cine.active) placeCallouts(); needs = false; }
+  if (needs || moving) { draw(); placeLabels(); if (cine.active) placeCallouts(); needs = false; }
   if (moving) requestAnimationFrame(loop); else { animating = false; lastT = 0; }
 }
 controls.addEventListener('change', requestRender);
@@ -2191,9 +2359,18 @@ canvas.addEventListener('wheel', e => {
   camera.position.add(d); controls.target.add(d); fly = null; requestRender();
 }, { capture: true, passive: false });
 
-function resize() { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; streetPx.value = 2 * Math.tan(camera.fov * Math.PI / 360) / h; frameForStory(); requestRender(); }
-// In story mode the frame is shifted down a little so the subject sits above the caption.
-function frameForStory() { const w = stage.clientWidth, h = stage.clientHeight; if (cine.active && w && h) camera.setViewOffset(w, h, 0, Math.round(h * (w < h ? 0.17 : 0.13)), w, h); else camera.clearViewOffset(); camera.updateProjectionMatrix(); }
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return;
+  renderer.setSize(w, h, false); postSize(w, h); camera.aspect = w / h; streetPx.value = 2 * Math.tan(camera.fov * Math.PI / 360) / h;
+  frameForStory(); if (cine.active) { measureSteps(); cine.sT = scrollPos(); } requestRender();
+}
+// In the story the subject sits beside the cards: right of them on wide screens, above them on phones.
+function frameForStory() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  if (cine.active && w && h) { if (w > 760) camera.setViewOffset(w, h, -Math.round(Math.min(240, w * 0.16)), Math.round(h * 0.03), w, h); else camera.setViewOffset(w, h, 0, Math.round(h * 0.2), w, h); }
+  else camera.clearViewOffset();
+  camera.updateProjectionMatrix();
+}
 new ResizeObserver(resize).observe(stage);
 
 /* ---------------- controls wiring ---------------- */
@@ -2203,6 +2380,7 @@ document.getElementById('tProtect').addEventListener('change', e => { state.prot
 document.getElementById('tSpec').addEventListener('change', e => { state.spec = e.target.checked; update(); });
 document.getElementById('tLabels').addEventListener('change', requestRender);
 document.getElementById('tTrees').addEventListener('change', e => { if (treeMesh) treeMesh.visible = e.target.checked; else if (e.target.checked && treeExclude) loadTrees(); requestRender(); });
+document.getElementById('tPaint').addEventListener('change', e => { post.on = e.target.checked; requestRender(); });
 document.getElementById('tBike').addEventListener('change', e => { if (bikeGroup) bikeGroup.visible = e.target.checked; if (!e.target.checked && selBike) { selBike = null; bikeHi.value = -1; card.hidden = true; } requestRender(); });
 
 /* ---------------- boot ---------------- */
@@ -2239,8 +2417,11 @@ function boot({ osm, dem, roads, groundImg, labels, bikes }) {
   const v = VIEWS.overview, [tx, tz] = XY(v.t[0], v.t[1]);
   controls.target.set(tx, 0, tz); camera.position.set(tx + v.off[0], v.off[1], tz + v.off[2]);
   resize(); if (camera.aspect < 1) camera.position.set(tx + v.off[0] * 1.45, v.off[1] * 1.45, tz + v.off[2] * 1.45); update();
+  controls.enabled = false; controls.autoRotate = true; controls.autoRotateSpeed = 0.35; // the intro turns the model slowly
   document.getElementById('loading').classList.add('done');
-  window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY, cine, camera, controls, cineTick, bikeGroup, bikeDash };
+  setMode(location.hash.slice(1) || 'intro');
+  requestRender();
+  window.__sr = { P, fabric, projObjs, state, update, flyToView, zoneObjs, heightAt, XY, cine, camera, controls, bikeGroup, bikeDash, setMode, post };
 }
 const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
