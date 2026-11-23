@@ -1,6 +1,6 @@
 # Pack OpenStreetMap streets into roads.json in the map's local metre frame (see XY() in index.html).
-# Freeways (motorway, motorway_link) are left out: US-101 and I-580 stay hand-traced because the
-# 101→580 connector project is built along them. Tunnels are dropped.
+# Freeways (motorway, motorway_link) are left out: US-101 and I-580 are drawn from OSM motorway midlines
+# kept in index.html (HWY101, I580). Tunnels are dropped.
 # Fetch roads.json from Overpass (overpass.kumi.systems if the main server is busy):
 #   [out:json][timeout:240];way["highway"~"^(trunk|trunk_link|primary|primary_link|secondary|secondary_link|
 #   tertiary|tertiary_link|residential|unclassified|living_street)$"](37.885,-122.665,38.16,-122.355);out tags geom qt;

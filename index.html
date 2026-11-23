@@ -311,6 +311,12 @@ details.about a { word-break: break-word; }
 .facts dt { color: var(--muted); }
 .facts dd { margin: 0; font-variant-numeric: tabular-nums; }
 .card .pimg { margin: -6px -6px 2px; }
+.card .alts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: -2px; }
+.card .alts button { display: grid; justify-items: start; gap: 3px; font: inherit; font-size: 12px; font-weight: 600; line-height: 1.2; text-align: left; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 10px; padding: 7px 8px; cursor: pointer; transition: background .15s, border-color .15s; }
+.card .alts button b { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; font-size: 11px; color: #fff; background: var(--ac); }
+.card .alts button:hover { border-color: color-mix(in srgb, var(--ink) 40%, transparent); }
+.card .alts button[aria-pressed="true"] { border-color: var(--ac); background: color-mix(in srgb, var(--ac) 12%, transparent); }
+.card .alts button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .card:has(.pimg) .x { z-index: 1; top: 14px; right: 14px; background: color-mix(in srgb, var(--panel) 88%, transparent); }
 .card .pimg a { display: block; border-radius: 10px; overflow: hidden; background: color-mix(in srgb, var(--ink) 5%, transparent); }
 .card .pimg img { display: block; width: 100%; height: auto; max-height: 200px; object-fit: contain; }
@@ -585,8 +591,9 @@ const LAND = LAND_LL.map(p => XY(p[0], p[1]));
 const TIB = TIB_LL.map(p => XY(p[0], p[1])), RICH = RICH_LL.map(p => XY(p[0], p[1]));
 const LANDS = [LAND, TIB, RICH], SHORES = [SHORE, TIB, RICH];
 
-const HWY101 = [[38.1589,-122.5702],[38.157,-122.5689],[38.1511,-122.5667],[38.1483,-122.5658],[38.1445,-122.5646],[38.1396,-122.564],[38.1356,-122.5639],[38.1314,-122.564],[38.128,-122.5649],[38.1239,-122.5658],[38.1213,-122.5657],[38.115,-122.5648],[38.1115,-122.5641],[38.1088,-122.5635],[38.1029,-122.5618],[38.1006,-122.5617],[38.0959,-122.5613],[38.0931,-122.56],[38.0882,-122.5548],[38.0837,-122.5503],[38.0785,-122.5446],[38.0762,-122.5425],[38.0712,-122.5397],[38.0682,-122.5383],[38.0649,-122.5362],[38.0593,-122.5317],[38.0568,-122.5308],[38.054,-122.5335],[38.035,-122.536],[38.0205,-122.537],[38.0165,-122.5385],[38.010,-122.5395],[38.006,-122.5395],[38.0016,-122.536],[37.9985,-122.5345],[37.992,-122.5315],[37.9863,-122.528],[37.979,-122.5245],[37.9725,-122.5215],[37.970,-122.5213],[37.965,-122.515],[37.9605,-122.5115],[37.9545,-122.5135],[37.948,-122.515],[37.9455,-122.5155],[37.938,-122.5168],[37.921,-122.518]];
-const I580 = [[37.9605,-122.5115],[37.959,-122.507],[37.9565,-122.502],[37.954,-122.4975],[37.951,-122.493],[37.9475,-122.4895],[37.945,-122.4855],[37.944,-122.4815],[37.9440,-122.4760],[37.9443,-122.4728]];
+// US-101 and I-580: midlines between OSM's two motorway carriageways (I-580 keeps its old hand-traced approach to the bridge)
+const HWY101 = [[38.15887,-122.56999],[38.15778,-122.56922],[38.15664,-122.56868],[38.14535,-122.56476],[38.14455,-122.56456],[38.14377,-122.56444],[38.1358,-122.56387],[38.13274,-122.56373],[38.13209,-122.56375],[38.13088,-122.5639],[38.12979,-122.5642],[38.12889,-122.56455],[38.12692,-122.56548],[38.12613,-122.56577],[38.12492,-122.56602],[38.12377,-122.56603],[38.11442,-122.56462],[38.11039,-122.56394],[38.10822,-122.56339],[38.10465,-122.56209],[38.10318,-122.56172],[38.10225,-122.5616],[38.10177,-122.56159],[38.0981,-122.56186],[38.09735,-122.5618],[38.09645,-122.56164],[38.09545,-122.56132],[38.09471,-122.561],[38.09381,-122.56048],[38.09317,-122.56001],[38.09236,-122.55932],[38.07751,-122.54358],[38.07652,-122.54265],[38.07541,-122.5419],[38.07075,-122.53938],[38.06945,-122.53881],[38.06756,-122.53822],[38.06686,-122.53787],[38.066,-122.53723],[38.06209,-122.53372],[38.0603,-122.53219],[38.05964,-122.53175],[38.05895,-122.53138],[38.05817,-122.53106],[38.05744,-122.53084],[38.0567,-122.53069],[38.05595,-122.53063],[38.05464,-122.53069],[38.05178,-122.53108],[38.05055,-122.53138],[38.04952,-122.53172],[38.04833,-122.53223],[38.04719,-122.53286],[38.04607,-122.53358],[38.04206,-122.53635],[38.04137,-122.53672],[38.04088,-122.53688],[38.04039,-122.53696],[38.03964,-122.53695],[38.03791,-122.53658],[38.03691,-122.5365],[38.03635,-122.53657],[38.03376,-122.53712],[38.02722,-122.53787],[38.02295,-122.53873],[38.0214,-122.5391],[38.02045,-122.53942],[38.01477,-122.54169],[38.01404,-122.54191],[38.01305,-122.54203],[38.00929,-122.54202],[38.00854,-122.54195],[38.00805,-122.54185],[38.00732,-122.54161],[38.00616,-122.54101],[37.99256,-122.53105],[37.99147,-122.53014],[37.98521,-122.52407],[37.98407,-122.52325],[37.98105,-122.52159],[37.98006,-122.52114],[37.9793,-122.52088],[37.97826,-122.52066],[37.97741,-122.52058],[37.97636,-122.52061],[37.97531,-122.52078],[37.9712,-122.52187],[37.97034,-122.52181],[37.96983,-122.52164],[37.96934,-122.52136],[37.96884,-122.52094],[37.96828,-122.52019],[37.96301,-122.51101],[37.96237,-122.51033],[37.96191,-122.51001],[37.96141,-122.5098],[37.95457,-122.5085],[37.95405,-122.50849],[37.95353,-122.50858],[37.95303,-122.50877],[37.95233,-122.50925],[37.95069,-122.51115],[37.94984,-122.51192],[37.94552,-122.51453],[37.94435,-122.51497],[37.93811,-122.51662],[37.93692,-122.51682],[37.93628,-122.51683],[37.93537,-122.51672],[37.92853,-122.51546],[37.9275,-122.5152],[37.92647,-122.51484],[37.92549,-122.5144],[37.92113,-122.51202]];
+const I580 = [[37.96442,-122.51348],[37.96008,-122.50575],[37.9596,-122.50512],[37.95813,-122.50355],[37.95782,-122.5031],[37.94637,-122.49107],[37.9458,-122.49037],[37.94549,-122.48983],[37.94526,-122.48932],[37.94505,-122.48869],[37.94486,-122.48774],[37.94482,-122.48683],[37.94493,-122.48451],[37.94488,-122.48377],[37.94477,-122.48312],[37.9446,-122.4825],[37.94436,-122.48191],[37.944,-122.476],[37.9443,-122.4728]];
 // State Route 37 from US-101 east to where OSM's Sears Point Road (in roads.json) takes over; from OSM motorway centrelines
 const SR37 = [[38.0811,-122.5445],[38.0841,-122.5393],[38.0857,-122.5368],[38.0882,-122.5336],[38.0933,-122.527],[38.0966,-122.5228],[38.098,-122.5209],[38.1028,-122.5148],[38.1056,-122.5115],[38.1113,-122.5082],[38.1175,-122.503],[38.1194,-122.5005],[38.122,-122.4963],[38.1245,-122.4925]];
 const RSR_BRIDGE = [[37.9443,-122.4728,6],[37.9425,-122.466,16],[37.9405,-122.458,26],[37.9385,-122.450,40],[37.937,-122.444,52],[37.9355,-122.438,40],[37.9347,-122.4338,30],[37.9325,-122.426,44],[37.931,-122.418,30]];
@@ -627,7 +634,7 @@ const ZONES = [
   { id:'francisco', name:'Francisco Blvd West, Andersen Dr & I-580 corridor', lat:37.9572, lon:-122.5085, rx:620, rz:300, rot:22, t:18, subs:false, protect:true,
     note:'Business districts and the I-580 commercial corridor are exposed in the near term (10–20 in). Plan Bay Area 2050 calls for a horizontal levee and marsh to protect this stretch of I-580.',
     src:['https://www.planbayarea.org/sites/default/files/documents/Plan_Bay_Area_2050_Final_Marin_County_Factsheet_012822.pdf'] },
-  { id:'ramps', name:'US-101 ramps at the I-580 junction', lat:37.9605, lon:-122.5130, rx:240, rz:190, rot:0, t:30, subs:false, protect:false,
+  { id:'ramps', name:'US-101 ramps at the I-580 junction', lat:37.9618, lon:-122.5100, rx:240, rz:190, rot:0, t:30, subs:false, protect:false,
     note:'Ramps flood in storm surges in the near term and from tides alone in the medium term.',
     src:['https://storage.googleapis.com/proudcity/sanrafaelca/uploads/2020/10/SLR-Adaptation-Report-final-9-28-20-v2.pdf'] },
   { id:'gallinas', name:'Santa Venetia edge along Gallinas Creek', lat:38.0090, lon:-122.5120, rx:620, rz:330, rot:-35, t:16, subs:false, protect:false,
@@ -745,9 +752,16 @@ const P = [
   { n:'Jonathan\'s Place (Homeward Bound)', a:'190 Mill St', lat:37.96600, lon:-122.51250, st:'built', y:2022, yb:'c', fl:3, u:32, w:36, d:26, note:'32 supportive homes plus a shelter of up to 60 beds. Finished 2022.', src:['https://web.archive.org/web/20251015234847/https://www.cityofsanrafael.org/homeward_bound/'] },
   { n:'88 Vivian Street', img:['img/88vivian.jpg','Elevation: Arris Studio Architects via City of San Rafael','https://sanrafael.gov/88-vivian-affordable-housing-project/'], a:'88 Vivian St (former Country Club Bowl)', lat:37.96414, lon:-122.50771, st:'proposed', y:2030, yb:'a', fl:4, u:124, kind:'multi', n2:2, w:110, d:50, note:'Resubmitted September 2026 as 124 affordable rentals in a 3- and a 4-story building.', src:['https://sanrafael.gov/san-rafael-considers-two-100-affordable-housing-development-applications/'] },
   { n:'Hampton Inn / Home2 Suites', a:'1075 Francisco Blvd E', lat:37.95827, lon:-122.50299, st:'approved', y:2029, yb:'a', fl:5, ft:54, u:0, sz:'About 185 rooms', w:62, d:28, note:'Dual-brand hotel, approved. Construction status unknown.', src:['https://web.archive.org/web/20250211182734/https://www.cityofsanrafael.org/major-planning-projects-2/'] },
-  { n:'Marin Square vision', img:['img/marinsq.jpg','Rendering: VMWP','https://www.vmwp.com/?p=4347'], a:'75 Bellam Blvd', lat:37.95941, lon:-122.50651, st:'concept', y:2036, yb:'a', fl:5, u:375, kind:'multi', n2:4, w:170, d:150, note:'A concept plan (Van Meter Williams Pollack) for 375 homes, 47% affordable, on 7.6 acres. No application has been filed.', src:['https://www.vmwp.com/?p=4347'] },
+  { n:'Marin Square vision', img:['img/marinsq.jpg','Rendering: VMWP','https://www.vmwp.com/?p=4347'], a:'75 Bellam Blvd', lat:37.95975, lon:-122.50790, st:'concept', y:2036, yb:'a', fl:5, u:375, kind:'multi', n2:4, w:140, d:130, note:'A concept plan (Van Meter Williams Pollack) for 375 homes, 47% affordable, on 7.6 acres. No application has been filed.', src:['https://www.vmwp.com/?p=4347'] },
   { n:'Tiscornia Marsh restoration', img:['img/tiscornia.jpg','Photo: SF Bay Restoration Authority','https://www.sfbayrestore.org/projects/tiscornia-marsh-restoration-and-sea-level-rise-adaptation'], a:'Mouth of San Rafael Creek', lat:37.9658, lon:-122.4895, st:'approved', y:2028, yb:'a', kind:'marsh', w:300, d:170, rot:0, u:0, sz:'About 2,000 ft of raised levee + 10–16 acres of marsh', note:'Marin Audubon project that raises the levee with a gentle ecotone slope and widens marsh in front of the Canal.', src:['https://www.sfbayrestore.org/projects/tiscornia-marsh-restoration-and-sea-level-rise-adaptation'] },
-  { n:'US-101 / I-580 direct connector', img:['img/connector.jpg','Alternative 1 diagram: Transportation Authority of Marin','https://www.tam.ca.gov/featured-projects/northbound-101-and-eastbound-580-direct-connector/'], a:'NB US-101 at Bellam Blvd to EB I-580', lat:37.9580, lon:-122.5090, st:'infra', y:2033, yb:'a', start:2030, kind:'ramp', u:0, sz:'$192–241M', note:'Environmental review began 2024; preferred alternative expected by end of 2027, then about 7 years to design and build. Construction is not fully funded. Shown as the flyover alternative.', src:['https://www.tam.ca.gov/featured-projects/northbound-101-and-eastbound-580-direct-connector/'] },
+  { n:'US-101 / I-580 direct connector', a:'Bellam Blvd at the US-101 / I-580 junction', lat:37.9590, lon:-122.5075, st:'infra', y:2034, yb:'a', start:2031, kind:'ramp', u:0, alt:1,
+    bellam:[[37.95804,-122.50846],[37.95837,-122.50797],[37.95864,-122.50748],[37.95893,-122.50702],[37.95935,-122.5065],[37.95963,-122.506],[37.96019,-122.50545],[37.96034,-122.50496],[37.96066,-122.50451]], bridge:[[37.96020,-122.50600],[37.95973,-122.50536]],
+    alts:[
+      { k:'1', c:'#f15a22', name:'Local streets', sz:'$30–40M', img:['img/connector-alt1.jpg','Alternative 1 map: Transportation Authority of Marin','https://www.tam.ca.gov/featured-projects/northbound-101-and-eastbound-580-direct-connector/'], note:'No new freeway ramp. Bellam Blvd is rebuilt between US-101 and Francisco Blvd E with signalized intersections, and the I-580 bridge over Bellam is replaced. A variation would turn Francisco Blvd E and Kerner Blvd back into two-way streets.' },
+      { k:'2', c:'#29abe2', name:'Simms St connector', sz:'$310–320M', path:[[37.95574,-122.50881],[37.95667,-122.50875],[37.9573,-122.50859],[37.9576,-122.50814],[37.95777,-122.50739],[37.95802,-122.50654],[37.9583,-122.50568],[37.95853,-122.50482],[37.95846,-122.50407],[37.95808,-122.50343],[37.95756,-122.50279]], peak:12, img:['img/connector-alt2.jpg','Alternative 2 map: Transportation Authority of Marin','https://www.tam.ca.gov/featured-projects/northbound-101-and-eastbound-580-direct-connector/'], note:'A new northbound 101 to eastbound 580 ramp leaves 101 south of Bellam, runs along Simms Street past Smart & Final and joins I-580 east of Bellam. Includes some of the Bellam street work. The most expensive option.' },
+      { k:'3', c:'#39b54a', name:'Bellam connector', sz:'$240–245M', path:[[37.95811,-122.50912],[37.95895,-122.50926],[37.95996,-122.5093],[37.96068,-122.50916],[37.96098,-122.50868],[37.96089,-122.50793],[37.96057,-122.50707],[37.9602,-122.50632],[37.95981,-122.50568]], peak:13, img:['img/connector-alt3.jpg','Alternative 3 map: Transportation Authority of Marin','https://www.tam.ca.gov/featured-projects/northbound-101-and-eastbound-580-direct-connector/'], note:'A shorter ramp leaves northbound 101 near the Bellam Blvd off-ramp, loops inside the 101/580 junction and joins I-580 at the Bellam bridge. Includes some of the Bellam street work.' }],
+    note:'TAM is studying three build alternatives and a no-build option; costs are in 2031 dollars. $154M is committed (Regional Measure 3 bridge tolls $135M, Measure A sales tax $17M, a $2M federal grant): enough for Alternative 1, not yet for either connector. In 2026 the team chose signals over roundabouts on Bellam and dropped a longer I-580 auxiliary lane, which removed a rebuild of the Sir Francis Drake overcrossing. A draft environmental document is next. No alternative has been picked, so the dates are model assumptions.',
+    src:['https://www.tam.ca.gov/featured-projects/northbound-101-and-eastbound-580-direct-connector/','https://www.tam.ca.gov/wp-content/uploads/2026/05/2026-05-27-TAM-101-580-CWG-4-Rev-6-for-posting.pdf'] },
   { n:'Village at Loch Lomond Marina', a:'110 Loch Lomond Dr', lat:37.97356, lon:-122.48241, st:'built', y:2023, yb:'c', kind:'houses', fl:2, u:81, w:150, d:90, note:'81 homes and a market building; the last townhomes sold in 2023.', src:['https://web.archive.org/web/20251015091823/https://www.cityofsanrafael.org/village-loch-lomond-marina/'] },
   { n:'25 Loch Lomond Drive', img:['img/25loch.jpg','Rendering: City of San Rafael','https://sanrafael.gov/25-loch-lomond-drive-housing-project/'], a:'25 Loch Lomond Dr', lat:37.97300, lon:-122.48090, st:'approved', y:2028, yb:'a', fl:3, u:14, w:36, d:20, note:'14 homes, approved December 2025.', src:['https://sanrafael.gov/planning-commission-approves-25-loch-lomond-housing-development/'] },
   { n:'San Quentin Learning Center', a:'San Quentin Rehabilitation Center', lat:37.9405, lon:-122.4870, st:'built', y:2026, yb:'c', fl:3, u:0, kind:'multi', n2:4, w:110, d:80, sz:'About 80,000 sf in four buildings', note:'Part of converting San Quentin into a rehabilitation center. Opened February 2026 ($239M).', src:['https://www.cdcr.ca.gov/news/2026/02/20/cdcr-announces-the-completion-of-san-quentin-learning-center/'] },
@@ -1502,8 +1516,6 @@ function addPart(obj, x, z, w, d, h, rot, mat) {
   m.userData.obj = obj; m.userData.base = m.material; pickables.push(m); obj.parts.push({ g, h }); obj.meshes.push(m);
   projGroup.add(g); return g;
 }
-/* NB 101 → EB 580 flyover: one continuous deck that peels off the east (northbound) edge of 101
-   south of Bellam, climbs over Bellam and the existing ramps, and lands on the south (eastbound) edge of 580. */
 function polyPoint(xy, d) { // point + unit tangent at arc length d along a polyline
   for (let i = 0; i < xy.length - 1; i++) {
     const a = xy[i], b = xy[i + 1], l = Math.hypot(b[0] - a[0], b[1] - a[1]);
@@ -1513,59 +1525,75 @@ function polyPoint(xy, d) { // point + unit tangent at arc length d along a poly
 }
 function polyLen(xy, upto) { let L = 0; for (let i = 0; i < upto; i++) L += Math.hypot(xy[i + 1][0] - xy[i][0], xy[i + 1][1] - xy[i][1]); return L; }
 function regMesh(obj, m) { m.userData.obj = obj; m.userData.base = m.material; pickables.push(m); obj.meshes.push(m); }
-function buildConnector(obj, exclude) {
-  const W = 10, T = 1.6, PEAK = 14, ROAD = 2.2;
-  // 101 is listed north→south. Find the 580 junction as the 101 vertex nearest where 580 begins (a fixed index broke when
-  // the 101 line was extended north to Novato). Diverge ~250 m south of it, at Bellam Blvd (further south the line climbs
-  // Cal Park Hill), and merge ~650 m east along 580.
-  let jk = 0, jd = Infinity;
-  HWY_XY.forEach((p, i) => { const d = Math.hypot(p[0] - I580_XY[0][0], p[1] - I580_XY[0][1]); if (d < jd) { jd = d; jk = i; } });
-  const j101 = polyLen(HWY_XY, jk);
-  const a = polyPoint(HWY_XY, j101 + 250), b = polyPoint(I580_XY, 650);
-  const ta = [-a.dx, -a.dz], tb = [b.dx, b.dz];                 // northbound heading; eastbound heading
-  const right = (dx, dz) => [-dz, dx];                           // x = east, z = south
-  const ra = right(...ta), rb = right(...tb);
-  const P0 = [a.x + ra[0] * 11, a.z + ra[1] * 11], P3 = [b.x + rb[0] * 10, b.z + rb[1] * 10];
-  const L = Math.hypot(P3[0] - P0[0], P3[1] - P0[1]) * 0.45;
-  const P1 = [P0[0] + ta[0] * L, P0[1] + ta[1] * L], P2 = [P3[0] - tb[0] * L, P3[1] - tb[1] * L];
-  const bez = (t, k) => { const u = 1 - t; return u * u * u * P0[k] + 3 * u * u * t * P1[k] + 3 * u * t * t * P2[k] + t * t * t * P3[k]; };
-  const N = 90, pts = [];
-  for (let i = 0; i <= N; i++) { const t = i / N; pts.push({ x:bez(t, 0), z:bez(t, 1) }); }
-  let acc = 0; pts.forEach((p, i) => { if (i) acc += Math.hypot(p.x - pts[i - 1].x, p.z - pts[i - 1].z); p.s = acc; });
-  const len = acc;
-  const y0 = yAt(P0[0], P0[1]) + ROAD, y1 = yAt(P3[0], P3[1]) + ROAD, base = Math.min(y0, y1);
+/* US-101 / I-580 project: TAM's three build alternatives, switched from the card. Every alternative rebuilds Bellam Blvd
+   (a flat ribbon) and the I-580 bridge over it; 2 and 3 add a NB 101 → EB 580 ramp traced from TAM's maps onto OSM roads. */
+function smoothXY(ll, step) { // Catmull-Rom through lat/lon waypoints, resampled about every `step` m
+  const c = ll.map(p => XY(p[0], p[1])), out = [];
+  for (let i = 0; i < c.length - 1; i++) {
+    const p0 = c[Math.max(0, i - 1)], p1 = c[i], p2 = c[i + 1], p3 = c[Math.min(c.length - 1, i + 2)];
+    const n = Math.max(2, Math.ceil(Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) / step));
+    for (let k = 0; k < n; k++) {
+      const t = k / n, t2 = t * t, t3 = t2 * t, f = (a, b, c2, d) => 0.5 * (2 * b + (-a + c2) * t + (2 * a - 5 * b + 4 * c2 - d) * t2 + (-a + 3 * b - 3 * c2 + d) * t3);
+      out.push({ x:f(p0[0], p1[0], p2[0], p3[0]), z:f(p0[1], p1[1], p2[1], p3[1]) });
+    }
+  }
+  const e = c[c.length - 1]; out.push({ x:e[0], z:e[1] });
+  let acc = 0; out.forEach((p, i) => { if (i) acc += Math.hypot(p.x - out[i - 1].x, p.z - out[i - 1].z); p.s = acc; });
+  return out;
+}
+// A deck extruded along pts. peak > 0: rises from road level at both ends to `peak` m, on piers. peak 0: hugs the ground.
+// lift: a fixed height above the ground instead (the bridge). Built relative to the lowest end so build-up rises from there.
+function addDeck(obj, pts, W, T, o) {
+  const ROAD = 2.2, N = pts.length - 1, len = pts[N].s, peak = o.peak || 0;
+  const y0 = yAt(pts[0].x, pts[0].z) + ROAD, y1 = yAt(pts[N].x, pts[N].z) + ROAD;
+  const base = o.lift ? Math.min(...pts.map(p => yAt(p.x, p.z))) : peak ? Math.min(y0, y1) : Math.min(...pts.map(p => yAt(p.x, p.z) + ROAD));
   pts.forEach(p => {
-    const u = p.s / len, grade = Math.min(smooth(u / 0.32), smooth((1 - u) / 0.32));  // ~5% climb, flat crown
-    p.top = Math.max(y0 + (y1 - y0) * u + 0.3 + PEAK * grade, yAt(p.x, p.z) + ROAD + 0.3) - base;
+    const g = yAt(p.x, p.z) + ROAD + 0.3;
+    if (o.lift) p.top = Math.max(...pts.map(q => yAt(q.x, q.z))) + o.lift - base;
+    else if (!peak) p.top = g + 0.5 - base;
+    else { const u = p.s / len, grade = Math.min(smooth(u / 0.3), smooth((1 - u) / 0.3)); p.top = Math.max(y0 + (y1 - y0) * u + 0.3 + peak * grade, g) - base; }
   });
-  // deck: extruded rectangle along the curve (relative to `base`, so the build-up animation rises from road level)
   const pos = [], idx = [], hw = W / 2;
   pts.forEach((p, i) => {
-    const q = pts[Math.min(N, i + 1)], o = pts[Math.max(0, i - 1)];
-    let dx = q.x - o.x, dz = q.z - o.z; const l = Math.hypot(dx, dz); dx /= l; dz /= l;
+    const q = pts[Math.min(N, i + 1)], r = pts[Math.max(0, i - 1)];
+    let dx = q.x - r.x, dz = q.z - r.z; const l = Math.hypot(dx, dz) || 1; dx /= l; dz /= l;
     const nx = -dz * hw, nz = dx * hw;
     pos.push(p.x + nx, p.top, p.z + nz,  p.x - nx, p.top, p.z - nz,  p.x - nx, p.top - T, p.z - nz,  p.x + nx, p.top - T, p.z + nz);
   });
-  for (let i = 0; i < N; i++) {
-    const k = i * 4, n = k + 4;
-    [[0, 1], [1, 2], [2, 3], [3, 0]].forEach(([c, d]) => idx.push(k + c, n + c, k + d, k + d, n + c, n + d));
-  }
+  for (let i = 0; i < N; i++) { const k = i * 4, n = k + 4; [[0, 1], [1, 2], [2, 3], [3, 0]].forEach(([c, d]) => idx.push(k + c, n + c, k + d, k + d, n + c, n + d)); }
   idx.push(0, 1, 2, 0, 2, 3, N * 4, N * 4 + 2, N * 4 + 1, N * 4, N * 4 + 3, N * 4 + 2);
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx);
-  const deckGeo = g.toNonIndexed(); deckGeo.computeVertexNormals();
+  const geo = g.toNonIndexed(); geo.computeVertexNormals();
   const grp = new THREE.Group(); grp.position.y = base;
-  const deck = new THREE.Mesh(deckGeo, projMat(obj.p.st)); grp.add(deck); regMesh(obj, deck);
-  grp.add(new THREE.LineSegments(new THREE.EdgesGeometry(deckGeo, 20), edgeMat));
-  // piers every ~32 m wherever the deck clears the ground
-  for (let d = 32; d < len - 20; d += 32) {
+  const deck = new THREE.Mesh(geo, projMat(obj.p.st)); grp.add(deck); regMesh(obj, deck);
+  grp.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 20), edgeMat));
+  if (peak) for (let d = 32; d < len - 20; d += 32) { // piers wherever the deck clears the ground
     const p = pts.find(q => q.s >= d), gy = yAt(p.x, p.z) - 1 - base, h = p.top - T - gy;
     if (h < 3) continue;
     const m = new THREE.Mesh(boxGeo, projMat(obj.p.st)); m.scale.set(2.4, h, 2.4); m.position.set(p.x, gy, p.z);
     const e = new THREE.LineSegments(edgeGeo, edgeMat); e.scale.copy(m.scale); e.position.copy(m.position);
     grp.add(m, e); regMesh(obj, m);
   }
-  pts.forEach((p, i) => { if (i % 2 === 0) exclude.push({ x:p.x, z:p.z, r:18 }); });  // keep fabric from poking through the deck
-  obj.parts.push({ g:grp, h:PEAK + 2 }); projGroup.add(grp);
+  obj.parts.push({ g:grp, h:(peak || o.lift || 1) + 2 }); projGroup.add(grp);
+}
+function buildConnector(obj, exclude) {
+  const p = obj.p;
+  if (obj.alt == null) {
+    obj.alt = p.alt || 0;
+    // keep the city fabric out from under every alternative's ramp, so switching never leaves a building poking through
+    if (exclude) p.alts.forEach(a => { if (a.path) smoothXY(a.path, 8).forEach((q, i) => { if (i % 2 === 0) exclude.push({ x:q.x, z:q.z, r:16 }); }); });
+  }
+  const a = p.alts[obj.alt];
+  addDeck(obj, smoothXY(p.bellam, 6), 24, 0.8, {});          // Bellam Blvd rebuilt (all three alternatives)
+  addDeck(obj, smoothXY(p.bridge, 6), 34, 1.6, { lift:7 });  // new I-580 bridge over Bellam
+  if (a.path) addDeck(obj, smoothXY(a.path, 6), 10, 1.6, { peak:a.peak });
+}
+function setConnectorAlt(obj, k) {
+  if (obj.alt === k) return;
+  obj.parts.forEach(pt => { projGroup.remove(pt.g); pt.g.traverse(m => { if (m.geometry && m.geometry !== boxGeo && m.geometry !== edgeGeo) m.geometry.dispose(); }); });
+  obj.meshes.forEach(m => { const i = pickables.indexOf(m); if (i >= 0) pickables.splice(i, 1); });
+  obj.parts = []; obj.meshes = []; obj.alt = k;
+  buildConnector(obj, null); requestRender();
 }
 // A marsh is draped over the ground (or today's water surface, where that is higher) and sits just above it; a flat box
 // would be buried on the shore's slope. The group's origin is the lowest point, so build-up rises from there.
@@ -2034,19 +2062,22 @@ let selZone = null, selBike = null;
 const BASIS = { r:'reported target', a:'model assumption', c:'completed' };
 function showCard(id, scroll) {
   const p = P[id], s = STATUS[p.st];
+  const A = p.alts ? p.alts[projObjs[id].alt || 0] : null, img = A ? A.img : p.img, sz = A ? A.sz : p.sz;
   const facts = [];
   if (p.fl && p.kind !== 'houses') facts.push(['Height', `${p.fl} ${p.fl === 1 ? 'story' : 'stories'}${p.ft ? ` · ${Math.round(p.ft)} ft` : ''}`]);
   if (p.u) facts.push(['Homes', p.u.toLocaleString('en-US')]);
-  if (p.sz) facts.push(['Program', p.sz]);
+  if (sz) facts.push([A ? 'Cost' : 'Program', esc(sz)]);
   facts.push([p.st === 'built' ? 'Completed' : 'Done by', `${p.y}<span class="basis">${BASIS[p.yb]}</span>`]);
   const yearState = p.st === 'built' ? '' : (state.year >= p.y ? `Shown complete in ${state.year}.` : (progressFor(p, state.year) > 0 ? `Shown under construction in ${state.year}.` : `Not yet built in ${state.year}.`));
   card.innerHTML = `<button class="x" type="button" aria-label="Close">×</button>
-    ${p.img ? `<figure class="pimg"><a href="${esc(p.img[2])}" target="_blank" rel="noopener"><img src="${esc(p.img[0])}" alt="${esc(p.img[1].split(':')[0])} of ${esc(p.n)}" loading="lazy" onerror="this.closest('figure').remove()"></a><figcaption>${esc(p.img[1])}</figcaption></figure>` : ''}
+    ${img ? `<figure class="pimg"><a href="${esc(img[2])}" target="_blank" rel="noopener"><img src="${esc(img[0])}" alt="${esc(img[1].split(':')[0])} of ${esc(p.n)}" loading="lazy" onerror="this.closest('figure').remove()"></a><figcaption>${esc(img[1])}</figcaption></figure>` : ''}
+    ${A ? `<div class="alts" role="group" aria-label="Alternatives under study">${p.alts.map((a, i) => `<button type="button" data-alt="${i}" aria-pressed="${a === A}" style="--ac:${a.c}"><b>${a.k}</b>${esc(a.name)}</button>`).join('')}</div>` : ''}
     <span class="pill" style="--c:var(${tokFor(p)})">${esc(labelFor(p))}</span>
     <h3>${esc(p.n)}</h3>
     <p class="addr">${esc(p.a)}</p>
     <dl class="facts">${facts.map(f => `<dt>${f[0]}</dt><dd>${f[1]}</dd>`).join('')}</dl>
     ${p.tbd ? `<p class="tbd"><b>Needs follow-up</b>Placeholder. Still to find: ${esc(p.tbd)}.</p>` : ''}
+    ${A ? `<p class="note altnote"><b>Alternative ${A.k}.</b> ${esc(A.note)}</p>` : ''}
     <p class="note">${esc(p.note)} ${yearState ? `<em>${yearState}</em>` : ''}</p>
     ${srcLinks(p.src)}`;
   card.hidden = false;
@@ -2065,7 +2096,10 @@ function showZone(z) {
     ${srcLinks(z.src)}`;
   card.hidden = false;
 }
-card.addEventListener('click', e => { if (e.target.closest('.x')) { card.hidden = true; select(null); selZone = null; selBike = null; } });
+card.addEventListener('click', e => {
+  const ab = e.target.closest('[data-alt]');
+  if (ab && selected && selected.p.alts) { setConnectorAlt(selected, +ab.dataset.alt); showCard(selected.p.id, false); return; }
+  if (e.target.closest('.x')) { card.hidden = true; select(null); selZone = null; selBike = null; } });
 function select(o) {
   selected = o; selZone = null; selBike = null; bikeHi.value = -1;
   if (o) { showCard(o.p.id, true); selLabel.textContent = o.p.n; }
@@ -2234,11 +2268,11 @@ const STEPS = [
   { id:'crossings', act:3, tag:'Crossings', key: () => 2034, fit:true,
     shot:{ t:[37.9655,-122.5135], d:3300, az:156, el:38, drift:4, dolly:0 },
     focus: () => namesTo(CROSSINGS),
-    call: [['US-101 / I-580 direct connector','101 → 580 flyover','$192–241M · not fully funded'], ['San Rafael Canal Crossing & 620 Canal St park','Canal Crossing','bike & walk drawbridge'], ['San Rafael Transit Center (relocated)','New transit center','by the SMART station']],
+    call: [['US-101 / I-580 direct connector','101 → 580 connector','2 routes studied · $154M funded'], ['San Rafael Canal Crossing & 620 Canal St park','Canal Crossing','bike & walk drawbridge'], ['San Rafael Transit Center (relocated)','New transit center','by the SMART station']],
     legend: ['move'],
     head: () => 'New ways across the freeway and the creek',
-    deck: () => 'If its construction money comes through, a flyover finally links northbound 101 to eastbound 580, ending the detour through local streets. Downtown’s buses move a block north to a new transit center by the SMART station, and a bike-and-walk drawbridge over San Rafael Creek ties the Canal to downtown.',
-    stats: () => [{ t:'$192–241M', l:'connector estimate, not fully funded' }, { n:17, l:'bus bays at the new transit center' }, { n:1.65, dec:2, suf:' ac', l:'new waterfront park on the Canal' }] },
+    deck: () => 'If one of two routes under study is chosen and funded, a new ramp finally links northbound 101 to eastbound 580, ending the detour through local streets (the Simms Street route is shown). Downtown’s buses move a block north to a new transit center by the SMART station, and a bike-and-walk drawbridge over San Rafael Creek ties the Canal to downtown.',
+    stats: () => [{ t:'$240–320M', l:'for a connector; $154M is committed' }, { n:17, l:'bus bays at the new transit center' }, { n:1.65, dec:2, suf:' ac', l:'new waterfront park on the Canal' }] },
 
   { id:'smart', act:3, tag:'SMART', key: () => 2034, veh:['train'],
     shot:{ t:SR_STN, dy:3, d:190, az:58, el:16, drift:14, dolly:-0.06, follow:'train', fw:0.6 },
