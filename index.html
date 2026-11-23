@@ -978,7 +978,7 @@ const LC_A = [0, 0.62, 0.5, 0.42, 0.7, 0.7, 1, 0, 0.75, 0.7, 0.55, 0.7, 0.6, 0.8
 const ground = { W: 0, H: 0, cls: null, thr: null, park: null, colorTex: null, floodTex: null };
 const groundU = {
   uCover: { value: null }, uFloodT: { value: null }, uOn: { value: 0 }, uFlood: { value: new THREE.Color() },
-  uX0: { value: 0 }, uZ0: { value: 0 }, uGW: { value: 1 }, uGH: { value: 1 }, uLevel: { value: -99 }, uHover: { value: -1 }, uNoise: { value: noiseTex }, uRise: { value: 1 }, uFloodK: { value: 0 },
+  uX0: { value: 0 }, uZ0: { value: 0 }, uGW: { value: 1 }, uGH: { value: 1 }, uTexel: { value: new THREE.Vector2(0, 0) }, uLevel: { value: -99 }, uHover: { value: -1 }, uNoise: { value: noiseTex }, uRise: { value: 1 }, uFloodK: { value: 0 },
   uZa: { value: ZONES.map(() => new THREE.Vector4()) }, uZb: { value: ZONES.map(() => new THREE.Vector4(1, 1, -99, 0)) }
 };
 function setupGround(img) {
@@ -991,7 +991,7 @@ function setupGround(img) {
   ground.colorTex = mk(new Uint8Array(n * 4), THREE.RGBAFormat);
   ground.floodTex = mk(ground.thr, THREE.LuminanceFormat);
   Object.assign(groundU, { uCover: { value: ground.colorTex }, uFloodT: { value: ground.floodTex }, uOn: { value: 1 } });
-  groundU.uX0.value = X0; groundU.uZ0.value = Z0; groundU.uGW.value = GW; groundU.uGH.value = GH;
+  groundU.uX0.value = X0; groundU.uZ0.value = Z0; groundU.uGW.value = GW; groundU.uGH.value = GH; groundU.uTexel.value.set(1 / ground.W, 1 / ground.H);
   // each zone floods NOAA's lowest ground first: when the reports say it goes under, show the lowest quarter of its
   // inundation footprint, and spread to higher ground as the water deepens
   ZONES.forEach(z => {
@@ -1023,7 +1023,7 @@ function paintGround(T) { // theme colours → cover texture (rgb colour, a cove
 terrainMat.onBeforeCompile = sh => {
   Object.assign(sh.uniforms, groundU);
   sh.vertexShader = 'varying vec2 vGxz;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\nvGxz = (modelMatrix * vec4(transformed, 1.0)).xz;');
-  sh.fragmentShader = `uniform sampler2D uCover, uFloodT, uNoise; uniform float uOn, uX0, uZ0, uGW, uGH, uLevel, uHover, uRise, uFloodK; uniform vec3 uFlood;
+  sh.fragmentShader = `uniform sampler2D uCover, uFloodT, uNoise; uniform float uOn, uX0, uZ0, uGW, uGH, uLevel, uHover, uRise, uFloodK; uniform vec3 uFlood; uniform vec2 uTexel;
 uniform vec4 uZa[${ZONES.length}], uZb[${ZONES.length}]; varying vec2 vGxz;\n` + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
 // watercolour washes: broad uneven blooms over everything, and blotted dabs (about tree-crown size) where the cover is green
 {
@@ -1032,6 +1032,10 @@ uniform vec4 uZa[${ZONES.length}], uZb[${ZONES.length}]; varying vec2 vGxz;\n` +
 }
 if (uOn > 0.5) {
   vec2 guv = vec2((vGxz.x - uX0) / uGW, (vGxz.y - uZ0) / uGH);
+  // ground.png is ~10 m a pixel: nudge each lookup by a texel or two of smooth noise (a ~40 m wobble plus a ~20 m
+  // ripple) so class edges read as uneven painted margins instead of a staircase when zoomed in
+  vec4 wa = texture2D(uNoise, vGxz / 640.0 + 0.13), wb = texture2D(uNoise, vGxz / 640.0 + vec2(0.61, 0.29)), wc = texture2D(uNoise, vGxz / 1300.0 + 0.47);
+  guv += (vec2(wa.b, wb.b) - 0.5) * 3.2 * uTexel + (wc.ba - 0.5) * 1.4 * uTexel;
   vec4 cv = texture2D(uCover, guv);
   diffuseColor.rgb = mix(diffuseColor.rgb, cv.rgb, cv.a);
   float veg = clamp((cv.g - max(cv.r, cv.b)) * 7.0, 0.0, 1.0) * cv.a;
